@@ -12,7 +12,10 @@ import {
   View,
 } from 'react-native';
 import { AuthInput } from '@/components/AuthInput';
-import { colors } from '@/constants/theme';
+import { PrimaryButton } from '@/components/PrimaryButton';
+import { ScreenBackground } from '@/components/ScreenBackground';
+import { ZakaLogo } from '@/components/ZakaLogo';
+import { colors, radius } from '@/constants/theme';
 import { login } from '@/services/authStorage';
 import { getHomeRoute } from '@/utils/routes';
 
@@ -38,116 +41,113 @@ export default function LoginScreen() {
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.flex}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <ScrollView
-        contentContainerStyle={styles.container}
-        keyboardShouldPersistTaps="handled"
+    <ScreenBackground>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <Text style={styles.logo}>💳</Text>
-        <Text style={styles.title}>Welcome back</Text>
-        <Text style={styles.subtitle}>Sign in to your ZakaPay wallet</Text>
-
-        <AuthInput
-          label="Phone number"
-          placeholder="+961 70 123 456"
-          value={phone}
-          onChangeText={setPhone}
-          keyboardType="phone-pad"
-          autoCapitalize="none"
-        />
-
-        <AuthInput
-          label="Password"
-          placeholder="Enter your password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
-
-        <Pressable
-          style={[styles.primaryBtn, loading && styles.disabled]}
-          onPress={handleLogin}
-          disabled={loading}
+        <ScrollView
+          contentContainerStyle={styles.container}
+          keyboardShouldPersistTaps="handled"
         >
-          <Text style={styles.primaryText}>Sign in</Text>
-        </Pressable>
+          <ZakaLogo size="lg" showTagline />
 
-        <View style={styles.demoBox}>
-          <Text style={styles.demoTitle}>Demo accounts</Text>
-          <Text style={styles.demoLine}>👑 Owner: +96170000001 / owner123</Text>
-          <Text style={styles.demoLine}>🛡️ Hamra: +96170000002 / admin123</Text>
-          <Text style={styles.demoLine}>🛡️ Verdun: +96170000003 / admin123</Text>
-          <Text style={styles.demoLine}>🛡️ Tripoli: +96170000004 / admin123</Text>
-          <Text style={styles.demoLine}>🛡️ Saida: +96170000005 / admin123</Text>
-        </View>
+          <Text style={styles.title}>Welcome back</Text>
+          <Text style={styles.subtitle}>Sign in to your wallet</Text>
 
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>Don't have an account? </Text>
-          <Link href="/signup" asChild>
-            <Pressable>
-              <Text style={styles.link}>Create account</Text>
-            </Pressable>
-          </Link>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+          <View style={styles.formCard}>
+            <AuthInput
+              label="Phone number"
+              placeholder="+961 70 123 456"
+              value={phone}
+              onChangeText={setPhone}
+              keyboardType="phone-pad"
+              autoCapitalize="none"
+            />
+
+            <AuthInput
+              label="Password"
+              placeholder="Enter your password"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+            />
+
+            <PrimaryButton
+              label="Sign in"
+              onPress={handleLogin}
+              disabled={loading}
+            />
+          </View>
+
+          <View style={styles.demoBox}>
+            <Text style={styles.demoTitle}>Demo accounts</Text>
+            <Text style={styles.demoLine}>👑 Owner: +96170000001 / owner123</Text>
+            <Text style={styles.demoLine}>🛡️ Hamra: +96170000002 / admin123</Text>
+            <Text style={styles.demoLine}>🛡️ Verdun: +96170000003 / admin123</Text>
+            <Text style={styles.demoLine}>🛡️ Tripoli: +96170000004 / admin123</Text>
+            <Text style={styles.demoLine}>🛡️ Saida: +96170000005 / admin123</Text>
+          </View>
+
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>Don't have an account? </Text>
+            <Link href="/signup" asChild>
+              <Pressable>
+                <Text style={styles.link}>Create account</Text>
+              </Pressable>
+            </Link>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: colors.background },
+  flex: { flex: 1 },
   container: {
     flexGrow: 1,
     padding: 24,
     justifyContent: 'center',
   },
-  logo: {
-    fontSize: 52,
-    textAlign: 'center',
-    marginBottom: 12,
-  },
   title: {
     color: colors.text,
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: '800',
     textAlign: 'center',
+    marginTop: 28,
   },
   subtitle: {
     color: colors.textSecondary,
-    fontSize: 15,
+    fontSize: 14,
     textAlign: 'center',
-    marginBottom: 32,
+    marginBottom: 24,
     marginTop: 6,
   },
-  primaryBtn: {
-    backgroundColor: colors.primaryDark,
-    padding: 18,
-    borderRadius: 16,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  disabled: { opacity: 0.7 },
-  primaryText: {
-    color: '#FFF',
-    fontSize: 17,
-    fontWeight: '800',
+  formCard: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.xl,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: colors.borderGold,
   },
   demoBox: {
     marginTop: 24,
-    backgroundColor: colors.surface,
-    borderRadius: 12,
+    backgroundColor: colors.surfaceLight,
+    borderRadius: radius.md,
     padding: 14,
     borderWidth: 1,
     borderColor: colors.border,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.goldMuted,
   },
   demoTitle: {
-    color: colors.text,
-    fontWeight: '700',
-    fontSize: 13,
+    color: colors.goldLight,
+    fontWeight: '800',
+    fontSize: 12,
     marginBottom: 8,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
   },
   demoLine: {
     color: colors.textSecondary,
@@ -157,14 +157,14 @@ const styles = StyleSheet.create({
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 20,
+    marginTop: 24,
   },
   footerText: {
     color: colors.textSecondary,
     fontSize: 14,
   },
   link: {
-    color: colors.primary,
+    color: colors.goldLight,
     fontSize: 14,
     fontWeight: '700',
   },

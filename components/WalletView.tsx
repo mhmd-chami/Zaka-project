@@ -192,15 +192,17 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   historyLinkText: {
-    color: colors.accent,
+    color: colors.goldLight,
     fontSize: 14,
     fontWeight: '600',
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: colors.text,
+    fontSize: 14,
+    fontWeight: '800',
+    color: colors.goldLight,
     marginBottom: 12,
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
   },
   empty: {
     color: colors.textSecondary,

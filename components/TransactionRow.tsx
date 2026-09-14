@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { colors } from '@/constants/theme';
+import { colors, radius } from '@/constants/theme';
 import { Transaction } from '@/types';
 
 const icons: Record<string, string> = {
@@ -11,17 +11,28 @@ const icons: Record<string, string> = {
   purchase: '🛒',
 };
 
+const stripeColors: Record<string, string> = {
+  send: colors.expense,
+  send_p2p: colors.expense,
+  send_cash: colors.pending,
+  receive: colors.income,
+  topup: colors.accent,
+  purchase: colors.gold,
+};
+
 interface Props {
   tx: Transaction;
 }
 
 export function TransactionRow({ tx }: Props) {
   const isIncome = tx.type === 'receive';
-  const isCashPending = tx.type === 'send_cash';
+  const isCashPending = tx.type === 'send_cash' && tx.status === 'pending';
   const sign = isIncome ? '+' : '-';
+  const stripe = stripeColors[tx.type] ?? colors.border;
 
   return (
     <View style={styles.row}>
+      <View style={[styles.stripe, { backgroundColor: stripe }]} />
       <Text style={styles.icon}>{icons[tx.type]}</Text>
       <View style={styles.body}>
         <Text style={styles.title}>{tx.title}</Text>
@@ -37,6 +48,9 @@ export function TransactionRow({ tx }: Props) {
           {isCashPending ? '' : sign}${tx.amount.toFixed(2)}
           {isCashPending ? `$${tx.amount.toFixed(2)}` : ''}
         </Text>
+        {isCashPending ? (
+          <Text style={styles.pendingLabel}>Pending</Text>
+        ) : null}
         <Text style={styles.date}>
           {new Date(tx.createdAt).toLocaleDateString()}
         </Text>
@@ -50,15 +64,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.surface,
-    borderRadius: 14,
+    borderRadius: radius.md,
     padding: 14,
     marginBottom: 10,
     borderWidth: 1,
     borderColor: colors.border,
+    overflow: 'hidden',
+  },
+  stripe: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 3,
   },
   icon: {
-    fontSize: 24,
+    fontSize: 22,
     marginRight: 12,
+    marginLeft: 4,
   },
   body: {
     flex: 1,
@@ -70,8 +93,8 @@ const styles = StyleSheet.create({
   },
   sub: {
     color: colors.textSecondary,
-    fontSize: 12,
-    marginTop: 2,
+    fontSize: 11,
+    marginTop: 3,
   },
   right: {
     alignItems: 'flex-end',
@@ -87,11 +110,18 @@ const styles = StyleSheet.create({
     color: colors.expense,
   },
   pending: {
-    color: colors.warning,
+    color: colors.pending,
+  },
+  pendingLabel: {
+    color: colors.pending,
+    fontSize: 9,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    marginTop: 2,
   },
   date: {
-    color: colors.textSecondary,
-    fontSize: 11,
+    color: colors.textMuted,
+    fontSize: 10,
     marginTop: 2,
   },
 });

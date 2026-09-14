@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors } from '@/constants/theme';
+import { colors, radius } from '@/constants/theme';
 import { ShopItem } from '@/types';
 
 interface Props {
@@ -13,6 +13,7 @@ export function ShopItemCard({ item, onPress }: Props) {
       style={({ pressed }) => [styles.card, pressed && styles.pressed]}
       onPress={onPress}
     >
+      <View style={styles.goldCorner} />
       <Text style={styles.emoji}>{item.emoji}</Text>
       <Text style={styles.name} numberOfLines={2}>
         {item.name}
@@ -20,7 +21,9 @@ export function ShopItemCard({ item, onPress }: Props) {
       <Text style={styles.category}>{item.category}</Text>
       <View style={styles.priceRow}>
         <Text style={styles.price}>${item.price.toFixed(2)}</Text>
-        <Text style={styles.buy}>Buy</Text>
+        <View style={styles.buyBtn}>
+          <Text style={styles.buy}>Buy</Text>
+        </View>
       </View>
     </Pressable>
   );
@@ -30,14 +33,25 @@ const styles = StyleSheet.create({
   card: {
     width: '48%',
     backgroundColor: colors.surface,
-    borderRadius: 16,
+    borderRadius: radius.lg,
     padding: 14,
     marginBottom: 12,
     borderWidth: 1,
     borderColor: colors.border,
+    overflow: 'hidden',
   },
   pressed: {
     opacity: 0.9,
+    borderColor: colors.borderGold,
+  },
+  goldCorner: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    width: 40,
+    height: 40,
+    borderBottomLeftRadius: 40,
+    backgroundColor: 'rgba(212,175,55,0.12)',
   },
   emoji: {
     fontSize: 32,
@@ -50,24 +64,34 @@ const styles = StyleSheet.create({
     minHeight: 36,
   },
   category: {
-    color: colors.textSecondary,
-    fontSize: 11,
+    color: colors.textMuted,
+    fontSize: 10,
     marginTop: 4,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   priceRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: 12,
   },
   price: {
-    color: colors.primary,
+    color: colors.goldLight,
     fontSize: 16,
     fontWeight: '800',
   },
+  buyBtn: {
+    backgroundColor: colors.primaryDark,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colors.goldMuted,
+  },
   buy: {
-    color: colors.accent,
-    fontSize: 12,
+    color: '#FFF',
+    fontSize: 11,
     fontWeight: '700',
   },
 });

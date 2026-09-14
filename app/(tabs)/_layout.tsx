@@ -1,7 +1,7 @@
 import { Tabs, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Text } from 'react-native';
-import { colors } from '@/constants/theme';
+import { colors, tabScreenOptions } from '@/constants/theme';
 import { getSession } from '@/services/authStorage';
 import { getUnreadCount } from '@/services/notificationStorage';
 
@@ -31,17 +31,7 @@ export default function TabLayout() {
 
   return (
     <Tabs
-      screenOptions={{
-        headerStyle: { backgroundColor: colors.background },
-        headerTintColor: colors.text,
-        headerTitleStyle: { fontWeight: '700' },
-        tabBarStyle: {
-          backgroundColor: colors.surface,
-          borderTopColor: colors.border,
-        },
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.textSecondary,
-      }}
+      screenOptions={tabScreenOptions(colors.goldLight)}
     >
       <Tabs.Screen
         name="index"

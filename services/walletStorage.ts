@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getSession } from '@/services/authStorage';
+import { getAllUsers, getSession } from '@/services/authStorage';
 import { Transaction, UserRole, WalletProfile } from '@/types';
 
 function defaultBalance(role: UserRole): number {
@@ -73,8 +73,55 @@ export async function getTransactions(): Promise<Transaction[]> {
 
 async function addTransaction(tx: Transaction): Promise<void> {
   const userId = await requireUserId();
-  const txs = await getTransactions();
+  await addTransactionForUser(userId, tx);
+}
+
+export async function getProfileByUserId(
+  userId: string
+): Promise<WalletProfile> {
+  const raw = await AsyncStorage.getItem(profileKey(userId));
+  if (!raw) {
+    const users = await getAllUsers();
+    const user = users.find((u) => u.id === userId);
+    const profile: WalletProfile = {
+      name: user?.name ?? 'User',
+      phone: user?.phone ?? '',
+      balance: defaultBalance(user?.role ?? 'user'),
+    };
+    await AsyncStorage.setItem(profileKey(userId), JSON.stringify(profile));
+    return profile;
+  }
+  return JSON.parse(raw);
+}
+
+export async function saveProfileByUserId(
+  userId: string,
+  profile: WalletProfile
+): Promise<void> {
+  await AsyncStorage.setItem(profileKey(userId), JSON.stringify(profile));
+}
+
+export async function addTransactionForUser(
+  userId: string,
+  tx: Transaction
+): Promise<void> {
+  const raw = await AsyncStorage.getItem(txKey(userId));
+  const txs: Transaction[] = raw ? JSON.parse(raw) : [];
   txs.unshift(tx);
+  await AsyncStorage.setItem(txKey(userId), JSON.stringify(txs));
+}
+
+export async function updateTransactionForUser(
+  userId: string,
+  transferId: string,
+  updates: Partial<Transaction>
+): Promise<void> {
+  const raw = await AsyncStorage.getItem(txKey(userId));
+  if (!raw) return;
+  const txs: Transaction[] = JSON.parse(raw);
+  const idx = txs.findIndex((t) => t.transferId === transferId);
+  if (idx < 0) return;
+  txs[idx] = { ...txs[idx], ...updates };
   await AsyncStorage.setItem(txKey(userId), JSON.stringify(txs));
 }
 
@@ -139,26 +186,26 @@ export async function sendMoneyP2P(
 
 export async function sendCashAtLocation(
   amount: number,
-  locationName: string,
-  _locationAddress: string
+  locationId: string,
+  locationName: string
 ): Promise<{ ok: boolean; error?: string; reference?: string }> {
   if (amount <= 0) return { ok: false, error: 'Enter a valid amount' };
 
   const session = await getSession();
   if (!session) return { ok: false, error: 'Not logged in' };
 
-  const reference = `ZKP-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+  const { createBranchTransfer } = await import(
+    '@/services/branchTransferStorage'
+  );
 
-  await addTransaction({
-    id: `tx-${Date.now()}`,
-    type: 'send_cash',
-    amount,
-    title: 'Cash at ZakaPay branch',
-    subtitle: `${locationName} · Ref ${reference}`,
-    createdAt: new Date().toISOString(),
-  });
-
-  return { ok: true, reference };
+  return createBranchTransfer(
+    session.userId,
+    session.name,
+    session.phone,
+    locationId,
+    locationName,
+    amount
+  );
 }
 
 export async function receiveMoney(

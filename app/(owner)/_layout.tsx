@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { Text } from 'react-native';
-import { colors } from '@/constants/theme';
+import { colors, tabScreenOptions } from '@/constants/theme';
 
 function TabIcon({ emoji }: { emoji: string }) {
   return <Text style={{ fontSize: 22 }}>{emoji}</Text>;
@@ -9,17 +9,7 @@ function TabIcon({ emoji }: { emoji: string }) {
 export default function OwnerLayout() {
   return (
     <Tabs
-      screenOptions={{
-        headerStyle: { backgroundColor: colors.background },
-        headerTintColor: colors.text,
-        headerTitleStyle: { fontWeight: '700' },
-        tabBarStyle: {
-          backgroundColor: colors.surface,
-          borderTopColor: colors.border,
-        },
-        tabBarActiveTintColor: colors.accent,
-        tabBarInactiveTintColor: colors.textSecondary,
-      }}
+      screenOptions={tabScreenOptions(colors.owner)}
     >
       <Tabs.Screen
         name="wallet"

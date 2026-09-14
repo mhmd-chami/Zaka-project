@@ -1,5 +1,5 @@
 import { StyleSheet, Text, TextInput, TextInputProps, View } from 'react-native';
-import { colors } from '@/constants/theme';
+import { colors, radius } from '@/constants/theme';
 
 interface Props extends TextInputProps {
   label: string;
@@ -9,11 +9,14 @@ export function AuthInput({ label, ...props }: Props) {
   return (
     <View style={styles.wrap}>
       <Text style={styles.label}>{label}</Text>
-      <TextInput
-        style={styles.input}
-        placeholderTextColor={colors.textSecondary}
-        {...props}
-      />
+      <View style={styles.inputWrap}>
+        <View style={styles.accentBar} />
+        <TextInput
+          style={styles.input}
+          placeholderTextColor={colors.textMuted}
+          {...props}
+        />
+      </View>
     </View>
   );
 }
@@ -23,18 +26,29 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   label: {
-    color: colors.text,
-    fontSize: 14,
+    color: colors.goldLight,
+    fontSize: 13,
     fontWeight: '700',
     marginBottom: 8,
+    letterSpacing: 0.4,
+    textTransform: 'uppercase',
+  },
+  inputWrap: {
+    flexDirection: 'row',
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    overflow: 'hidden',
+  },
+  accentBar: {
+    width: 4,
+    backgroundColor: colors.gold,
   },
   input: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
+    flex: 1,
     padding: 16,
     fontSize: 16,
     color: colors.text,
-    borderWidth: 1,
-    borderColor: colors.border,
   },
 });

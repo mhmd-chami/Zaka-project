@@ -10,6 +10,8 @@ export type TransactionType =
 
 export type SendMode = 'p2p' | 'location';
 
+export type TransactionStatus = 'pending' | 'completed';
+
 export interface Transaction {
   id: string;
   type: TransactionType;
@@ -17,6 +19,25 @@ export interface Transaction {
   title: string;
   subtitle: string;
   createdAt: string;
+  status?: TransactionStatus;
+  transferId?: string;
+}
+
+export type BranchTransferStatus = 'pending' | 'completed';
+
+export interface BranchTransfer {
+  id: string;
+  reference: string;
+  senderUserId: string;
+  senderName: string;
+  senderPhone: string;
+  locationId: string;
+  locationName: string;
+  amount: number;
+  status: BranchTransferStatus;
+  createdAt: string;
+  completedAt?: string;
+  acceptedByUserId?: string;
 }
 
 export interface ShopItem {

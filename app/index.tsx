@@ -1,6 +1,8 @@
 import { Href, Redirect } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ScreenBackground } from '@/components/ScreenBackground';
+import { ZakaLogo } from '@/components/ZakaLogo';
 import { colors } from '@/constants/theme';
 import { getSession } from '@/services/authStorage';
 import { getHomeRoute } from '@/utils/routes';
@@ -20,11 +22,12 @@ export default function IndexScreen() {
 
   if (!ready) {
     return (
-      <View style={styles.loading}>
-        <Text style={styles.logo}>💳</Text>
-        <Text style={styles.title}>ZakaPay</Text>
-        <ActivityIndicator color={colors.primary} style={styles.spinner} />
-      </View>
+      <ScreenBackground>
+        <View style={styles.loading}>
+          <ZakaLogo size="lg" showTagline />
+          <ActivityIndicator color={colors.gold} style={styles.spinner} size="large" />
+        </View>
+      </ScreenBackground>
     );
   }
 
@@ -38,20 +41,10 @@ export default function IndexScreen() {
 const styles = StyleSheet.create({
   loading: {
     flex: 1,
-    backgroundColor: colors.background,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  logo: {
-    fontSize: 56,
-    marginBottom: 8,
-  },
-  title: {
-    color: colors.text,
-    fontSize: 28,
-    fontWeight: '800',
-  },
   spinner: {
-    marginTop: 24,
+    marginTop: 32,
   },
 });

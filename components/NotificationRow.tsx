@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors } from '@/constants/theme';
+import { colors, radius } from '@/constants/theme';
 import { roleLabel } from '@/services/authStorage';
 import { AppNotification } from '@/types';
 
@@ -14,6 +14,7 @@ export function NotificationRow({ notification, onPress }: Props) {
       style={[styles.row, !notification.read && styles.unread]}
       onPress={onPress}
     >
+      {!notification.read ? <View style={styles.unreadStripe} /> : null}
       <View style={styles.dotWrap}>
         {!notification.read && <View style={styles.dot} />}
       </View>
@@ -33,15 +34,24 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     backgroundColor: colors.surface,
-    borderRadius: 14,
+    borderRadius: radius.md,
     padding: 14,
     marginBottom: 10,
     borderWidth: 1,
     borderColor: colors.border,
+    overflow: 'hidden',
   },
   unread: {
-    borderColor: colors.primary,
+    borderColor: colors.borderGold,
     backgroundColor: colors.surfaceLight,
+  },
+  unreadStripe: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 3,
+    backgroundColor: colors.gold,
   },
   dotWrap: {
     width: 12,
@@ -52,7 +62,7 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: colors.primary,
+    backgroundColor: colors.gold,
   },
   body: {
     flex: 1,
@@ -69,7 +79,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   meta: {
-    color: colors.textSecondary,
+    color: colors.textMuted,
     fontSize: 11,
     marginTop: 8,
   },

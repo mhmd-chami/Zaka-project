@@ -12,7 +12,10 @@ import {
   View,
 } from 'react-native';
 import { AuthInput } from '@/components/AuthInput';
-import { colors } from '@/constants/theme';
+import { PrimaryButton } from '@/components/PrimaryButton';
+import { ScreenBackground } from '@/components/ScreenBackground';
+import { ZakaLogo } from '@/components/ZakaLogo';
+import { colors, radius } from '@/constants/theme';
 import { signUp } from '@/services/authStorage';
 import { sendWelcomeNotification } from '@/services/notificationStorage';
 import { getHomeRoute } from '@/utils/routes';
@@ -52,110 +55,103 @@ export default function SignUpScreen() {
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.flex}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <ScrollView
-        contentContainerStyle={styles.container}
-        keyboardShouldPersistTaps="handled"
+    <ScreenBackground>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <Text style={styles.logo}>✨</Text>
-        <Text style={styles.title}>Create account</Text>
-        <Text style={styles.subtitle}>Join ZakaPay and start sending money</Text>
-
-        <AuthInput
-          label="Full name"
-          placeholder="Your name"
-          value={name}
-          onChangeText={setName}
-          autoCapitalize="words"
-        />
-
-        <AuthInput
-          label="Phone number"
-          placeholder="+961 70 123 456"
-          value={phone}
-          onChangeText={setPhone}
-          keyboardType="phone-pad"
-          autoCapitalize="none"
-        />
-
-        <AuthInput
-          label="Password"
-          placeholder="At least 4 characters"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
-
-        <AuthInput
-          label="Confirm password"
-          placeholder="Repeat password"
-          value={confirm}
-          onChangeText={setConfirm}
-          secureTextEntry
-        />
-
-        <Pressable
-          style={[styles.primaryBtn, loading && styles.disabled]}
-          onPress={handleSignUp}
-          disabled={loading}
+        <ScrollView
+          contentContainerStyle={styles.container}
+          keyboardShouldPersistTaps="handled"
         >
-          <Text style={styles.primaryText}>Create account</Text>
-        </Pressable>
+          <ZakaLogo size="md" />
 
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>Already have an account? </Text>
-          <Link href="/login" asChild>
-            <Pressable>
-              <Text style={styles.link}>Sign in</Text>
-            </Pressable>
-          </Link>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+          <Text style={styles.title}>Create account</Text>
+          <Text style={styles.subtitle}>Join ZakaPay and start sending money</Text>
+
+          <View style={styles.formCard}>
+            <AuthInput
+              label="Full name"
+              placeholder="Your name"
+              value={name}
+              onChangeText={setName}
+              autoCapitalize="words"
+            />
+
+            <AuthInput
+              label="Phone number"
+              placeholder="+961 70 123 456"
+              value={phone}
+              onChangeText={setPhone}
+              keyboardType="phone-pad"
+              autoCapitalize="none"
+            />
+
+            <AuthInput
+              label="Password"
+              placeholder="At least 4 characters"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+            />
+
+            <AuthInput
+              label="Confirm password"
+              placeholder="Repeat password"
+              value={confirm}
+              onChangeText={setConfirm}
+              secureTextEntry
+            />
+
+            <PrimaryButton
+              label="Create account"
+              onPress={handleSignUp}
+              disabled={loading}
+            />
+          </View>
+
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>Already have an account? </Text>
+            <Link href="/login" asChild>
+              <Pressable>
+                <Text style={styles.link}>Sign in</Text>
+              </Pressable>
+            </Link>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: colors.background },
+  flex: { flex: 1 },
   container: {
     flexGrow: 1,
     padding: 24,
     paddingTop: 40,
     paddingBottom: 40,
   },
-  logo: {
-    fontSize: 48,
-    textAlign: 'center',
-    marginBottom: 12,
-  },
   title: {
     color: colors.text,
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: '800',
     textAlign: 'center',
+    marginTop: 20,
   },
   subtitle: {
     color: colors.textSecondary,
-    fontSize: 15,
+    fontSize: 14,
     textAlign: 'center',
-    marginBottom: 28,
+    marginBottom: 24,
     marginTop: 6,
   },
-  primaryBtn: {
-    backgroundColor: colors.primaryDark,
-    padding: 18,
-    borderRadius: 16,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  disabled: { opacity: 0.7 },
-  primaryText: {
-    color: '#FFF',
-    fontSize: 17,
-    fontWeight: '800',
+  formCard: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.xl,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: colors.borderGold,
   },
   footer: {
     flexDirection: 'row',
@@ -167,7 +163,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   link: {
-    color: colors.primary,
+    color: colors.goldLight,
     fontSize: 14,
     fontWeight: '700',
   },

@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
   },
   bannerEmoji: { fontSize: 44, marginBottom: 8 },
   bannerTitle: {
-    color: colors.warning,
+    color: colors.goldLight,
     fontSize: 24,
     fontWeight: '800',
   },

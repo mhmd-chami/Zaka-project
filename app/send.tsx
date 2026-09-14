@@ -74,8 +74,8 @@ export default function SendScreen() {
     setLoading(true);
     const result = await sendCashAtLocation(
       value,
-      location.name,
-      location.address
+      location.id,
+      location.name
     );
     setLoading(false);
 
@@ -86,11 +86,10 @@ export default function SendScreen() {
 
     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     Alert.alert(
-      'Take cash to ZakaPay branch 🏪',
-      `Bring $${value.toFixed(2)} in cash to:\n\n` +
+      'Request sent to branch 🏪',
+      `$${value.toFixed(2)} will be sent from your wallet once the branch accepts.\n\n` +
         `${location.name}\n${location.address}\n` +
         `Hours: ${location.hours}\n\n` +
-        `Your number: ${session?.phone ?? ''}\n` +
         `Reference: ${result.reference}\n\n` +
         `Show this code to the agent at the branch.`,
       [{ text: 'OK', onPress: () => router.back() }]
@@ -172,8 +171,8 @@ export default function SendScreen() {
         ) : (
           <View style={styles.form}>
             <Text style={styles.info}>
-              Choose a branch, enter the amount, and take cash there. The agent
-              will add it to your ZakaPay wallet.
+              Choose a branch and amount. The branch agent must accept before
+              money leaves your wallet and is received at the location.
             </Text>
 
             <Text style={styles.label}>Choose branch</Text>
@@ -236,13 +235,15 @@ const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.background },
   container: { padding: 20, paddingBottom: 40 },
   staffBanner: {
-    backgroundColor: '#92400E',
+    backgroundColor: colors.adminDark,
     borderRadius: 12,
     padding: 12,
     marginBottom: 16,
+    borderWidth: 1,
+    borderColor: colors.borderGold,
   },
   ownerBanner: {
-    backgroundColor: '#5B21B6',
+    backgroundColor: colors.ownerDark,
   },
   staffBannerText: {
     color: '#FFF',
@@ -270,7 +271,7 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   modeBtnActive: {
-    borderColor: colors.primary,
+    borderColor: colors.gold,
     backgroundColor: colors.surfaceLight,
   },
   modeEmoji: {
@@ -324,7 +325,7 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   locationSelected: {
-    borderColor: colors.primary,
+    borderColor: colors.gold,
     backgroundColor: colors.surfaceLight,
   },
   locationName: {
@@ -355,7 +356,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   quickText: {
-    color: colors.accent,
+    color: colors.goldLight,
     fontWeight: '700',
   },
   sendBtn: {
@@ -364,6 +365,8 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: 'center',
     marginTop: 28,
+    borderWidth: 1.5,
+    borderColor: colors.goldMuted,
   },
   disabled: { opacity: 0.7 },
   sendText: {

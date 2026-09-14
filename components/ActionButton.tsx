@@ -1,5 +1,5 @@
-import { Pressable, StyleSheet, Text } from 'react-native';
-import { colors } from '@/constants/theme';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { colors, radius } from '@/constants/theme';
 
 interface Props {
   emoji: string;
@@ -13,7 +13,9 @@ export function ActionButton({ emoji, label, onPress }: Props) {
       style={({ pressed }) => [styles.btn, pressed && styles.pressed]}
       onPress={onPress}
     >
-      <Text style={styles.emoji}>{emoji}</Text>
+      <View style={styles.iconRing}>
+        <Text style={styles.emoji}>{emoji}</Text>
+      </View>
       <Text style={styles.label}>{label}</Text>
     </Pressable>
   );
@@ -23,23 +25,36 @@ const styles = StyleSheet.create({
   btn: {
     flex: 1,
     backgroundColor: colors.surface,
-    borderRadius: 16,
-    padding: 16,
+    borderRadius: radius.lg,
+    paddingVertical: 18,
+    paddingHorizontal: 8,
     alignItems: 'center',
     borderWidth: 1,
     borderColor: colors.border,
   },
   pressed: {
     opacity: 0.85,
-    transform: [{ scale: 0.97 }],
+    transform: [{ scale: 0.96 }],
+    borderColor: colors.borderGold,
+  },
+  iconRing: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: colors.surfaceLight,
+    borderWidth: 1.5,
+    borderColor: colors.borderGold,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
   },
   emoji: {
-    fontSize: 28,
-    marginBottom: 8,
+    fontSize: 24,
   },
   label: {
     color: colors.text,
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
+    letterSpacing: 0.3,
   },
 });
