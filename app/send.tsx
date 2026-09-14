@@ -12,7 +12,8 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { colors } from '@/constants/theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { colors, contentBottomPadding } from '@/constants/theme';
 import { getLocationById, zakaLocations, ZakaLocation } from '@/data/locations';
 import { getSession } from '@/services/authStorage';
 import { sendCashAtLocation, sendMoneyP2P } from '@/services/walletStorage';
@@ -22,6 +23,7 @@ const QUICK = [5, 10, 20, 50];
 
 export default function SendScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [mode, setMode] = useState<SendMode>('p2p');
   const [phone, setPhone] = useState('');
   const [amount, setAmount] = useState('');
@@ -101,7 +103,12 @@ export default function SendScreen() {
       style={styles.flex}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.container,
+          { paddingBottom: contentBottomPadding(insets.bottom, 20) },
+        ]}
+      >
         {session?.role === 'admin' && adminLocation ? (
           <View style={styles.staffBanner}>
             <Text style={styles.staffBannerText}>
@@ -233,7 +240,7 @@ export default function SendScreen() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.background },
-  container: { padding: 20, paddingBottom: 40 },
+  container: { padding: 20 },
   staffBanner: {
     backgroundColor: colors.adminDark,
     borderRadius: 12,

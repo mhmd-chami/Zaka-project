@@ -11,16 +11,18 @@ import {
   Text,
   View,
 } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AuthInput } from '@/components/AuthInput';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { ScreenBackground } from '@/components/ScreenBackground';
 import { ZakaLogo } from '@/components/ZakaLogo';
-import { colors, radius } from '@/constants/theme';
+import { colors, contentBottomPadding, radius } from '@/constants/theme';
 import { login } from '@/services/authStorage';
 import { getHomeRoute } from '@/utils/routes';
 
 export default function LoginScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -42,63 +44,69 @@ export default function LoginScreen() {
 
   return (
     <ScreenBackground>
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
-        <ScrollView
-          contentContainerStyle={styles.container}
-          keyboardShouldPersistTaps="handled"
+      <SafeAreaView style={styles.flex} edges={['top', 'bottom']}>
+        <KeyboardAvoidingView
+          style={styles.flex}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
-          <ZakaLogo size="lg" showTagline />
+          <ScrollView
+            contentContainerStyle={[
+              styles.container,
+              { paddingBottom: contentBottomPadding(insets.bottom, 12) },
+            ]}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <ZakaLogo size="md" showTagline />
 
-          <Text style={styles.title}>Welcome back</Text>
-          <Text style={styles.subtitle}>Sign in to your wallet</Text>
+            <Text style={styles.title}>Welcome back</Text>
+            <Text style={styles.subtitle}>Sign in to your wallet</Text>
 
-          <View style={styles.formCard}>
-            <AuthInput
-              label="Phone number"
-              placeholder="+961 70 123 456"
-              value={phone}
-              onChangeText={setPhone}
-              keyboardType="phone-pad"
-              autoCapitalize="none"
-            />
+            <View style={styles.formCard}>
+              <AuthInput
+                label="Phone number"
+                placeholder="+961 70 123 456"
+                value={phone}
+                onChangeText={setPhone}
+                keyboardType="phone-pad"
+                autoCapitalize="none"
+              />
 
-            <AuthInput
-              label="Password"
-              placeholder="Enter your password"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-            />
+              <AuthInput
+                label="Password"
+                placeholder="Enter your password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+              />
 
-            <PrimaryButton
-              label="Sign in"
-              onPress={handleLogin}
-              disabled={loading}
-            />
-          </View>
+              <PrimaryButton
+                label="Sign in"
+                onPress={handleLogin}
+                disabled={loading}
+              />
+            </View>
 
-          <View style={styles.demoBox}>
-            <Text style={styles.demoTitle}>Demo accounts</Text>
-            <Text style={styles.demoLine}>👑 Owner: +96170000001 / owner123</Text>
-            <Text style={styles.demoLine}>🛡️ Hamra: +96170000002 / admin123</Text>
-            <Text style={styles.demoLine}>🛡️ Verdun: +96170000003 / admin123</Text>
-            <Text style={styles.demoLine}>🛡️ Tripoli: +96170000004 / admin123</Text>
-            <Text style={styles.demoLine}>🛡️ Saida: +96170000005 / admin123</Text>
-          </View>
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>Don't have an account? </Text>
+              <Link href="/signup" asChild>
+                <Pressable>
+                  <Text style={styles.link}>Create account</Text>
+                </Pressable>
+              </Link>
+            </View>
 
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>Don't have an account? </Text>
-            <Link href="/signup" asChild>
-              <Pressable>
-                <Text style={styles.link}>Create account</Text>
-              </Pressable>
-            </Link>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+            <View style={styles.demoBox}>
+              <Text style={styles.demoTitle}>Demo accounts</Text>
+              <Text style={styles.demoLine}>👑 Owner: +96170000001 / owner123</Text>
+              <Text style={styles.demoLine}>🛡️ Hamra: +96170000002 / admin123</Text>
+              <Text style={styles.demoLine}>🛡️ Verdun: +96170000003 / admin123</Text>
+              <Text style={styles.demoLine}>🛡️ Tripoli: +96170000004 / admin123</Text>
+              <Text style={styles.demoLine}>🛡️ Saida: +96170000005 / admin123</Text>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
     </ScreenBackground>
   );
 }
@@ -107,21 +115,21 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   container: {
     flexGrow: 1,
-    padding: 24,
-    justifyContent: 'center',
+    paddingHorizontal: 24,
+    paddingTop: 16,
   },
   title: {
     color: colors.text,
     fontSize: 26,
     fontWeight: '800',
     textAlign: 'center',
-    marginTop: 28,
+    marginTop: 20,
   },
   subtitle: {
     color: colors.textSecondary,
     fontSize: 14,
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: 20,
     marginTop: 6,
   },
   formCard: {
@@ -131,8 +139,22 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.borderGold,
   },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 20,
+    marginBottom: 16,
+  },
+  footerText: {
+    color: colors.textSecondary,
+    fontSize: 14,
+  },
+  link: {
+    color: colors.goldLight,
+    fontSize: 14,
+    fontWeight: '700',
+  },
   demoBox: {
-    marginTop: 24,
     backgroundColor: colors.surfaceLight,
     borderRadius: radius.md,
     padding: 14,
@@ -153,19 +175,5 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontSize: 12,
     marginTop: 4,
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 24,
-  },
-  footerText: {
-    color: colors.textSecondary,
-    fontSize: 14,
-  },
-  link: {
-    color: colors.goldLight,
-    fontSize: 14,
-    fontWeight: '700',
   },
 });

@@ -95,7 +95,9 @@ export const goldTopBorder: ViewStyle = {
   borderTopColor: colors.gold,
 };
 
-export function tabScreenOptions(accent = colors.primary) {
+export function tabScreenOptions(accent = colors.primary, bottomInset = 0) {
+  const tabPaddingBottom = Math.max(bottomInset, 6);
+
   return {
     headerStyle: { backgroundColor: colors.background },
     headerTintColor: colors.text,
@@ -105,14 +107,17 @@ export function tabScreenOptions(accent = colors.primary) {
       backgroundColor: colors.surface,
       borderTopColor: colors.borderGold,
       borderTopWidth: 1,
-      height: 60,
-      paddingBottom: 8,
-      paddingTop: 6,
+      paddingTop: 4,
+      paddingBottom: tabPaddingBottom,
     },
     tabBarActiveTintColor: accent,
     tabBarInactiveTintColor: colors.textMuted,
     tabBarLabelStyle: { fontSize: 11, fontWeight: '600' as const },
   };
+}
+
+export function contentBottomPadding(bottomInset = 0, extra = 16): number {
+  return Math.max(bottomInset, 8) + extra;
 }
 
 export const logoText: TextStyle = {

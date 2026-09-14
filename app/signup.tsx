@@ -11,17 +11,19 @@ import {
   Text,
   View,
 } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AuthInput } from '@/components/AuthInput';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { ScreenBackground } from '@/components/ScreenBackground';
 import { ZakaLogo } from '@/components/ZakaLogo';
-import { colors, radius } from '@/constants/theme';
+import { colors, contentBottomPadding, radius } from '@/constants/theme';
 import { signUp } from '@/services/authStorage';
 import { sendWelcomeNotification } from '@/services/notificationStorage';
 import { getHomeRoute } from '@/utils/routes';
 
 export default function SignUpScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
@@ -56,70 +58,76 @@ export default function SignUpScreen() {
 
   return (
     <ScreenBackground>
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
-        <ScrollView
-          contentContainerStyle={styles.container}
-          keyboardShouldPersistTaps="handled"
+      <SafeAreaView style={styles.flex} edges={['top', 'bottom']}>
+        <KeyboardAvoidingView
+          style={styles.flex}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
-          <ZakaLogo size="md" />
+          <ScrollView
+            contentContainerStyle={[
+              styles.container,
+              { paddingBottom: contentBottomPadding(insets.bottom, 12) },
+            ]}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <ZakaLogo size="md" />
 
-          <Text style={styles.title}>Create account</Text>
-          <Text style={styles.subtitle}>Join ZakaPay and start sending money</Text>
+            <Text style={styles.title}>Create account</Text>
+            <Text style={styles.subtitle}>Join ZakaPay and start sending money</Text>
 
-          <View style={styles.formCard}>
-            <AuthInput
-              label="Full name"
-              placeholder="Your name"
-              value={name}
-              onChangeText={setName}
-              autoCapitalize="words"
-            />
+            <View style={styles.formCard}>
+              <AuthInput
+                label="Full name"
+                placeholder="Your name"
+                value={name}
+                onChangeText={setName}
+                autoCapitalize="words"
+              />
 
-            <AuthInput
-              label="Phone number"
-              placeholder="+961 70 123 456"
-              value={phone}
-              onChangeText={setPhone}
-              keyboardType="phone-pad"
-              autoCapitalize="none"
-            />
+              <AuthInput
+                label="Phone number"
+                placeholder="+961 70 123 456"
+                value={phone}
+                onChangeText={setPhone}
+                keyboardType="phone-pad"
+                autoCapitalize="none"
+              />
 
-            <AuthInput
-              label="Password"
-              placeholder="At least 4 characters"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-            />
+              <AuthInput
+                label="Password"
+                placeholder="At least 4 characters"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+              />
 
-            <AuthInput
-              label="Confirm password"
-              placeholder="Repeat password"
-              value={confirm}
-              onChangeText={setConfirm}
-              secureTextEntry
-            />
+              <AuthInput
+                label="Confirm password"
+                placeholder="Repeat password"
+                value={confirm}
+                onChangeText={setConfirm}
+                secureTextEntry
+              />
 
-            <PrimaryButton
-              label="Create account"
-              onPress={handleSignUp}
-              disabled={loading}
-            />
-          </View>
+              <PrimaryButton
+                label="Create account"
+                onPress={handleSignUp}
+                disabled={loading}
+              />
+            </View>
 
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>Already have an account? </Text>
-            <Link href="/login" asChild>
-              <Pressable>
-                <Text style={styles.link}>Sign in</Text>
-              </Pressable>
-            </Link>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>Already have an account? </Text>
+              <Link href="/login" asChild>
+                <Pressable>
+                  <Text style={styles.link}>Sign in</Text>
+                </Pressable>
+              </Link>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
     </ScreenBackground>
   );
 }
@@ -128,9 +136,8 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   container: {
     flexGrow: 1,
-    padding: 24,
-    paddingTop: 40,
-    paddingBottom: 40,
+    paddingHorizontal: 24,
+    paddingTop: 16,
   },
   title: {
     color: colors.text,
@@ -143,7 +150,7 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontSize: 14,
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: 20,
     marginTop: 6,
   },
   formCard: {
@@ -156,7 +163,7 @@ const styles = StyleSheet.create({
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 24,
+    marginTop: 20,
   },
   footerText: {
     color: colors.textSecondary,

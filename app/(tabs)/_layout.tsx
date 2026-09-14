@@ -1,6 +1,7 @@
 import { Tabs, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Text } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, tabScreenOptions } from '@/constants/theme';
 import { getSession } from '@/services/authStorage';
 import { getUnreadCount } from '@/services/notificationStorage';
@@ -10,6 +11,7 @@ function TabIcon({ emoji }: { emoji: string }) {
 }
 
 export default function TabLayout() {
+  const insets = useSafeAreaInsets();
   const [badge, setBadge] = useState<number | undefined>();
 
   useFocusEffect(
@@ -31,7 +33,7 @@ export default function TabLayout() {
 
   return (
     <Tabs
-      screenOptions={tabScreenOptions(colors.goldLight)}
+      screenOptions={tabScreenOptions(colors.goldLight, insets.bottom)}
     >
       <Tabs.Screen
         name="index"

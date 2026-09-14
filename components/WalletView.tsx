@@ -8,10 +8,11 @@ import {
   Text,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ActionButton } from '@/components/ActionButton';
 import { BalanceCard } from '@/components/BalanceCard';
 import { TransactionRow } from '@/components/TransactionRow';
-import { colors } from '@/constants/theme';
+import { colors, contentBottomPadding } from '@/constants/theme';
 import { getLocationById } from '@/data/locations';
 import { logout } from '@/services/authStorage';
 import {
@@ -33,6 +34,7 @@ export function WalletView({
   showLogout = true,
 }: Props) {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [profile, setProfile] = useState<WalletProfile | null>(null);
   const [recent, setRecent] = useState<Transaction[]>([]);
 
@@ -77,7 +79,13 @@ export function WalletView({
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={[
+        styles.content,
+        { paddingBottom: contentBottomPadding(insets.bottom, 8) },
+      ]}
+    >
       <BalanceCard
         balance={profile.balance}
         name={profile.name}
@@ -149,7 +157,6 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 20,
-    paddingBottom: 40,
   },
   loading: {
     flex: 1,

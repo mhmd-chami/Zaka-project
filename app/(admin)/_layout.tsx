@@ -1,5 +1,6 @@
 import { Tabs } from 'expo-router';
 import { Text } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, tabScreenOptions } from '@/constants/theme';
 
 function TabIcon({ emoji }: { emoji: string }) {
@@ -7,9 +8,11 @@ function TabIcon({ emoji }: { emoji: string }) {
 }
 
 export default function AdminLayout() {
+  const insets = useSafeAreaInsets();
+
   return (
     <Tabs
-      screenOptions={tabScreenOptions(colors.warning)}
+      screenOptions={tabScreenOptions(colors.warning, insets.bottom)}
     >
       <Tabs.Screen
         name="wallet"
