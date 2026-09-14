@@ -1,26 +1,31 @@
-export type TripType = 'beach' | 'hiking' | 'conference' | 'hospital';
+export interface Coordinates {
+  latitude: number;
+  longitude: number;
+}
 
-export interface ChecklistItem {
+export interface SafeSpot {
   id: string;
   name: string;
-  category: 'medical' | 'documents' | 'essentials' | 'tech' | 'clothing';
-  packed: boolean;
-  photoUri?: string;
+  type: 'police' | 'cafe' | 'hospital' | 'campus' | 'shop';
+  coordinate: Coordinates;
+  lit: boolean;
+  openLate: boolean;
 }
 
-export interface TripPack {
+export interface WalkSession {
   id: string;
-  tripType: TripType;
-  title: string;
-  createdAt: string;
-  items: ChecklistItem[];
+  destinationName: string;
+  destination: Coordinates;
+  start: Coordinates;
+  routeCoords: Coordinates[];
+  safeSpots: SafeSpot[];
+  startedAt: string;
+  status: 'active' | 'completed' | 'sos';
 }
 
-export interface TripTemplate {
-  id: TripType;
-  title: string;
+export interface DestinationPreset {
+  id: string;
+  name: string;
   emoji: string;
-  description: string;
-  color: string;
-  items: Omit<ChecklistItem, 'packed' | 'photoUri'>[];
+  coordinate: Coordinates;
 }

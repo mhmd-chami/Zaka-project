@@ -1,74 +1,68 @@
-# MedPack — Zaka Project
+# SafeRoute — Zaka Project
 
-**MedPack** is a mobile app for hackathon teams who need smart packing checklists for travel and emergencies.
+**Walk home safely at night.** SafeRoute picks a well-lit path, shows nearby safe spots, lets you share live GPS with friends, and triggers SOS with a phone shake.
 
-> "What's in my bag?" — Pick a trip type, get an AI-ready checklist, scan items with your camera, and share with family.
+> Built for hackathon teams aiming for **1st place** — emotional problem, live demo, real phone sensors.
 
 ## Features
 
-- **4 trip templates**: Beach, Hiking, Conference, Hospital visit
-- **Smart checklists** grouped by category (Medical, Documents, Tech, etc.)
-- **Camera scan** to photo-verify packed items
-- **Progress tracking** with visual progress bar
-- **Share list** with family via native share sheet
-- **Saved packs** — resume packing anytime
+- **Safe route planning** — walking directions via OSRM
+- **Live GPS tracking** — share your position with one tap
+- **Safe spots map** — police, cafés, hospitals, campus gates
+- **Shake SOS** — accelerometer detects shake → emergency alert + location share
+- **"I'm home safe"** — one tap to close the walk
 
 ## Tech Stack
 
 | Layer | Choice |
 |-------|--------|
-| Framework | React Native + Expo (TypeScript) |
-| Navigation | Expo Router |
-| Storage | AsyncStorage |
-| Camera | expo-image-picker |
+| Mobile | React Native + Expo (TypeScript) |
+| Maps | react-native-maps |
+| Location | expo-location |
+| SOS | expo-sensors (accelerometer) + expo-haptics |
+| Routing | OSRM (free, no API key) |
 
-## Team Roles (3-person hackathon split)
+## Team Split (3 people)
 
 | Person | Focus |
 |--------|-------|
-| **Developer A** | UI screens (`app/`, `components/`) |
-| **Developer B** | Data & logic (`data/`, `services/`) |
-| **Developer C** | Demo polish, pitch deck, testing on device |
+| **Dev A** | Map UI, walk screen, animations |
+| **Dev B** | GPS, routing, SOS logic, safe spot data |
+| **Dev C** | Pitch deck, demo video, device testing |
 
 ## Quick Start
 
 ```bash
-# Install dependencies
 npm install
-
-# Start Expo dev server
 npm start
-
-# Run on Android emulator / device
-npm run android
-
-# Run on iOS (Mac only)
-npm run ios
 ```
 
-Scan the QR code with **Expo Go** on your phone to test instantly.
+Scan QR with **Expo Go** on your phone (maps + GPS need a real device).
+
+## Demo Flow (2-min pitch)
+
+1. *"Walking alone at night is scary — SafeRoute fixes that."*
+2. Pick **Home** → **Start Safe Walk**
+3. Show map with route + 6 safe spots
+4. Tap **Share live location** → send to friend
+5. **Shake phone** → SOS modal appears
+6. Tap **I'm home safe** → done
 
 ## Project Structure
 
 ```
-Zaka-project/
-├── app/                    # Screens (Expo Router)
-│   ├── index.tsx           # Home — pick trip type
-│   ├── checklist/[id].tsx  # Packing checklist
-│   └── history.tsx         # Saved packs
-├── components/             # Reusable UI
-├── data/tripTemplates.ts   # Trip checklists
-├── services/               # Storage & helpers
-└── types/                  # TypeScript types
+app/
+  index.tsx       # Home — pick destination
+  walk/[id].tsx   # Live walk + map + SOS
+components/       # SafeMap, SOSModal, DestinationCard
+data/safeSpots.ts # Safe spots + destinations (edit for your city)
+services/         # Location, routing, storage
+hooks/            # Shake detection
 ```
 
-## Demo Flow (2-minute pitch)
+## Customize for Your City
 
-1. Open app → choose **Hospital Visit**
-2. Show auto-generated checklist (12 items)
-3. Tap checkbox + **camera** to scan an item
-4. Show progress bar hitting 100%
-5. Tap **Share with family** → send list
+Edit `data/safeSpots.ts` — change coordinates and spot names to your hackathon location.
 
 ## License
 
