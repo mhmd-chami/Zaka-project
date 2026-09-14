@@ -78,7 +78,10 @@ export default function LoginScreen() {
         <View style={styles.demoBox}>
           <Text style={styles.demoTitle}>Demo accounts</Text>
           <Text style={styles.demoLine}>👑 Owner: +96170000001 / owner123</Text>
-          <Text style={styles.demoLine}>🛡️ Admin: +96170000002 / admin123</Text>
+          <Text style={styles.demoLine}>🛡️ Hamra: +96170000002 / admin123</Text>
+          <Text style={styles.demoLine}>🛡️ Verdun: +96170000003 / admin123</Text>
+          <Text style={styles.demoLine}>🛡️ Tripoli: +96170000004 / admin123</Text>
+          <Text style={styles.demoLine}>🛡️ Saida: +96170000005 / admin123</Text>
         </View>
 
         <View style={styles.footer}>

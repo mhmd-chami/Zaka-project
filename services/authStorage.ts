@@ -15,11 +15,38 @@ const DEMO_ACCOUNTS: UserAccount[] = [
   },
   {
     id: 'user-admin',
-    name: 'Zaka Admin',
+    name: 'Hamra Admin',
     phone: '+96170000002',
     password: 'admin123',
     role: 'admin',
     locationId: 'loc-1',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'user-admin-verdun',
+    name: 'Verdun Admin',
+    phone: '+96170000003',
+    password: 'admin123',
+    role: 'admin',
+    locationId: 'loc-2',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'user-admin-tripoli',
+    name: 'Tripoli Admin',
+    phone: '+96170000004',
+    password: 'admin123',
+    role: 'admin',
+    locationId: 'loc-3',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'user-admin-saida',
+    name: 'Saida Admin',
+    phone: '+96170000005',
+    password: 'admin123',
+    role: 'admin',
+    locationId: 'loc-4',
     createdAt: new Date().toISOString(),
   },
 ];
@@ -59,10 +86,12 @@ export async function seedDemoAccounts(): Promise<void> {
     } else {
       const merged = {
         ...users[idx],
+        name: demo.name,
         role: demo.role,
         locationId: demo.locationId ?? users[idx].locationId,
       };
       if (
+        users[idx].name !== merged.name ||
         users[idx].role !== merged.role ||
         users[idx].locationId !== merged.locationId
       ) {

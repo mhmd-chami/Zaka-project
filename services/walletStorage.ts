@@ -138,13 +138,14 @@ export async function sendMoneyP2P(
 }
 
 export async function sendCashAtLocation(
-  toPhone: string,
   amount: number,
   locationName: string,
   _locationAddress: string
 ): Promise<{ ok: boolean; error?: string; reference?: string }> {
   if (amount <= 0) return { ok: false, error: 'Enter a valid amount' };
-  if (!toPhone.trim()) return { ok: false, error: 'Enter recipient number' };
+
+  const session = await getSession();
+  if (!session) return { ok: false, error: 'Not logged in' };
 
   const reference = `ZKP-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
 
@@ -152,7 +153,7 @@ export async function sendCashAtLocation(
     id: `tx-${Date.now()}`,
     type: 'send_cash',
     amount,
-    title: 'Cash send at agent',
+    title: 'Cash at ZakaPay branch',
     subtitle: `${locationName} · Ref ${reference}`,
     createdAt: new Date().toISOString(),
   });

@@ -66,10 +66,6 @@ export default function SendScreen() {
 
   async function handleCashSend() {
     const value = parseFloat(amount);
-    if (!phone.trim()) {
-      Alert.alert('Missing number', 'Enter who receives the money.');
-      return;
-    }
     if (!value || value <= 0) {
       Alert.alert('Invalid amount', 'Enter the cash amount.');
       return;
@@ -77,7 +73,6 @@ export default function SendScreen() {
 
     setLoading(true);
     const result = await sendCashAtLocation(
-      phone.trim(),
       value,
       location.name,
       location.address
@@ -91,13 +86,13 @@ export default function SendScreen() {
 
     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     Alert.alert(
-      'Take cash to ZakaPay location 🏪',
+      'Take cash to ZakaPay branch 🏪',
       `Bring $${value.toFixed(2)} in cash to:\n\n` +
         `${location.name}\n${location.address}\n` +
         `Hours: ${location.hours}\n\n` +
-        `Recipient: ${phone.trim()}\n` +
+        `Your number: ${session?.phone ?? ''}\n` +
         `Reference: ${result.reference}\n\n` +
-        `Show this code to the agent.`,
+        `Show this code to the agent at the branch.`,
       [{ text: 'OK', onPress: () => router.back() }]
     );
   }
@@ -177,11 +172,11 @@ export default function SendScreen() {
         ) : (
           <View style={styles.form}>
             <Text style={styles.info}>
-              Visit a ZakaPay location with cash. The agent sends money to the
-              recipient for you.
+              Choose a branch, enter the amount, and take cash there. The agent
+              will add it to your ZakaPay wallet.
             </Text>
 
-            <Text style={styles.label}>ZakaPay location</Text>
+            <Text style={styles.label}>Choose branch</Text>
             {zakaLocations.map((loc) => (
               <Pressable
                 key={loc.id}
@@ -196,16 +191,6 @@ export default function SendScreen() {
                 <Text style={styles.locationHours}>🕐 {loc.hours}</Text>
               </Pressable>
             ))}
-
-            <Text style={styles.label}>Recipient phone number</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="+961 71 000 000"
-              placeholderTextColor={colors.textSecondary}
-              value={phone}
-              onChangeText={setPhone}
-              keyboardType="phone-pad"
-            />
           </View>
         )}
 
@@ -239,7 +224,7 @@ export default function SendScreen() {
           <Text style={styles.sendText}>
             {mode === 'p2p' || isStaff
               ? '💸 Send to ZakaPay user'
-              : '🏪 Get location code'}
+              : '🏪 Send to branch'}
           </Text>
         </Pressable>
       </ScrollView>
