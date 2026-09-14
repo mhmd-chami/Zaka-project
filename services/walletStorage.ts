@@ -1,0 +1,227 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getSession } from '@/services/authStorage';
+import { Transaction, UserRole, WalletProfile } from '@/types';
+
+function defaultBalance(role: UserRole): number {
+  switch (role) {
+    case 'owner':
+      return 10000;
+    case 'admin':
+      return 5000;
+    default:
+      return 150;
+  }
+}
+
+function profileKey(userId: string) {
+  return `@zaka_wallet_profile_${userId}`;
+}
+
+function txKey(userId: string) {
+  return `@zaka_wallet_transactions_${userId}`;
+}
+
+async function requireUserId(): Promise<string> {
+  const session = await getSession();
+  if (!session) throw new Error('Not logged in');
+  return session.userId;
+}
+
+export async function getProfile(): Promise<WalletProfile> {
+  const session = await getSession();
+  if (!session) {
+    return { name: 'Guest', phone: '', balance: 0 };
+  }
+
+  const key = profileKey(session.userId);
+  const raw = await AsyncStorage.getItem(key);
+
+  if (!raw) {
+    const profile: WalletProfile = {
+      name: session.name,
+      phone: session.phone,
+      balance: defaultBalance(session.role),
+    };
+    await AsyncStorage.setItem(key, JSON.stringify(profile));
+    return profile;
+  }
+
+  const profile: WalletProfile = JSON.parse(raw);
+  return {
+    ...profile,
+    name: session.name,
+    phone: session.phone,
+  };
+}
+
+export async function saveProfile(profile: WalletProfile): Promise<void> {
+  const userId = await requireUserId();
+  await AsyncStorage.setItem(profileKey(userId), JSON.stringify(profile));
+}
+
+export async function getTransactions(): Promise<Transaction[]> {
+  const session = await getSession();
+  if (!session) return [];
+
+  const raw = await AsyncStorage.getItem(txKey(session.userId));
+  if (!raw) return [];
+  const txs: Transaction[] = JSON.parse(raw);
+  return txs.sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+}
+
+async function addTransaction(tx: Transaction): Promise<void> {
+  const userId = await requireUserId();
+  const txs = await getTransactions();
+  txs.unshift(tx);
+  await AsyncStorage.setItem(txKey(userId), JSON.stringify(txs));
+}
+
+export async function seedDemoTransactions(): Promise<void> {
+  try {
+    const session = await getSession();
+    if (!session) return;
+
+    const existing = await getTransactions();
+    if (existing.length > 0) return;
+
+    const profile = await getProfile();
+    const demos: Transaction[] = [
+      {
+        id: 'tx-1',
+        type: 'receive',
+        amount: 50,
+        title: 'Received from Sara',
+        subtitle: '+961 71 555 123',
+        createdAt: new Date(Date.now() - 86400000).toISOString(),
+      },
+      {
+        id: 'tx-2',
+        type: 'topup',
+        amount: 10,
+        title: 'Alfa recharge',
+        subtitle: profile.phone,
+        createdAt: new Date(Date.now() - 172800000).toISOString(),
+      },
+    ];
+
+    await AsyncStorage.setItem(txKey(session.userId), JSON.stringify(demos));
+  } catch {
+    // Ignore seed errors — wallet still loads
+  }
+}
+
+export async function sendMoneyP2P(
+  toPhone: string,
+  amount: number
+): Promise<{ ok: boolean; error?: string }> {
+  if (amount <= 0) return { ok: false, error: 'Enter a valid amount' };
+
+  const profile = await getProfile();
+  if (amount > profile.balance) {
+    return { ok: false, error: 'Not enough balance' };
+  }
+
+  profile.balance -= amount;
+  await saveProfile(profile);
+  await addTransaction({
+    id: `tx-${Date.now()}`,
+    type: 'send_p2p',
+    amount,
+    title: 'ZakaPay → ZakaPay',
+    subtitle: toPhone,
+    createdAt: new Date().toISOString(),
+  });
+
+  return { ok: true };
+}
+
+export async function sendCashAtLocation(
+  toPhone: string,
+  amount: number,
+  locationName: string,
+  _locationAddress: string
+): Promise<{ ok: boolean; error?: string; reference?: string }> {
+  if (amount <= 0) return { ok: false, error: 'Enter a valid amount' };
+  if (!toPhone.trim()) return { ok: false, error: 'Enter recipient number' };
+
+  const reference = `ZKP-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+
+  await addTransaction({
+    id: `tx-${Date.now()}`,
+    type: 'send_cash',
+    amount,
+    title: 'Cash send at agent',
+    subtitle: `${locationName} · Ref ${reference}`,
+    createdAt: new Date().toISOString(),
+  });
+
+  return { ok: true, reference };
+}
+
+export async function receiveMoney(
+  fromName: string,
+  amount: number
+): Promise<void> {
+  const profile = await getProfile();
+  profile.balance += amount;
+  await saveProfile(profile);
+  await addTransaction({
+    id: `tx-${Date.now()}`,
+    type: 'receive',
+    amount,
+    title: `Received from ${fromName}`,
+    subtitle: 'Demo payment',
+    createdAt: new Date().toISOString(),
+  });
+}
+
+export async function topUpPhone(
+  carrier: string,
+  phone: string,
+  amount: number
+): Promise<{ ok: boolean; error?: string }> {
+  if (amount <= 0) return { ok: false, error: 'Enter a valid amount' };
+
+  const profile = await getProfile();
+  if (amount > profile.balance) {
+    return { ok: false, error: 'Not enough balance' };
+  }
+
+  profile.balance -= amount;
+  await saveProfile(profile);
+  await addTransaction({
+    id: `tx-${Date.now()}`,
+    type: 'topup',
+    amount,
+    title: `${carrier} recharge`,
+    subtitle: phone,
+    createdAt: new Date().toISOString(),
+  });
+
+  return { ok: true };
+}
+
+export async function purchaseItem(
+  itemName: string,
+  price: number
+): Promise<{ ok: boolean; error?: string }> {
+  const profile = await getProfile();
+  if (price > profile.balance) {
+    return { ok: false, error: 'Not enough balance' };
+  }
+
+  profile.balance -= price;
+  await saveProfile(profile);
+  await addTransaction({
+    id: `tx-${Date.now()}`,
+    type: 'purchase',
+    amount: price,
+    title: itemName,
+    subtitle: 'Shop purchase',
+    createdAt: new Date().toISOString(),
+  });
+
+  return { ok: true };
+}

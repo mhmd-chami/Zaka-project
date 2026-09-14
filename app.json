@@ -1,47 +1,30 @@
 {
   "expo": {
-    "name": "SafeRoute",
-    "slug": "saferoute",
+    "name": "ZakaPay",
+    "slug": "zakapay",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "scheme": "saferoute",
+    "scheme": "zakapay",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#0F172A"
+      "backgroundColor": "#0B1220"
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.zaka.saferoute",
-      "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "SafeRoute uses your location to guide you on a safe path and share live position with trusted contacts.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "SafeRoute tracks your walk so friends can see you arrive safely."
-      }
+      "bundleIdentifier": "com.zaka.zakapay"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#0F172A"
+        "backgroundColor": "#0B1220"
       },
-      "package": "com.zaka.saferoute",
-      "permissions": [
-        "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION",
-        "VIBRATE"
-      ]
+      "package": "com.zaka.zakapay"
     },
-    "plugins": [
-      "expo-router",
-      [
-        "expo-location",
-        {
-          "locationAlwaysAndWhenInUsePermission": "SafeRoute needs location to guide your walk and share live position."
-        }
-      ]
-    ],
+    "plugins": ["expo-router"],
     "experiments": {
       "typedRoutes": true
     }

@@ -14,11 +14,15 @@ export default function RootLayout() {
           contentStyle: { backgroundColor: colors.background },
         }}
       >
-        <Stack.Screen name="index" options={{ title: 'SafeRoute' }} />
-        <Stack.Screen
-          name="walk/[id]"
-          options={{ title: 'Live Walk', headerShown: false }}
-        />
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="login" options={{ title: 'Sign In', headerShown: false }} />
+        <Stack.Screen name="signup" options={{ title: 'Sign Up', headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="(admin)" options={{ headerShown: false }} />
+        <Stack.Screen name="(owner)" options={{ headerShown: false }} />
+        <Stack.Screen name="send" options={{ title: 'Send Money' }} />
+        <Stack.Screen name="receive" options={{ title: 'Receive Money' }} />
+        <Stack.Screen name="topup" options={{ title: 'Charge Number' }} />
       </Stack>
     </>
   );

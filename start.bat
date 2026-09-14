@@ -1,9 +1,9 @@
 @echo off
-title SafeRoute - Expo Dev Server
+title ZakaPay - Expo Dev Server
 cd /d "%~dp0"
 echo.
 echo  ========================================
-echo   SafeRoute - Starting Expo...
+echo   ZakaPay - Starting Expo...
 echo  ========================================
 echo.
 echo  1. Wait for the QR code to appear below
