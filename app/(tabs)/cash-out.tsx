@@ -1,7 +1,5 @@
-import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Haptics from 'expo-haptics';
-import { useFocusEffect } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -14,6 +12,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { CameraQrScanner } from '@/components/CameraQrScanner';
 import { colors, contentBottomPadding } from '@/constants/theme';
 import { getLocationById } from '@/data/locations';
 import { createCashOutRequest } from '@/services/cashOutStorage';
@@ -23,19 +22,10 @@ const QUICK = [20, 50, 100, 200];
 
 export default function CashOutScreen() {
   const insets = useSafeAreaInsets();
-  const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [location, setLocation] = useState<LocationQrData | null>(null);
   const [amount, setAmount] = useState('');
   const [loading, setLoading] = useState(false);
-
-  useFocusEffect(
-    useCallback(() => {
-      if (permission && !permission.granted && permission.canAskAgain) {
-        requestPermission();
-      }
-    }, [permission, requestPermission])
-  );
 
   function resetScan() {
     setScanned(false);
@@ -153,26 +143,11 @@ export default function CashOutScreen() {
         Scan the branch QR at the counter to withdraw cash from your wallet.
       </Text>
 
-      {!permission?.granted ? (
-        <View style={styles.center}>
-          <Text style={styles.message}>
-            Camera access is needed to scan the branch QR code.
-          </Text>
-          <Pressable style={styles.permBtn} onPress={requestPermission}>
-            <Text style={styles.permBtnText}>Allow camera</Text>
-          </Pressable>
-        </View>
-      ) : (
-        <View style={styles.cameraWrap}>
-          <CameraView
-            style={styles.camera}
-            barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
-            onBarcodeScanned={handleBarcode}
-          />
-          <View style={styles.frame} pointerEvents="none" />
-          <Text style={styles.scanHint}>Scan the branch cash-out QR</Text>
-        </View>
-      )}
+      <CameraQrScanner
+        hint="Scan the branch cash-out QR"
+        scanned={scanned}
+        onScan={(data) => handleBarcode({ data })}
+      />
     </View>
   );
 }
@@ -187,65 +162,6 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     marginBottom: 16,
     lineHeight: 20,
-  },
-  center: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  message: {
-    color: colors.textSecondary,
-    fontSize: 15,
-    textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 20,
-  },
-  permBtn: {
-    backgroundColor: colors.primaryDark,
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: colors.goldMuted,
-  },
-  permBtnText: {
-    color: '#FFF',
-    fontWeight: '800',
-    fontSize: 15,
-  },
-  cameraWrap: {
-    flex: 1,
-    marginHorizontal: 20,
-    marginBottom: 16,
-    borderRadius: 20,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: colors.borderGold,
-  },
-  camera: { flex: 1 },
-  frame: {
-    position: 'absolute',
-    top: '22%',
-    left: '12%',
-    right: '12%',
-    bottom: '30%',
-    borderWidth: 2,
-    borderColor: colors.gold,
-    borderRadius: 16,
-  },
-  scanHint: {
-    position: 'absolute',
-    bottom: 28,
-    left: 0,
-    right: 0,
-    textAlign: 'center',
-    color: '#FFF',
-    fontSize: 14,
-    fontWeight: '600',
-    textShadowColor: '#000',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
   },
   formContainer: { padding: 20 },
   branchCard: {

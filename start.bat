@@ -6,9 +6,10 @@ echo  ========================================
 echo   ZakaPay - Starting Expo...
 echo  ========================================
 echo.
-echo  1. Wait for the QR code to appear below
-echo  2. Open Expo Go on your phone
-echo  3. Scan the QR code
+echo  1. Phone and PC must be on the SAME Wi-Fi
+echo  2. Wait for "Waiting on http://localhost:8081"
+echo  3. Open Expo Go and scan assets\expo-qr.png
+echo     OR enter URL: exp://192.168.1.6:8081
 echo.
-call npm start
+call npx expo start --lan --port 8081
 pause
