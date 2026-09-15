@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   unread: {
-    borderColor: 'rgba(40,199,128,0.28)',
+    borderColor: 'rgba(42,140,137,0.28)',
     backgroundColor: colors.surfaceLight,
   },
   unreadStripe: { position: 'absolute', left: 0, top: 14, bottom: 14, width: 3, borderRadius: 3, backgroundColor: colors.primary },

@@ -34,14 +34,14 @@ export function AuthInput({ label, onBlur, onFocus, ...props }: Props) {
 
 const styles = StyleSheet.create({
   wrap: {
-    marginBottom: 18,
+    marginBottom: 16,
   },
   label: {
     color: colors.textSecondary,
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
-    marginBottom: 8,
-    letterSpacing: 0.05,
+    marginBottom: 7,
+    letterSpacing: 0.4,
   },
   inputWrap: {
     flexDirection: 'row',
@@ -57,10 +57,10 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    minHeight: 54,
+    minHeight: 50,
     paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
+    paddingVertical: 13,
+    fontSize: 15,
     color: colors.text,
   },
 });

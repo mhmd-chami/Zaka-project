@@ -32,7 +32,7 @@ export function MoneyActionIcon({ action, size = 58 }: { action: MoneyAction; si
         {
           width: size,
           height: size,
-          borderRadius: size * 0.3,
+          borderRadius: size * 0.25,
           backgroundColor: palette.background,
           borderColor: `${palette.accent}55`,
         },

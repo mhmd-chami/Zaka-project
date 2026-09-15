@@ -1,12 +1,14 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { colors } from '@/constants/theme';
+import { SettingsProvider, useSettings } from '@/contexts/SettingsContext';
 
-export default function RootLayout() {
+function RootNavigator() {
+  const { colors, theme } = useSettings();
+
   return (
-    <SafeAreaProvider>
-      <StatusBar style="light" />
+    <>
+      <StatusBar style={theme === 'light' ? 'dark' : 'light'} />
       <Stack
         screenOptions={{
           headerStyle: { backgroundColor: colors.background },
@@ -26,7 +28,18 @@ export default function RootLayout() {
         <Stack.Screen name="receive" options={{ title: 'Receive Money' }} />
         <Stack.Screen name="add-money" options={{ title: 'Add Money' }} />
         <Stack.Screen name="notifications" options={{ title: 'Notifications' }} />
+        <Stack.Screen name="support-agent" options={{ title: 'Zaka Assistant' }} />
       </Stack>
+    </>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <SafeAreaProvider>
+      <SettingsProvider>
+        <RootNavigator />
+      </SettingsProvider>
     </SafeAreaProvider>
   );
 }

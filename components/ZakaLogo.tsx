@@ -8,19 +8,17 @@ interface Props {
 }
 
 export function ZakaLogo({ size = 'md', showTagline = false }: Props) {
-  const scale = size === 'sm' ? 0.75 : size === 'lg' ? 1.2 : 1;
+  const scale = size === 'sm' ? 0.78 : size === 'lg' ? 1.15 : 1;
 
   return (
     <View style={styles.wrap}>
       <View style={[styles.badge, { transform: [{ scale }] }]}>
-        <View style={styles.badgeInner}>
-          <AppIcon
-            name="cedar"
-            size={34}
-            color={colors.goldLight}
-            strokeWidth={1.7}
-          />
-        </View>
+        <AppIcon
+          name='cedar'
+          size={28}
+          color={colors.goldLight}
+          strokeWidth={1.8}
+        />
       </View>
       <View style={{ transform: [{ scale }] }}>
         <Text style={styles.brand}>
@@ -29,7 +27,7 @@ export function ZakaLogo({ size = 'md', showTagline = false }: Props) {
         </Text>
         {showTagline ? (
           <Text style={styles.tagline}>
-            Lebanon&apos;s wallet  ·  Send  ·  Shop  ·  Pay
+          Lebanon's wallet  ·  Send  ·  Shop  ·  Pay
           </Text>
         ) : null}
       </View>
@@ -43,27 +41,19 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   badge: {
-    width: 70,
-    height: 70,
-    borderRadius: 24,
+    width: 60,
+    height: 60,
+    borderRadius: 18,
     backgroundColor: colors.goldSoft,
     borderWidth: 1,
     borderColor: colors.borderGold,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: colors.gold,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.22,
-    shadowRadius: 16,
-    elevation: 4,
-  },
-  badgeInner: {
-    width: 54,
-    height: 54,
-    borderRadius: 18,
-    backgroundColor: colors.primaryMuted,
-    alignItems: 'center',
-    justifyContent: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 1,
   },
   brand: {
     ...logoText,
@@ -77,9 +67,9 @@ const styles = StyleSheet.create({
   },
   tagline: {
     color: colors.textSecondary,
-    fontSize: 13,
+    fontSize: 12,
     textAlign: 'center',
     marginTop: 6,
-    letterSpacing: 0.1,
+    letterSpacing: 0.2,
   },
 });

@@ -14,6 +14,7 @@ import { ActionButton } from '@/components/ActionButton';
 import { BalanceCard } from '@/components/BalanceCard';
 import { TransactionRow } from '@/components/TransactionRow';
 import { colors, contentBottomPadding } from '@/constants/theme';
+import { useSettings } from '@/contexts/SettingsContext';
 import { getLocationById } from '@/data/locations';
 import { logout } from '@/services/authStorage';
 import {
@@ -36,6 +37,7 @@ export function WalletView({
 }: Props) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { t } = useSettings();
   const [profile, setProfile] = useState<WalletProfile | null>(null);
   const [recent, setRecent] = useState<Transaction[]>([]);
 
@@ -98,31 +100,47 @@ export function WalletView({
 
       {session.role === 'admin' && location ? (
         <View style={styles.locationInfo}>
-          <IconLabel icon="clock" style={styles.locationInfoText}>
-            Open {location.hours} · Accept cash & ZakaPay transfers here
+          <IconLabel icon='clock' style={styles.locationInfoText}>
+            Open {location.hours} - Accept cash & ZakaPay transfers here
           </IconLabel>
         </View>
       ) : null}
 
       <View style={styles.actions}>
         <ActionButton
-          icon="send"
-          label="Send"
+          icon='send'
+          label='Send'
           onPress={() => router.push('/send')}
         />
         <ActionButton
-          icon="receive"
-          label="Receive"
+          icon='receive'
+          label='Receive'
           onPress={() => router.push('/receive')}
         />
         {showAddMoney ? (
           <ActionButton
-            icon="add-money"
-            label="Add Money"
+            icon='add-money'
+            label='Add Money'
             onPress={() => router.push('/add-money')}
           />
         ) : null}
       </View>
+
+      {session.role === 'user' ? (
+        <Pressable
+          style={styles.agentCard}
+          onPress={() => router.push('/support-agent')}
+        >
+          <View style={styles.agentIconWrap}>
+            <AppIcon name="bot" size={20} color={colors.primaryLight} />
+          </View>
+          <View style={styles.agentTextWrap}>
+            <Text style={styles.agentTitle}>{t('aiAssistant')}</Text>
+            <Text style={styles.agentSub}>{t('aiAssistantSub')}</Text>
+          </View>
+          <AppIcon name="chevron-right" size={18} color={colors.primaryLight} />
+        </Pressable>
+      ) : null}
 
       {showLogout ? (
         <Pressable style={styles.logoutBtn} onPress={handleLogout}>
@@ -144,7 +162,7 @@ export function WalletView({
           }}
         >
           <Text style={styles.historyLinkText}>See all</Text>
-          <AppIcon name="chevron-right" size={16} color={colors.primaryLight} />
+          <AppIcon name='chevron-right' size={15} color={colors.primaryLight} />
         </Pressable>
       </View>
       {recent.length === 0 ? (
@@ -163,7 +181,7 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: 20,
-    paddingTop: 18,
+    paddingTop: 16,
   },
   loading: {
     flex: 1,
@@ -176,48 +194,89 @@ const styles = StyleSheet.create({
   },
   locationInfo: {
     backgroundColor: colors.surfaceSoft,
-    borderRadius: 14,
-    padding: 13,
-    marginBottom: 18,
+    borderRadius: 12,
+    padding: 11,
+    marginBottom: 16,
     borderWidth: 1,
     borderColor: colors.border,
   },
   locationInfoText: {
     color: colors.textSecondary,
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: 12,
+    lineHeight: 17,
+  },
+  agentCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: colors.surfaceSoft,
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 22,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  agentIconWrap: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primarySoft,
+  },
+  agentTextWrap: { flex: 1 },
+  agentTitle: {
+    color: colors.text,
+    fontSize: 15,
+    fontWeight: '800',
+  },
+  agentSub: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    marginTop: 2,
   },
   actions: {
     flexDirection: 'row',
     gap: 10,
-    marginBottom: 22,
+    marginBottom: 18,
   },
   logoutBtn: {
     alignSelf: 'flex-end',
-    marginBottom: 8,
-    paddingVertical: 6,
+    marginBottom: 6,
+    paddingVertical: 5,
   },
   logoutText: {
     color: colors.danger,
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
   },
-  sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 },
-  historyLink: { flexDirection: 'row', alignItems: 'center', gap: 2, paddingVertical: 7, paddingLeft: 10 },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  historyLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    paddingVertical: 6,
+    paddingLeft: 8,
+  },
   historyLinkText: {
     color: colors.primaryLight,
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '800',
     color: colors.text,
     letterSpacing: -0.3,
   },
-  sectionSubtitle: { color: colors.textMuted, fontSize: 12, marginTop: 2 },
+  sectionSubtitle: { color: colors.textMuted, fontSize: 11, marginTop: 2 },
   empty: {
     color: colors.textSecondary,
-    fontSize: 14,
+    fontSize: 13,
   },
 });

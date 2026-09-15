@@ -1,4 +1,4 @@
-import * as Haptics from 'expo-haptics';
+﻿import * as Haptics from 'expo-haptics';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   promoteText: {
-    color: '#06130D',
+    color: colors.background,
     fontWeight: '700',
     fontSize: 13,
   },

@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
   btn: {
     backgroundColor: colors.accent,
     padding: 18,
-    borderRadius: 16,
+    borderRadius: 14,
     alignItems: 'center',
     marginTop: 24,
   },

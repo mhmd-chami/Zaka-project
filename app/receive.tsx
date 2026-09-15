@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
   loadingText: { color: colors.textSecondary },
   card: {
     backgroundColor: colors.surfaceSoft,
-    borderRadius: 22,
+    borderRadius: 18,
     padding: 24,
     alignItems: 'center',
     borderWidth: 1,
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
   qrSection: {
     marginTop: 20,
     backgroundColor: colors.surfaceSoft,
-    borderRadius: 22,
+    borderRadius: 18,
     padding: 20,
     alignItems: 'center',
     borderWidth: 1,
@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   shareText: {
-    color: '#06130D',
+    color: colors.background,
     fontSize: 16,
     fontWeight: '800',
   },
@@ -312,7 +312,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   demoBtnText: {
-    color: '#06130D',
+    color: colors.background,
     fontWeight: '800',
     fontSize: 15,
   },

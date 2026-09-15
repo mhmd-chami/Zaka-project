@@ -1,4 +1,4 @@
-import { AppIcon, IconLabel } from '@/components/AppIcon';
+﻿import { AppIcon, IconLabel } from '@/components/AppIcon';
 import * as Haptics from 'expo-haptics';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: colors.surface,
-    borderRadius: 16,
+    borderRadius: 14,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
@@ -335,7 +335,7 @@ const styles = StyleSheet.create({
     borderColor: colors.warning,
   },
   acceptText: {
-    color: '#06130D',
+    color: colors.background,
     fontSize: 15,
     fontWeight: '800',
   },

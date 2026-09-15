@@ -1,4 +1,6 @@
 import { AppIcon } from '@/components/AppIcon';
+import { DashboardTile } from '@/components/DashboardTile';
+import { StatCard } from '@/components/StatCard';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
@@ -9,14 +11,22 @@ import {
   Text,
   View,
 } from 'react-native';
-import { StatCard } from '@/components/StatCard';
 import { colors } from '@/constants/theme';
 import { getAllUsers, getSession, logout } from '@/services/authStorage';
+import { getPendingTransfersForLocation } from '@/services/branchTransferStorage';
+import { getPendingCashOutsForLocation } from '@/services/cashOutStorage';
 import { zakaLocations } from '@/data/locations';
+
+const tileTints = {
+  receive: 'rgba(62,142,126,0.16)',
+  users: 'rgba(245,185,66,0.14)',
+  megaphone: 'rgba(255,99,118,0.12)',
+  bot: 'rgba(62,142,126,0.12)',
+};
 
 export default function AdminDashboard() {
   const router = useRouter();
-  const [stats, setStats] = useState({ users: 0, admins: 0, locations: 0 });
+  const [stats, setStats] = useState({ users: 0, admins: 0, locations: 0, pending: 0 });
 
   const load = useCallback(async () => {
     const session = await getSession();
@@ -34,10 +44,19 @@ export default function AdminDashboard() {
     }
 
     const users = await getAllUsers();
+    let pending = 0;
+    if (session.locationId) {
+      const [transfers, cashOuts] = await Promise.all([
+        getPendingTransfersForLocation(session.locationId),
+        getPendingCashOutsForLocation(session.locationId),
+      ]);
+      pending = transfers.length + cashOuts.length;
+    }
     setStats({
       users: users.filter((u) => u.role === 'user').length,
       admins: users.filter((u) => u.role === 'admin').length,
       locations: zakaLocations.length,
+      pending,
     });
   }, []);
 
@@ -82,7 +101,46 @@ export default function AdminDashboard() {
           label="Locations"
           value={String(stats.locations)}
         />
-        <StatCard icon="megaphone" label="Quick action" value="Notify" />
+        <StatCard
+          icon="inbox"
+          label="Pending requests"
+          value={String(stats.pending)}
+        />
+      </View>
+
+      <Text style={styles.sectionTitle}>Branch operations</Text>
+      <View style={styles.tiles}>
+        <DashboardTile
+          icon="receive"
+          label="Requests"
+          hint="Review incoming activity"
+          badge={stats.pending}
+          tint={tileTints.receive}
+          onPress={() => router.push('/(admin)/requests')}
+        />
+        <DashboardTile
+          icon="users"
+          label="Members"
+          hint="All platform users"
+          tint={tileTints.users}
+          onPress={() => router.push('/(admin)/members')}
+        />
+      </View>
+      <View style={styles.tiles}>
+        <DashboardTile
+          icon="megaphone"
+          label="Send alert"
+          hint="Notify branch members"
+          tint={tileTints.megaphone}
+          onPress={() => router.push('/(admin)/alerts')}
+        />
+        <DashboardTile
+          icon="bot"
+          label="Zaka assistant"
+          hint="Smart support chat"
+          tint={tileTints.bot}
+          onPress={() => router.push('/support-agent')}
+        />
       </View>
 
       <Pressable style={styles.logoutBtn} onPress={signOut}>
@@ -101,7 +159,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceSoft,
     borderWidth: 1,
     borderColor: 'rgba(245,185,66,0.2)',
-    borderRadius: 22,
+    borderRadius: 18,
     padding: 18,
     marginBottom: 24,
   },
@@ -120,6 +178,20 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   stats: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 12,
+  },
+  sectionTitle: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 1.1,
+    marginBottom: 12,
+    marginTop: 12,
+  },
+  tiles: {
     flexDirection: 'row',
     gap: 12,
     marginBottom: 12,

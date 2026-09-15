@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
     color: colors.pending,
   },
   pendingPill: {
-    backgroundColor: 'rgba(245,185,66,0.12)',
+    backgroundColor: 'rgba(201,169,97,0.12)',
     borderRadius: radius.full,
     paddingHorizontal: 7,
     paddingVertical: 2,

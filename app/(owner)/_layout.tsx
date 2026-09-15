@@ -11,14 +11,6 @@ export default function OwnerLayout() {
       screenOptions={tabScreenOptions(colors.owner, insets.bottom)}
     >
       <Tabs.Screen
-        name="wallet"
-        options={{
-          title: 'Owner Wallet',
-          tabBarLabel: 'Wallet',
-          tabBarIcon: ({ color, size }) => <AppIcon name="wallet" color={color} size={size} />,
-        }}
-      />
-      <Tabs.Screen
         name="index"
         options={{
           title: 'Owner Control',
@@ -27,33 +19,24 @@ export default function OwnerLayout() {
         }}
       />
       <Tabs.Screen
+        name="wallet"
+        options={{
+          title: 'Owner Wallet',
+          tabBarLabel: 'Wallet',
+          tabBarIcon: ({ color, size }) => <AppIcon name="wallet" color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
         name="history"
         options={{
           title: 'Transactions',
+          tabBarLabel: 'History',
           tabBarIcon: ({ color, size }) => <AppIcon name="history" color={color} size={size} />,
         }}
       />
-      <Tabs.Screen
-        name="admins"
-        options={{
-          title: 'Manage Roles',
-          tabBarIcon: ({ color, size }) => <AppIcon name="shield" color={color} size={size} />,
-        }}
-      />
-      <Tabs.Screen
-        name="broadcast"
-        options={{
-          title: 'Broadcast',
-          tabBarIcon: ({ color, size }) => <AppIcon name="megaphone" color={color} size={size} />,
-        }}
-      />
-      <Tabs.Screen
-        name="accounts"
-        options={{
-          title: 'All Accounts',
-          tabBarIcon: ({ color, size }) => <AppIcon name="users" color={color} size={size} />,
-        }}
-      />
+      <Tabs.Screen name="admins" options={{ href: null }} />
+      <Tabs.Screen name="accounts" options={{ href: null }} />
+      <Tabs.Screen name="broadcast" options={{ href: null }} />
     </Tabs>
   );
 }

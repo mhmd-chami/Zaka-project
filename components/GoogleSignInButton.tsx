@@ -1,5 +1,6 @@
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
+import { colors, radius } from '@/constants/theme';
 
 function GoogleMark() {
   return (
@@ -27,7 +28,7 @@ export function GoogleSignInButton({
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
-        pressed && styles.pressed,
+        pressed && !loading && styles.pressed,
         loading && styles.disabled,
       ]}
     >
@@ -40,8 +41,8 @@ export function GoogleSignInButton({
 
 const styles = StyleSheet.create({
   button: {
-    minHeight: 54,
-    borderRadius: 18,
+    minHeight: 50,
+    borderRadius: radius.md,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#DADCE0',
@@ -56,14 +57,14 @@ const styles = StyleSheet.create({
   },
   label: {
     color: '#202124',
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '700',
   },
   spacer: {
     width: 28,
   },
   pressed: {
-    backgroundColor: '#F8FAFF',
+    opacity: 0.92,
     transform: [{ scale: 0.985 }],
   },
   disabled: {

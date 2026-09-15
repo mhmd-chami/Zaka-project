@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
   },
   formCard: {
     backgroundColor: colors.surfaceSoft,
-    borderRadius: radius.xl,
+    borderRadius: 16,
     padding: 20,
     borderWidth: 1,
     borderColor: colors.borderStrong,

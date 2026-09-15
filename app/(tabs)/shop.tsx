@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   },
   rechargeBox: {
     backgroundColor: colors.surfaceSoft,
-    borderRadius: 22,
+    borderRadius: 18,
     padding: 17,
     borderWidth: 1,
     borderColor: colors.border,
@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'transparent',
   },
-  quickBtnActive: { backgroundColor: colors.primarySoft, borderColor: 'rgba(40,199,128,0.35)' },
+  quickBtnActive: { backgroundColor: colors.primarySoft, borderColor: 'rgba(42,140,137,0.35)' },
   quickText: {
     color: colors.textSecondary,
     fontWeight: '700',
@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.08)',
   },
   rechargeBtnText: {
-    color: '#06130D',
+    color: colors.background,
     fontSize: 15,
     fontWeight: '800',
   },
