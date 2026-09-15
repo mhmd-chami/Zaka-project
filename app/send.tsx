@@ -14,11 +14,17 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { PinGateModal } from '@/components/PinGateModal';
 import { QrScannerModal } from '@/components/QrScannerModal';
 import { MoneyActionIcon } from '@/components/MoneyActionIcon';
 import { colors, contentBottomPadding } from '@/constants/theme';
 import { getLocationById, zakaLocations, ZakaLocation } from '@/data/locations';
 import { getSession } from '@/services/authStorage';
+import {
+  getDefaultSendMode,
+  getProfileSettings,
+  verifySendPin,
+} from '@/services/profileSettingsStorage';
 import { sendCashAtLocation, sendMoneyP2P } from '@/services/walletStorage';
 import { AuthSession, SendMode } from '@/types';
 
@@ -34,12 +40,15 @@ export default function SendScreen() {
   const [loading, setLoading] = useState(false);
   const [session, setSession] = useState<AuthSession | null>(null);
   const [scannerOpen, setScannerOpen] = useState(false);
+  const [pinModalOpen, setPinModalOpen] = useState(false);
+  const [pendingSend, setPendingSend] = useState<'p2p' | 'cash' | null>(null);
 
   const isStaff = session?.role === 'admin' || session?.role === 'owner';
   const adminLocation = getLocationById(session?.locationId);
 
   useEffect(() => {
     getSession().then(setSession);
+    getDefaultSendMode().then(setMode);
   }, []);
 
   async function handleP2PSend() {
@@ -68,6 +77,30 @@ export default function SendScreen() {
       `$${value.toFixed(2)} sent to ${result.recipientName ?? phone.trim()} via ZakaPay.`,
       [{ text: 'OK', onPress: () => router.back() }]
     );
+  }
+
+  async function requestSend() {
+    const settings = await getProfileSettings();
+    if (settings?.requirePinForSend && settings.pinCode) {
+      setPendingSend(mode === 'p2p' ? 'p2p' : 'cash');
+      setPinModalOpen(true);
+      return;
+    }
+    if (mode === 'p2p') await handleP2PSend();
+    else await handleCashSend();
+  }
+
+  async function handlePinSubmit(pin: string) {
+    const ok = await verifySendPin(pin);
+    if (!ok) {
+      Alert.alert('Wrong PIN', 'Try again.');
+      return;
+    }
+    setPinModalOpen(false);
+    const action = pendingSend;
+    setPendingSend(null);
+    if (action === 'p2p') await handleP2PSend();
+    else if (action === 'cash') await handleCashSend();
   }
 
   async function handleCashSend() {
@@ -259,7 +292,7 @@ export default function SendScreen() {
 
         <Pressable
           style={[styles.sendBtn, loading && styles.disabled]}
-          onPress={mode === 'p2p' || isStaff ? handleP2PSend : handleCashSend}
+          onPress={requestSend}
           disabled={loading}
         >
           <IconLabel
@@ -280,6 +313,15 @@ export default function SendScreen() {
           setPhone(data.phone);
           if (data.amount) setAmount(String(data.amount));
         }}
+      />
+
+      <PinGateModal
+        visible={pinModalOpen}
+        onClose={() => {
+          setPinModalOpen(false);
+          setPendingSend(null);
+        }}
+        onSubmit={handlePinSubmit}
       />
     </KeyboardAvoidingView>
   );

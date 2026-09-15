@@ -117,3 +117,20 @@ export interface AppNotification {
   fromRole: UserRole;
   createdAt: string;
 }
+
+export type AppLanguage = 'en' | 'ar';
+export type AppTheme = 'dark' | 'light';
+
+export interface ProfileSettings {
+  avatarEmoji: string;
+  verified: boolean;
+  notificationSound: boolean;
+  notificationVibration: boolean;
+  requirePinForSend: boolean;
+  pinCode: string | null;
+  defaultSendMode: SendMode;
+  language: AppLanguage;
+  theme: AppTheme;
+  dailySendLimit: number;
+  dailyCashOutLimit: number;
+}

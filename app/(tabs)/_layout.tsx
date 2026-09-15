@@ -2,10 +2,12 @@ import { AppIcon } from '@/components/AppIcon';
 import { Tabs } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NotificationBellButton } from '@/components/NotificationBellButton';
-import { colors, tabScreenOptions } from '@/constants/theme';
+import { tabScreenOptions } from '@/constants/theme';
+import { useSettings } from '@/contexts/SettingsContext';
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
+  const { colors } = useSettings();
 
   return (
     <Tabs
@@ -13,6 +15,7 @@ export default function TabLayout() {
         ...tabScreenOptions(colors.primaryLight, insets.bottom),
         headerRight: () => <NotificationBellButton />,
         sceneStyle: { flex: 1, backgroundColor: colors.background },
+        headerStyle: { backgroundColor: colors.background },
       }}
     >
       <Tabs.Screen

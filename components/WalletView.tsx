@@ -14,6 +14,7 @@ import { ActionButton } from '@/components/ActionButton';
 import { BalanceCard } from '@/components/BalanceCard';
 import { TransactionRow } from '@/components/TransactionRow';
 import { colors, contentBottomPadding } from '@/constants/theme';
+import { useSettings } from '@/contexts/SettingsContext';
 import { getLocationById } from '@/data/locations';
 import { logout } from '@/services/authStorage';
 import {
@@ -36,6 +37,7 @@ export function WalletView({
 }: Props) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { t } = useSettings();
   const [profile, setProfile] = useState<WalletProfile | null>(null);
   const [recent, setRecent] = useState<Transaction[]>([]);
 
@@ -124,6 +126,22 @@ export function WalletView({
         ) : null}
       </View>
 
+      {session.role === 'user' ? (
+        <Pressable
+          style={styles.agentCard}
+          onPress={() => router.push('/support-agent')}
+        >
+          <View style={styles.agentIconWrap}>
+            <AppIcon name="bot" size={20} color={colors.primaryLight} />
+          </View>
+          <View style={styles.agentTextWrap}>
+            <Text style={styles.agentTitle}>{t('aiAssistant')}</Text>
+            <Text style={styles.agentSub}>{t('aiAssistantSub')}</Text>
+          </View>
+          <AppIcon name="chevron-right" size={18} color={colors.primaryLight} />
+        </Pressable>
+      ) : null}
+
       {showLogout ? (
         <Pressable style={styles.logoutBtn} onPress={handleLogout}>
           <Text style={styles.logoutText}>Sign out</Text>
@@ -191,6 +209,36 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 10,
     marginBottom: 22,
+  },
+  agentCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: colors.surfaceSoft,
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 22,
+    borderWidth: 1,
+    borderColor: 'rgba(40,199,128,0.22)',
+  },
+  agentIconWrap: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primarySoft,
+  },
+  agentTextWrap: { flex: 1 },
+  agentTitle: {
+    color: colors.text,
+    fontSize: 15,
+    fontWeight: '800',
+  },
+  agentSub: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    marginTop: 2,
   },
   logoutBtn: {
     alignSelf: 'flex-end',

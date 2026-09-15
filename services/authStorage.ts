@@ -276,6 +276,57 @@ export async function login(
   return { ok: true, session };
 }
 
+export async function getUserAccount(
+  userId: string
+): Promise<UserAccount | null> {
+  const users = await getAllUsers();
+  return users.find((u) => u.id === userId) ?? null;
+}
+
+export async function updateUserName(
+  userId: string,
+  name: string
+): Promise<{ ok: boolean; error?: string; session?: AuthSession }> {
+  const trimmed = name.trim();
+  if (!trimmed) return { ok: false, error: 'Enter a valid name' };
+
+  const users = await getAllUsers();
+  const idx = users.findIndex((u) => u.id === userId);
+  if (idx < 0) return { ok: false, error: 'User not found' };
+
+  users[idx].name = trimmed;
+  await saveUsers(users);
+
+  const session = toSession(users[idx]);
+  await AsyncStorage.setItem(SESSION_KEY, JSON.stringify(session));
+  return { ok: true, session };
+}
+
+export async function changePassword(
+  userId: string,
+  currentPassword: string,
+  newPassword: string
+): Promise<{ ok: boolean; error?: string }> {
+  const users = await getAllUsers();
+  const idx = users.findIndex((u) => u.id === userId);
+  if (idx < 0) return { ok: false, error: 'User not found' };
+
+  const user = users[idx];
+  if (user.authProvider === 'google') {
+    return { ok: false, error: 'Google accounts cannot change password here' };
+  }
+  if (user.password !== currentPassword.trim()) {
+    return { ok: false, error: 'Current password is incorrect' };
+  }
+  if (newPassword.trim().length < 4) {
+    return { ok: false, error: 'Password must be at least 4 characters' };
+  }
+
+  users[idx].password = newPassword.trim();
+  await saveUsers(users);
+  return { ok: true };
+}
+
 export async function logout(): Promise<void> {
   const session = await getSession();
   await AsyncStorage.removeItem(SESSION_KEY);
