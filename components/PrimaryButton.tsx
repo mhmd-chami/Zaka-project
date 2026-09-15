@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, ViewStyle } from 'react-native';
+﻿import { Pressable, StyleSheet, Text, ViewStyle } from 'react-native';
 import { colors, radius, shadows } from '@/constants/theme';
 
 interface Props {
@@ -45,19 +45,19 @@ export function PrimaryButton({
 
 const styles = StyleSheet.create({
   btn: {
-    minHeight: 56,
+    minHeight: 50,
     backgroundColor: colors.primary,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
+    paddingVertical: 14,
+    paddingHorizontal: 22,
     borderRadius: radius.md,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: 'rgba(255,255,255,0.06)',
   },
   gold: {
     backgroundColor: colors.gold,
-    borderColor: 'rgba(255,255,255,0.12)',
+    borderColor: 'rgba(255,255,255,0.10)',
   },
   outline: {
     backgroundColor: colors.surfaceSoft,
@@ -66,15 +66,15 @@ const styles = StyleSheet.create({
     elevation: 0,
   },
   pressed: {
-    opacity: 0.9,
+    opacity: 0.88,
     transform: [{ scale: 0.985 }],
   },
   disabled: {
-    opacity: 0.55,
+    opacity: 0.50,
   },
   text: {
-    color: '#06130D',
-    fontSize: 16,
+    color: colors.background,
+    fontSize: 15,
     fontWeight: '800',
     letterSpacing: 0.1,
   },

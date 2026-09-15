@@ -37,11 +37,6 @@ export function BalanceCard({
         shadows.card,
       ]}
     >
-      <View style={styles.pattern}>
-        <View style={styles.circle1} />
-        <View style={styles.circle2} />
-      </View>
-
       <View style={styles.content}>
         <View style={styles.topRow}>
           <View style={styles.identity}>
@@ -49,7 +44,7 @@ export function BalanceCard({
               <>
                 <View style={[styles.badge, { backgroundColor: `${accent}1F` }]}>
                   <IconLabel
-                    icon="store"
+                    icon='store'
                     color={accent}
                     style={[styles.badgeText, { color: accent }]}
                   >
@@ -61,7 +56,7 @@ export function BalanceCard({
             ) : isOwner ? (
               <View style={[styles.badge, { backgroundColor: `${accent}1F` }]}>
                 <IconLabel
-                  icon="crown"
+                  icon='crown'
                   color={accent}
                   style={[styles.badgeText, { color: accent }]}
                 >
@@ -76,12 +71,12 @@ export function BalanceCard({
           </View>
 
           <View style={styles.walletMark}>
-            <AppIcon name="wallet" size={21} color={accent} />
+            <AppIcon name='wallet' size={18} color={accent} />
           </View>
         </View>
 
         <Text style={styles.label}>
-          {isAdmin ? 'Location float' : 'Available balance'}
+                      {isAdmin ? 'Location float' : 'Available balance'}
         </Text>
         <Text style={styles.balance} adjustsFontSizeToFit numberOfLines={1}>
           ${balance.toFixed(2)}
@@ -90,9 +85,9 @@ export function BalanceCard({
         <View style={styles.footerRow}>
           <View style={styles.phoneRow}>
             <AppIcon
-              name="smartphone"
-              size={14}
-              color="rgba(255,255,255,0.62)"
+              name='smartphone'
+              size={13}
+              color='rgba(255,255,255,0.55)'
             />
             <Text style={styles.phone}>{phone}</Text>
           </View>
@@ -116,142 +111,120 @@ export function BalanceCard({
 const styles = StyleSheet.create({
   card: {
     backgroundColor: '#123B2B',
-    borderRadius: radius.xl,
-    marginBottom: 22,
+    borderRadius: radius.lg,
+    marginBottom: 20,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(101,227,167,0.25)',
+    borderColor: 'rgba(101,227,167,0.20)',
   },
   cardAdmin: {
     backgroundColor: '#392B13',
-    borderColor: 'rgba(245,185,66,0.28)',
+    borderColor: 'rgba(245,185,66,0.22)',
   },
   cardOwner: {
     backgroundColor: '#2C2450',
-    borderColor: 'rgba(155,135,245,0.28)',
-  },
-  pattern: {
-    ...StyleSheet.absoluteFill,
-    overflow: 'hidden',
-  },
-  circle1: {
-    position: 'absolute',
-    top: -58,
-    right: -38,
-    width: 190,
-    height: 190,
-    borderRadius: 95,
-    backgroundColor: 'rgba(255,255,255,0.055)',
-  },
-  circle2: {
-    position: 'absolute',
-    bottom: -72,
-    left: -38,
-    width: 170,
-    height: 170,
-    borderRadius: 85,
-    backgroundColor: 'rgba(235,203,104,0.08)',
+    borderColor: 'rgba(155,135,245,0.22)',
   },
   content: {
-    minHeight: 200,
-    padding: 22,
+    minHeight: 190,
+    padding: 20,
   },
   topRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
-    minHeight: 46,
+    minHeight: 44,
   },
   identity: {
     flex: 1,
-    paddingRight: 12,
+    paddingRight: 10,
   },
   walletMark: {
-    width: 42,
-    height: 42,
-    borderRadius: 14,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.06)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   badge: {
     alignSelf: 'flex-start',
-    paddingHorizontal: 9,
-    paddingVertical: 5,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     borderRadius: radius.full,
-    marginBottom: 7,
+    marginBottom: 6,
   },
   badgeText: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
     letterSpacing: 0.1,
   },
   locationName: {
     color: '#FFFFFF',
-    fontSize: 19,
+    fontSize: 18,
     fontWeight: '800',
   },
   greeting: {
-    color: 'rgba(255,255,255,0.78)',
-    fontSize: 15,
+    color: 'rgba(255,255,255,0.72)',
+    fontSize: 14,
     fontWeight: '600',
-    marginTop: 4,
+    marginTop: 3,
   },
   label: {
-    color: 'rgba(255,255,255,0.58)',
-    fontSize: 12,
+    color: 'rgba(255,255,255,0.50)',
+    fontSize: 11,
     fontWeight: '600',
     letterSpacing: 0.2,
-    marginTop: 10,
+    marginTop: 8,
   },
   balance: {
     color: '#FFFFFF',
-    fontSize: 42,
+    fontSize: 40,
     fontWeight: '800',
     marginTop: 1,
-    letterSpacing: -1.3,
+    letterSpacing: -1.2,
   },
   footerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: 16,
+    marginTop: 14,
   },
   phoneRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 5,
   },
   phone: {
-    color: 'rgba(255,255,255,0.7)',
-    fontSize: 13,
+    color: 'rgba(255,255,255,0.65)',
+    fontSize: 12,
     fontWeight: '600',
   },
   locationAddr: {
     flex: 1,
-    color: 'rgba(255,255,255,0.62)',
-    fontSize: 11,
+    color: 'rgba(255,255,255,0.55)',
+    fontSize: 10,
     textAlign: 'right',
-    marginLeft: 10,
+    marginLeft: 8,
   },
   activePill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-    backgroundColor: 'rgba(0,0,0,0.14)',
-    paddingHorizontal: 9,
-    paddingVertical: 5,
+    gap: 4,
+    backgroundColor: 'rgba(0,0,0,0.12)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     borderRadius: radius.full,
   },
   activeDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
     backgroundColor: colors.primaryLight,
   },
   activeText: {
-    color: 'rgba(255,255,255,0.72)',
-    fontSize: 10,
+    color: 'rgba(255,255,255,0.65)',
+    fontSize: 9,
     fontWeight: '700',
   },
 });

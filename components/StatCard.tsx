@@ -12,7 +12,7 @@ export function StatCard({ icon, label, value }: Props) {
   return (
     <View style={[styles.card, shadows.soft]}>
       <View style={styles.icon}>
-        <AppIcon name={icon} size={25} color={colors.primaryLight} />
+        <AppIcon name={icon} size={22} color={colors.primaryLight} />
       </View>
       <Text style={styles.value}>{value}</Text>
       <Text style={styles.label}>{label}</Text>
@@ -25,23 +25,31 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.surfaceSoft,
     borderRadius: radius.lg,
-    padding: 16,
+    padding: 14,
     alignItems: 'flex-start',
     borderWidth: 1,
     borderColor: colors.border,
     minWidth: '45%',
   },
-  icon: { width: 44, height: 44, borderRadius: 14, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
+  icon: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: colors.primarySoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
   value: {
     color: colors.text,
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: '800',
-    letterSpacing: -0.6,
+    letterSpacing: -0.5,
   },
   label: {
     color: colors.textSecondary,
-    fontSize: 11,
-    marginTop: 5,
+    fontSize: 10,
+    marginTop: 4,
     fontWeight: '600',
     letterSpacing: 0.1,
   },

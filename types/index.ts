@@ -2,6 +2,21 @@ import type { BrandName } from '@/constants/brands';
 
 export type UserRole = 'owner' | 'admin' | 'user';
 
+export type IdentityDocumentType = 'lebanese_id' | 'passport' | 'residence_permit';
+export type IdentityVerificationStatus = 'not_submitted' | 'pending' | 'approved' | 'rejected';
+
+export interface IdentityVerification {
+  documentType: IdentityDocumentType;
+  documentNumber: string;
+  status: IdentityVerificationStatus;
+  submittedAt: string;
+  documentPhotoUri?: string;
+  fullName?: string;
+  dateOfBirth?: string;
+  expiryDate?: string;
+  nationality?: string;
+}
+
 export type TransactionType =
   | 'send'
   | 'send_p2p'
@@ -95,6 +110,7 @@ export interface UserAccount {
   authProvider?: 'password' | 'google';
   googleId?: string;
   email?: string;
+  identityVerification?: IdentityVerification;
   createdAt: string;
 }
 

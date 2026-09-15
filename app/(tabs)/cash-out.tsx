@@ -1,4 +1,4 @@
-import * as Haptics from 'expo-haptics';
+﻿import * as Haptics from 'expo-haptics';
 import { IconLabel } from '@/components/AppIcon';
 import { useState } from 'react';
 import {
@@ -167,11 +167,11 @@ const styles = StyleSheet.create({
   formContainer: { padding: 20 },
   branchCard: {
     backgroundColor: colors.surfaceSoft,
-    borderRadius: 20,
+    borderRadius: 16,
     padding: 24,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(40,199,128,0.28)',
+    borderColor: 'rgba(42,140,137,0.28)',
     marginBottom: 24,
   },
   branchBadge: {
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'transparent',
   },
-  quickBtnActive: { backgroundColor: colors.primarySoft, borderColor: 'rgba(40,199,128,0.35)' },
+  quickBtnActive: { backgroundColor: colors.primarySoft, borderColor: 'rgba(42,140,137,0.35)' },
   quickText: {
     color: colors.textSecondary,
     fontWeight: '700',
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
   },
   disabled: { opacity: 0.7 },
   submitText: {
-    color: '#06130D',
+    color: colors.background,
     fontSize: 16,
     fontWeight: '800',
   },

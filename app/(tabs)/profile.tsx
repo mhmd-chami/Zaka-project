@@ -203,7 +203,7 @@ export default function ProfileScreen() {
             <AppIcon name={roleIcon(session.role)} size={12} color={colors.primaryLight} />
             <Text style={styles.roleText}>{roleLabel(session.role, t)}</Text>
           </View>
-          {settings.verified && (
+          {(settings.verified || account?.identityVerification?.status === 'approved') && (
             <View style={styles.verifiedBadge}>
               <Text style={styles.verifiedText}>✓ {t('verified')}</Text>
             </View>
@@ -242,6 +242,21 @@ export default function ProfileScreen() {
         </View>
 
         <SectionTitle title={t('account')} colors={colors} />
+        <MenuItem
+          colors={colors}
+          icon={
+            <View style={styles.historyIcon}>
+              <AppIcon name="shield" size={23} color={colors.primaryLight} />
+            </View>
+          }
+          title={account?.identityVerification?.status === 'approved' ? 'Identity verified' : 'Verify identity'}
+          subtitle={
+            account?.identityVerification?.status === 'pending'
+              ? 'Your documents are under review'
+              : 'Use a Lebanese ID, passport, or residence permit'
+          }
+          onPress={() => router.push('/verification')}
+        />
         <MenuItem
           colors={colors}
           icon={<MoneyActionIcon action="receive" size={46} />}

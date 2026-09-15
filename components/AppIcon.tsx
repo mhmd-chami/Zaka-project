@@ -18,7 +18,7 @@ interface IconProps {
 export function AppIcon({
   name,
   size = 24,
-  color = colors.goldLight,
+  color = colors.primaryLight,
   strokeWidth = 1.8,
   style,
 }: IconProps) {

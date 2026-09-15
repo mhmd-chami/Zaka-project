@@ -377,7 +377,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 15,
-    backgroundColor: '#3A3014',
+    backgroundColor: colors.goldMuted,
     borderWidth: 1,
     borderColor: `${colors.goldLight}55`,
     alignItems: 'center',
@@ -504,7 +504,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'transparent',
   },
-  quickBtnActive: { backgroundColor: colors.primarySoft, borderColor: 'rgba(40,199,128,0.35)' },
+  quickBtnActive: { backgroundColor: colors.primarySoft, borderColor: 'rgba(42,140,137,0.35)' },
   quickText: {
     color: colors.textSecondary,
     fontWeight: '700',
@@ -521,7 +521,7 @@ const styles = StyleSheet.create({
   },
   disabled: { opacity: 0.7 },
   sendText: {
-    color: '#06130D',
+    color: colors.background,
     fontSize: 16,
     fontWeight: '800',
   },

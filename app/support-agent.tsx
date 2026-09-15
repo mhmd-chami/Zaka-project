@@ -23,6 +23,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { contentBottomPadding } from '@/constants/theme';
 import { useSettings } from '@/contexts/SettingsContext';
+import { getSession } from '@/services/authStorage';
 import {
   AgentContext,
   AgentMessage,
@@ -41,6 +42,7 @@ export default function SupportAgentScreen() {
   const [messages, setMessages] = useState<AgentMessage[]>([]);
   const [input, setInput] = useState('');
   const [thinking, setThinking] = useState(false);
+  const [showActions, setShowActions] = useState(false);
   const listRef = useRef<FlatList<AgentMessage>>(null);
 
   const scrollToEnd = useCallback(() => {
@@ -50,13 +52,15 @@ export default function SupportAgentScreen() {
   }, []);
 
   useEffect(() => {
-    buildAgentContext().then((ctx) => {
+    buildAgentContext().then(async (ctx) => {
       if (!ctx) {
         router.replace('/login');
         return;
       }
       setContext(ctx);
       setMessages([getWelcomeMessage(ctx)]);
+      const session = await getSession();
+      setShowActions(session?.role === 'user');
     });
   }, [router]);
 
@@ -115,6 +119,7 @@ export default function SupportAgentScreen() {
         colors={colors}
         styles={styles}
         bottomPadding={contentBottomPadding(insets.bottom, 12)}
+        showActions={showActions}
         onAction={(route) => router.push(route as never)}
       />
 
@@ -144,9 +149,10 @@ const MessageList = memo(
     colors: ThemeColors;
     styles: AgentStyles;
     bottomPadding: number;
+    showActions: boolean;
     onAction: (route: string) => void;
   }>(function MessageList(
-    { messages, thinking, typingLabel, t, colors, styles, bottomPadding, onAction },
+    { messages, thinking, typingLabel, t, colors, styles, bottomPadding, showActions, onAction },
     ref
   ) {
   return (
@@ -184,7 +190,7 @@ const MessageList = memo(
             >
               {item.text}
             </Text>
-            {item.actions?.map((action) => (
+            {showActions && item.actions?.map((action) => (
               <Pressable
                 key={action.route + action.labelKey}
                 style={styles.actionBtn}

@@ -1,5 +1,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AuthSession, UserAccount, UserRole } from '@/types';
+import {
+  AuthSession,
+  IdentityDocumentType,
+  IdentityVerification,
+  UserAccount,
+  UserRole,
+} from '@/types';
 import { GoogleIdentity, signOutFromGoogle } from '@/services/googleAuth';
 
 const USERS_KEY = '@zaka_users';
@@ -300,6 +306,52 @@ export async function updateUserName(
   const session = toSession(users[idx]);
   await AsyncStorage.setItem(SESSION_KEY, JSON.stringify(session));
   return { ok: true, session };
+}
+
+export async function submitIdentityVerification(
+  userId: string,
+  documentType: IdentityDocumentType,
+  documentNumber: string,
+  details?: Pick<IdentityVerification, 'documentPhotoUri' | 'fullName' | 'dateOfBirth' | 'expiryDate' | 'nationality'>
+): Promise<{ ok: boolean; error?: string; verification?: IdentityVerification }> {
+  const normalizedNumber = documentNumber.trim().toUpperCase();
+  if (documentType === 'lebanese_id' && !/^\d{8}$/.test(normalizedNumber)) {
+    return { ok: false, error: 'Lebanese ID numbers must contain 8 digits' };
+  }
+  if (documentType !== 'lebanese_id' && normalizedNumber.length < 5) {
+    return { ok: false, error: 'Enter a valid document number' };
+  }
+
+  const users = await getAllUsers();
+  const idx = users.findIndex((user) => user.id === userId);
+  if (idx < 0) return { ok: false, error: 'User not found' };
+
+  const verification: IdentityVerification = {
+    documentType,
+    documentNumber: normalizedNumber,
+    status: 'pending',
+    submittedAt: new Date().toISOString(),
+    ...details,
+  };
+  users[idx] = { ...users[idx], identityVerification: verification };
+  await saveUsers(users);
+  return { ok: true, verification };
+}
+
+export async function reviewIdentityVerification(
+  userId: string,
+  status: 'approved' | 'rejected'
+): Promise<{ ok: boolean; error?: string }> {
+  const users = await getAllUsers();
+  const idx = users.findIndex((user) => user.id === userId);
+  if (idx < 0) return { ok: false, error: 'User not found' };
+  if (!users[idx].identityVerification) return { ok: false, error: 'No identity document was submitted' };
+  users[idx] = {
+    ...users[idx],
+    identityVerification: { ...users[idx].identityVerification, status },
+  };
+  await saveUsers(users);
+  return { ok: true };
 }
 
 export async function changePassword(

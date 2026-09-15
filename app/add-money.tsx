@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
   section: { marginTop: 4 },
   card: {
     backgroundColor: colors.surfaceSoft,
-    borderRadius: 20,
+    borderRadius: 16,
     padding: 24,
     alignItems: 'center',
     borderWidth: 1,
@@ -369,7 +369,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'transparent',
   },
-  quickBtnActive: { backgroundColor: colors.primarySoft, borderColor: 'rgba(40,199,128,0.35)' },
+  quickBtnActive: { backgroundColor: colors.primarySoft, borderColor: 'rgba(42,140,137,0.35)' },
   quickText: {
     color: colors.textSecondary,
     fontWeight: '700',
@@ -397,7 +397,7 @@ const styles = StyleSheet.create({
   },
   disabled: { opacity: 0.7 },
   submitText: {
-    color: '#06130D',
+    color: '#06120D',
     fontSize: 16,
     fontWeight: '800',
   },
