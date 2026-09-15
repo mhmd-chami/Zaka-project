@@ -9,6 +9,8 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { LocationQrCode } from '@/components/LocationQrCode';
+import { PaymentQrCode } from '@/components/PaymentQrCode';
 import { colors } from '@/constants/theme';
 import { getLocationById } from '@/data/locations';
 import { getSession } from '@/services/authStorage';
@@ -19,6 +21,7 @@ export default function ReceiveScreen() {
   const [session, setSession] = useState<AuthSession | null>(null);
   const [profile, setProfile] = useState<WalletProfile | null>(null);
   const [demoAmount, setDemoAmount] = useState('25');
+  const [qrAmount, setQrAmount] = useState('');
 
   useEffect(() => {
     (async () => {
@@ -103,6 +106,36 @@ export default function ReceiveScreen() {
             ? 'Customers can send ZakaPay or pay cash at your counter'
             : 'Share this number so others can send you money'}
         </Text>
+      </View>
+
+      {isAdmin && location ? (
+        <View style={[styles.qrSection, styles.cashOutQrSection]}>
+          <Text style={styles.qrTitle}>Cash out QR</Text>
+          <LocationQrCode locationId={location.id} name={location.name} />
+        </View>
+      ) : null}
+
+      <View style={styles.qrSection}>
+        <Text style={styles.qrTitle}>
+          {isAdmin ? 'Receive payment QR' : 'Scan to pay me'}
+        </Text>
+        <PaymentQrCode
+          phone={profile.phone}
+          name={session?.name ?? profile.name}
+          amount={
+            parseFloat(qrAmount) > 0 ? parseFloat(qrAmount) : undefined
+          }
+        />
+        {!isAdmin ? (
+          <TextInput
+            style={styles.qrAmountInput}
+            value={qrAmount}
+            onChangeText={setQrAmount}
+            keyboardType="decimal-pad"
+            placeholder="Fixed amount (optional)"
+            placeholderTextColor={colors.textSecondary}
+          />
+        ) : null}
       </View>
 
       <Pressable style={styles.shareBtn} onPress={shareNumber}>
@@ -192,6 +225,36 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 12,
     lineHeight: 18,
+  },
+  qrSection: {
+    marginTop: 20,
+    backgroundColor: colors.surface,
+    borderRadius: 20,
+    padding: 20,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  cashOutQrSection: {
+    borderColor: colors.warning,
+  },
+  qrTitle: {
+    color: colors.goldLight,
+    fontSize: 14,
+    fontWeight: '800',
+    marginBottom: 16,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
+  qrAmountInput: {
+    backgroundColor: colors.surfaceLight,
+    borderRadius: 12,
+    padding: 12,
+    fontSize: 15,
+    color: colors.text,
+    marginTop: 14,
+    width: '100%',
+    textAlign: 'center',
   },
   shareBtn: {
     backgroundColor: colors.primaryDark,

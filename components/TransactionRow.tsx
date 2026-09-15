@@ -6,7 +6,9 @@ const icons: Record<string, string> = {
   send: '📤',
   send_p2p: '💸',
   send_cash: '🏪',
+  cash_out: '💵',
   receive: '📥',
+  deposit: '💳',
   topup: '📱',
   purchase: '🛒',
 };
@@ -15,7 +17,9 @@ const stripeColors: Record<string, string> = {
   send: colors.expense,
   send_p2p: colors.expense,
   send_cash: colors.pending,
+  cash_out: colors.expense,
   receive: colors.income,
+  deposit: colors.income,
   topup: colors.accent,
   purchase: colors.gold,
 };
@@ -25,8 +29,10 @@ interface Props {
 }
 
 export function TransactionRow({ tx }: Props) {
-  const isIncome = tx.type === 'receive';
-  const isCashPending = tx.type === 'send_cash' && tx.status === 'pending';
+  const isIncome = tx.type === 'receive' || tx.type === 'deposit';
+  const isCashPending =
+    (tx.type === 'send_cash' || tx.type === 'cash_out') &&
+    tx.status === 'pending';
   const sign = isIncome ? '+' : '-';
   const stripe = stripeColors[tx.type] ?? colors.border;
 

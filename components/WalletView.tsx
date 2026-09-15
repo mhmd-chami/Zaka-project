@@ -24,13 +24,13 @@ import { AuthSession, Transaction, WalletProfile } from '@/types';
 
 interface Props {
   session: AuthSession;
-  showTopUp?: boolean;
+  showAddMoney?: boolean;
   showLogout?: boolean;
 }
 
 export function WalletView({
   session,
-  showTopUp = false,
+  showAddMoney = false,
   showLogout = true,
 }: Props) {
   const router = useRouter();
@@ -114,14 +114,17 @@ export function WalletView({
           label="Receive"
           onPress={() => router.push('/receive')}
         />
-        {showTopUp ? (
-          <ActionButton
-            emoji="📱"
-            label="Top Up"
-            onPress={() => router.push('/topup')}
-          />
-        ) : null}
       </View>
+
+      {showAddMoney ? (
+        <View style={styles.actions}>
+          <ActionButton
+            emoji="💰"
+            label="Add Money"
+            onPress={() => router.push('/add-money')}
+          />
+        </View>
+      ) : null}
 
       {showLogout ? (
         <Pressable style={styles.logoutBtn} onPress={handleLogout}>

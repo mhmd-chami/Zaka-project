@@ -50,11 +50,11 @@ export default function NotificationsScreen() {
 
   return (
     <View style={styles.container}>
-      {unread > 0 && (
+      {unread > 0 ? (
         <Pressable style={styles.markAll} onPress={handleMarkAll}>
           <Text style={styles.markAllText}>Mark all as read</Text>
         </Pressable>
-      )}
+      ) : null}
 
       <FlatList
         data={items}

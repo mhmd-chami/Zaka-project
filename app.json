@@ -7,12 +7,6 @@
     "icon": "./assets/icon.png",
     "scheme": "zakapay",
     "userInterfaceStyle": "dark",
-    "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#0B1220"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.zaka.zakapay"
@@ -24,7 +18,15 @@
       },
       "package": "com.zaka.zakapay"
     },
-    "plugins": ["expo-router"],
+    "plugins": [
+      "expo-router",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow ZakaPay to scan payment QR codes."
+        }
+      ]
+    ],
     "experiments": {
       "typedRoutes": true
     }

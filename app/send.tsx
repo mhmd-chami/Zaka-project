@@ -13,6 +13,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { QrScannerModal } from '@/components/QrScannerModal';
 import { colors, contentBottomPadding } from '@/constants/theme';
 import { getLocationById, zakaLocations, ZakaLocation } from '@/data/locations';
 import { getSession } from '@/services/authStorage';
@@ -30,6 +31,7 @@ export default function SendScreen() {
   const [location, setLocation] = useState<ZakaLocation>(zakaLocations[0]);
   const [loading, setLoading] = useState(false);
   const [session, setSession] = useState<AuthSession | null>(null);
+  const [scannerOpen, setScannerOpen] = useState(false);
 
   const isStaff = session?.role === 'admin' || session?.role === 'owner';
   const adminLocation = getLocationById(session?.locationId);
@@ -61,7 +63,7 @@ export default function SendScreen() {
     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     Alert.alert(
       'Sent instantly! 💸',
-      `$${value.toFixed(2)} sent to ${phone.trim()} via ZakaPay.`,
+      `$${value.toFixed(2)} sent to ${result.recipientName ?? phone.trim()} via ZakaPay.`,
       [{ text: 'OK', onPress: () => router.back() }]
     );
   }
@@ -166,14 +168,23 @@ export default function SendScreen() {
             <Text style={styles.label}>
               {isStaff ? 'Customer phone number' : 'Recipient ZakaPay number'}
             </Text>
-            <TextInput
-              style={styles.input}
-              placeholder="+961 70 000 000"
-              placeholderTextColor={colors.textSecondary}
-              value={phone}
-              onChangeText={setPhone}
-              keyboardType="phone-pad"
-            />
+            <View style={styles.phoneRow}>
+              <TextInput
+                style={[styles.input, styles.phoneInput]}
+                placeholder="+961 70 000 000"
+                placeholderTextColor={colors.textSecondary}
+                value={phone}
+                onChangeText={setPhone}
+                keyboardType="phone-pad"
+              />
+              <Pressable
+                style={styles.scanBtn}
+                onPress={() => setScannerOpen(true)}
+              >
+                <Text style={styles.scanEmoji}>📷</Text>
+                <Text style={styles.scanLabel}>Scan QR</Text>
+              </Pressable>
+            </View>
           </View>
         ) : (
           <View style={styles.form}>
@@ -234,6 +245,15 @@ export default function SendScreen() {
           </Text>
         </Pressable>
       </ScrollView>
+
+      <QrScannerModal
+        visible={scannerOpen}
+        onClose={() => setScannerOpen(false)}
+        onScan={(data) => {
+          setPhone(data.phone);
+          if (data.amount) setAmount(String(data.amount));
+        }}
+      />
     </KeyboardAvoidingView>
   );
 }
@@ -322,6 +342,33 @@ const styles = StyleSheet.create({
     color: colors.text,
     borderWidth: 1,
     borderColor: colors.border,
+  },
+  phoneRow: {
+    flexDirection: 'row',
+    gap: 10,
+    alignItems: 'stretch',
+  },
+  phoneInput: {
+    flex: 1,
+  },
+  scanBtn: {
+    backgroundColor: colors.surfaceLight,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.borderGold,
+    minWidth: 72,
+  },
+  scanEmoji: {
+    fontSize: 22,
+  },
+  scanLabel: {
+    color: colors.goldLight,
+    fontSize: 10,
+    fontWeight: '700',
+    marginTop: 2,
   },
   locationCard: {
     backgroundColor: colors.surface,

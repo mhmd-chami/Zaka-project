@@ -1,10 +1,8 @@
-import { Tabs, useFocusEffect } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { Tabs } from 'expo-router';
 import { Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { NotificationBellButton } from '@/components/NotificationBellButton';
 import { colors, tabScreenOptions } from '@/constants/theme';
-import { getSession } from '@/services/authStorage';
-import { getUnreadCount } from '@/services/notificationStorage';
 
 function TabIcon({ emoji }: { emoji: string }) {
   return <Text style={{ fontSize: 22 }}>{emoji}</Text>;
@@ -12,28 +10,13 @@ function TabIcon({ emoji }: { emoji: string }) {
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
-  const [badge, setBadge] = useState<number | undefined>();
-
-  useFocusEffect(
-    useCallback(() => {
-      let active = true;
-      (async () => {
-        const session = await getSession();
-        if (!session || !active) return;
-        const count = await getUnreadCount(session.userId);
-        if (active) {
-          setBadge(count > 0 ? count : undefined);
-        }
-      })();
-      return () => {
-        active = false;
-      };
-    }, [])
-  );
 
   return (
     <Tabs
-      screenOptions={tabScreenOptions(colors.goldLight, insets.bottom)}
+      screenOptions={{
+        ...tabScreenOptions(colors.goldLight, insets.bottom),
+        headerRight: () => <NotificationBellButton />,
+      }}
     >
       <Tabs.Screen
         name="index"
@@ -51,6 +34,14 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="cash-out"
+        options={{
+          title: 'Cash Out',
+          tabBarLabel: 'Cash Out',
+          tabBarIcon: () => <TabIcon emoji="💵" />,
+        }}
+      />
+      <Tabs.Screen
         name="history"
         options={{
           title: 'History',
@@ -58,11 +49,10 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="notifications"
+        name="profile"
         options={{
-          title: 'Notifications',
-          tabBarIcon: () => <TabIcon emoji="🔔" />,
-          ...(badge ? { tabBarBadge: badge } : {}),
+          title: 'Profile',
+          tabBarIcon: () => <TabIcon emoji="👤" />,
         }}
       />
     </Tabs>

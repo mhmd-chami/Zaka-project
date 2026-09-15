@@ -17,11 +17,19 @@ import {
   acceptBranchTransfer,
   getPendingTransfersForLocation,
 } from '@/services/branchTransferStorage';
-import { BranchTransfer } from '@/types';
+import {
+  acceptCashOutRequest,
+  getPendingCashOutsForLocation,
+} from '@/services/cashOutStorage';
+import { BranchTransfer, CashOutRequest } from '@/types';
+
+type RequestItem =
+  | { kind: 'send'; data: BranchTransfer }
+  | { kind: 'cashout'; data: CashOutRequest };
 
 export default function AdminRequestsScreen() {
   const router = useRouter();
-  const [requests, setRequests] = useState<BranchTransfer[]>([]);
+  const [requests, setRequests] = useState<RequestItem[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [locationName, setLocationName] = useState('');
 
@@ -38,8 +46,22 @@ export default function AdminRequestsScreen() {
 
     const location = getLocationById(session.locationId);
     setLocationName(location?.name ?? 'Your branch');
-    const pending = await getPendingTransfersForLocation(session.locationId);
-    setRequests(pending);
+
+    const [sends, cashOuts] = await Promise.all([
+      getPendingTransfersForLocation(session.locationId),
+      getPendingCashOutsForLocation(session.locationId),
+    ]);
+
+    const merged: RequestItem[] = [
+      ...sends.map((data) => ({ kind: 'send' as const, data })),
+      ...cashOuts.map((data) => ({ kind: 'cashout' as const, data })),
+    ].sort(
+      (a, b) =>
+        new Date(b.data.createdAt).getTime() -
+        new Date(a.data.createdAt).getTime()
+    );
+
+    setRequests(merged);
   }, [router]);
 
   useFocusEffect(
@@ -54,7 +76,7 @@ export default function AdminRequestsScreen() {
     setRefreshing(false);
   }
 
-  async function handleAccept(item: BranchTransfer) {
+  async function handleAcceptSend(item: BranchTransfer) {
     const session = await getSession();
     if (!session) return;
 
@@ -89,16 +111,51 @@ export default function AdminRequestsScreen() {
     );
   }
 
+  async function handleAcceptCashOut(item: CashOutRequest) {
+    const session = await getSession();
+    if (!session) return;
+
+    Alert.alert(
+      'Confirm cash out?',
+      `Hand $${item.amount.toFixed(2)} in cash to ${item.userName} (${item.userPhone})?\n\nRef: ${item.reference}\n\nThis will deduct from their wallet.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Confirm & pay cash',
+          onPress: async () => {
+            const result = await acceptCashOutRequest(
+              item.id,
+              session.userId,
+              session.locationId
+            );
+            if (!result.ok) {
+              Alert.alert('Could not complete', result.error);
+              return;
+            }
+            await Haptics.notificationAsync(
+              Haptics.NotificationFeedbackType.Success
+            );
+            Alert.alert(
+              'Cash out done 💵',
+              `$${item.amount.toFixed(2)} handed to ${item.userName}.`
+            );
+            load();
+          },
+        },
+      ]
+    );
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.subtitle}>
-        Pending sends for {locationName}. Accept to receive money into your
-        branch wallet.
+        Pending requests for {locationName}. Accept sends into your wallet or
+        confirm cash outs at the counter.
       </Text>
 
       <FlatList
         data={requests}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => `${item.kind}-${item.data.id}`}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
@@ -107,26 +164,57 @@ export default function AdminRequestsScreen() {
             <Text style={styles.emptyEmoji}>📭</Text>
             <Text style={styles.emptyTitle}>No pending requests</Text>
             <Text style={styles.emptySub}>
-              When users send money to your branch, they will appear here.
+              Branch sends and cash out requests will appear here.
             </Text>
           </View>
         }
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <View style={styles.cardTop}>
-              <Text style={styles.amount}>${item.amount.toFixed(2)}</Text>
-              <Text style={styles.ref}>{item.reference}</Text>
+        renderItem={({ item }) => {
+          if (item.kind === 'send') {
+            const send = item.data;
+            return (
+              <View style={styles.card}>
+                <Text style={styles.typeBadge}>📥 Branch send</Text>
+                <View style={styles.cardTop}>
+                  <Text style={styles.amount}>${send.amount.toFixed(2)}</Text>
+                  <Text style={styles.ref}>{send.reference}</Text>
+                </View>
+                <Text style={styles.name}>{send.senderName}</Text>
+                <Text style={styles.phone}>{send.senderPhone}</Text>
+                <Text style={styles.time}>
+                  {new Date(send.createdAt).toLocaleString()}
+                </Text>
+                <Pressable
+                  style={styles.acceptBtn}
+                  onPress={() => handleAcceptSend(send)}
+                >
+                  <Text style={styles.acceptText}>✅ Accept & receive</Text>
+                </Pressable>
+              </View>
+            );
+          }
+
+          const cashOut = item.data;
+          return (
+            <View style={[styles.card, styles.cashOutCard]}>
+              <Text style={styles.typeBadgeCash}>💵 Cash out</Text>
+              <View style={styles.cardTop}>
+                <Text style={styles.amount}>${cashOut.amount.toFixed(2)}</Text>
+                <Text style={styles.ref}>{cashOut.reference}</Text>
+              </View>
+              <Text style={styles.name}>{cashOut.userName}</Text>
+              <Text style={styles.phone}>{cashOut.userPhone}</Text>
+              <Text style={styles.time}>
+                {new Date(cashOut.createdAt).toLocaleString()}
+              </Text>
+              <Pressable
+                style={styles.cashOutBtn}
+                onPress={() => handleAcceptCashOut(cashOut)}
+              >
+                <Text style={styles.acceptText}>💵 Confirm & hand cash</Text>
+              </Pressable>
             </View>
-            <Text style={styles.name}>{item.senderName}</Text>
-            <Text style={styles.phone}>{item.senderPhone}</Text>
-            <Text style={styles.time}>
-              {new Date(item.createdAt).toLocaleString()}
-            </Text>
-            <Pressable style={styles.acceptBtn} onPress={() => handleAccept(item)}>
-              <Text style={styles.acceptText}>✅ Accept & receive</Text>
-            </Pressable>
-          </View>
-        )}
+          );
+        }}
       />
     </View>
   );
@@ -172,6 +260,25 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
+  cashOutCard: {
+    borderColor: colors.warning,
+  },
+  typeBadge: {
+    color: colors.goldLight,
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+    marginBottom: 8,
+    textTransform: 'uppercase',
+  },
+  typeBadgeCash: {
+    color: colors.warning,
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+    marginBottom: 8,
+    textTransform: 'uppercase',
+  },
   cardTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -211,6 +318,15 @@ const styles = StyleSheet.create({
     marginTop: 14,
     borderWidth: 1.5,
     borderColor: colors.goldMuted,
+  },
+  cashOutBtn: {
+    backgroundColor: colors.adminDark,
+    borderRadius: 12,
+    padding: 14,
+    alignItems: 'center',
+    marginTop: 14,
+    borderWidth: 1.5,
+    borderColor: colors.warning,
   },
   acceptText: {
     color: '#FFF',

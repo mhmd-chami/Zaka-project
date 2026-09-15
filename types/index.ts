@@ -4,9 +4,13 @@ export type TransactionType =
   | 'send'
   | 'send_p2p'
   | 'send_cash'
+  | 'cash_out'
   | 'receive'
+  | 'deposit'
   | 'topup'
   | 'purchase';
+
+export type AddMoneyMode = 'qr' | 'card';
 
 export type SendMode = 'p2p' | 'location';
 
@@ -24,6 +28,23 @@ export interface Transaction {
 }
 
 export type BranchTransferStatus = 'pending' | 'completed';
+
+export type CashOutStatus = 'pending' | 'completed';
+
+export interface CashOutRequest {
+  id: string;
+  reference: string;
+  userId: string;
+  userName: string;
+  userPhone: string;
+  locationId: string;
+  locationName: string;
+  amount: number;
+  status: CashOutStatus;
+  createdAt: string;
+  completedAt?: string;
+  acceptedByUserId?: string;
+}
 
 export interface BranchTransfer {
   id: string;

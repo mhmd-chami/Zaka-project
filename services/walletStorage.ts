@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getAllUsers, getSession } from '@/services/authStorage';
+import { findUserByPhone, getAllUsers, getSession } from '@/services/authStorage';
+import { sendNotificationToUser } from '@/services/notificationStorage';
 import { Transaction, UserRole, WalletProfile } from '@/types';
 
 function defaultBalance(role: UserRole): number {
@@ -162,22 +163,70 @@ export async function seedDemoTransactions(): Promise<void> {
 export async function sendMoneyP2P(
   toPhone: string,
   amount: number
-): Promise<{ ok: boolean; error?: string }> {
+): Promise<{ ok: boolean; error?: string; recipientName?: string }> {
   if (amount <= 0) return { ok: false, error: 'Enter a valid amount' };
 
-  const profile = await getProfile();
-  if (amount > profile.balance) {
+  const session = await getSession();
+  if (!session) return { ok: false, error: 'Not logged in' };
+
+  const recipient = await findUserByPhone(toPhone);
+  if (!recipient) {
+    return { ok: false, error: 'No ZakaPay account found for this number' };
+  }
+
+  if (recipient.id === session.userId) {
+    return { ok: false, error: 'You cannot send money to yourself' };
+  }
+
+  const senderProfile = await getProfile();
+  if (amount > senderProfile.balance) {
     return { ok: false, error: 'Not enough balance' };
   }
 
-  profile.balance -= amount;
-  await saveProfile(profile);
+  senderProfile.balance -= amount;
+  await saveProfile(senderProfile);
   await addTransaction({
     id: `tx-${Date.now()}`,
     type: 'send_p2p',
     amount,
     title: 'ZakaPay → ZakaPay',
-    subtitle: toPhone,
+    subtitle: recipient.phone,
+    createdAt: new Date().toISOString(),
+  });
+
+  const recipientProfile = await getProfileByUserId(recipient.id);
+  recipientProfile.balance += amount;
+  await saveProfileByUserId(recipient.id, recipientProfile);
+  await addTransactionForUser(recipient.id, {
+    id: `tx-${Date.now()}-in`,
+    type: 'receive',
+    amount,
+    title: `Received from ${session.name}`,
+    subtitle: session.phone,
+    createdAt: new Date().toISOString(),
+  });
+
+  return { ok: true, recipientName: recipient.name };
+}
+
+export async function addMoneyViaCard(
+  amount: number,
+  cardLast4: string
+): Promise<{ ok: boolean; error?: string }> {
+  if (amount <= 0) return { ok: false, error: 'Enter a valid amount' };
+  if (amount > 5000) {
+    return { ok: false, error: 'Maximum deposit is $5,000 per transaction' };
+  }
+
+  const profile = await getProfile();
+  profile.balance += amount;
+  await saveProfile(profile);
+  await addTransaction({
+    id: `tx-${Date.now()}`,
+    type: 'deposit',
+    amount,
+    title: 'Credit card deposit',
+    subtitle: `•••• ${cardLast4}`,
     createdAt: new Date().toISOString(),
   });
 
@@ -225,17 +274,28 @@ export async function receiveMoney(
   });
 }
 
+function generateRedeemCode(carrier: string): string {
+  const prefix = carrier.toUpperCase().replace(/\s/g, '').slice(0, 4);
+  const segment = () => Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `${prefix}-${segment()}-${segment()}`;
+}
+
 export async function topUpPhone(
   carrier: string,
   phone: string,
   amount: number
-): Promise<{ ok: boolean; error?: string }> {
+): Promise<{ ok: boolean; error?: string; redeemCode?: string }> {
   if (amount <= 0) return { ok: false, error: 'Enter a valid amount' };
+
+  const session = await getSession();
+  if (!session) return { ok: false, error: 'Not logged in' };
 
   const profile = await getProfile();
   if (amount > profile.balance) {
     return { ok: false, error: 'Not enough balance' };
   }
+
+  const redeemCode = generateRedeemCode(carrier);
 
   profile.balance -= amount;
   await saveProfile(profile);
@@ -244,11 +304,18 @@ export async function topUpPhone(
     type: 'topup',
     amount,
     title: `${carrier} recharge`,
-    subtitle: phone,
+    subtitle: `${phone} · ${redeemCode}`,
     createdAt: new Date().toISOString(),
   });
 
-  return { ok: true };
+  await sendNotificationToUser(
+    session.userId,
+    `${carrier} redeem code 🎫`,
+    `Your $${amount.toFixed(2)} ${carrier} recharge for ${phone} is ready.\n\nRedeem code: ${redeemCode}\n\nUse this code with ${carrier} to top up your line.`,
+    'admin'
+  );
+
+  return { ok: true, redeemCode };
 }
 
 export async function purchaseItem(

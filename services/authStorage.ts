@@ -106,6 +106,14 @@ export async function seedDemoAccounts(): Promise<void> {
   }
 }
 
+export async function findUserByPhone(
+  phone: string
+): Promise<UserAccount | null> {
+  const normalized = normalizePhone(phone);
+  const users = await getAllUsers();
+  return users.find((u) => normalizePhone(u.phone) === normalized) ?? null;
+}
+
 export async function getAllUsers(): Promise<UserAccount[]> {
   await seedDemoAccounts();
   const raw = await AsyncStorage.getItem(USERS_KEY);

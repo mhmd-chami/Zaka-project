@@ -35,7 +35,7 @@ export default function WalletScreen() {
     );
   }
 
-  return <WalletView session={session} showTopUp />;
+  return <WalletView session={session} showAddMoney showLogout={false} />;
 }
 
 const styles = StyleSheet.create({

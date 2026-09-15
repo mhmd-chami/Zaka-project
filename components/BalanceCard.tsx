@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.gold,
   },
   pattern: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     overflow: 'hidden',
   },
   circle1: {

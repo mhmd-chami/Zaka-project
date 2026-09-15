@@ -24,7 +24,8 @@ export default function RootLayout() {
         <Stack.Screen name="(owner)" options={{ headerShown: false }} />
         <Stack.Screen name="send" options={{ title: 'Send Money' }} />
         <Stack.Screen name="receive" options={{ title: 'Receive Money' }} />
-        <Stack.Screen name="topup" options={{ title: 'Charge Number' }} />
+        <Stack.Screen name="add-money" options={{ title: 'Add Money' }} />
+        <Stack.Screen name="notifications" options={{ title: 'Notifications' }} />
       </Stack>
     </SafeAreaProvider>
   );
