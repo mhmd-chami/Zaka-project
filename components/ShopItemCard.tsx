@@ -1,5 +1,7 @@
+import { AppIcon } from '@/components/AppIcon';
+import { BrandMark } from '@/components/BrandMark';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors, radius } from '@/constants/theme';
+import { colors, radius, shadows } from '@/constants/theme';
 import { ShopItem } from '@/types';
 
 interface Props {
@@ -10,11 +12,12 @@ interface Props {
 export function ShopItemCard({ item, onPress }: Props) {
   return (
     <Pressable
-      style={({ pressed }) => [styles.card, pressed && styles.pressed]}
+      style={({ pressed }) => [styles.card, shadows.soft, pressed && styles.pressed]}
       onPress={onPress}
     >
-      <View style={styles.goldCorner} />
-      <Text style={styles.emoji}>{item.emoji}</Text>
+      <View style={styles.markWrap}>
+        <BrandMark brand={item.brand} size={52} />
+      </View>
       <Text style={styles.name} numberOfLines={2}>
         {item.name}
       </Text>
@@ -22,7 +25,7 @@ export function ShopItemCard({ item, onPress }: Props) {
       <View style={styles.priceRow}>
         <Text style={styles.price}>${item.price.toFixed(2)}</Text>
         <View style={styles.buyBtn}>
-          <Text style={styles.buy}>Buy</Text>
+          <AppIcon name="chevron-right" size={17} color="#07110C" strokeWidth={2.5} />
         </View>
       </View>
     </Pressable>
@@ -32,43 +35,32 @@ export function ShopItemCard({ item, onPress }: Props) {
 const styles = StyleSheet.create({
   card: {
     width: '48%',
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceSoft,
     borderRadius: radius.lg,
     padding: 14,
     marginBottom: 12,
     borderWidth: 1,
     borderColor: colors.border,
-    overflow: 'hidden',
   },
   pressed: {
     opacity: 0.9,
-    borderColor: colors.borderGold,
+    borderColor: colors.primary,
+    transform: [{ translateY: -2 }],
   },
-  goldCorner: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    width: 40,
-    height: 40,
-    borderBottomLeftRadius: 40,
-    backgroundColor: 'rgba(212,175,55,0.12)',
-  },
-  emoji: {
-    fontSize: 32,
-    marginBottom: 8,
-  },
+  markWrap: { alignSelf: 'flex-start', borderRadius: 16, overflow: 'hidden' },
   name: {
     color: colors.text,
     fontSize: 14,
     fontWeight: '700',
     minHeight: 36,
+    marginTop: 14,
+    lineHeight: 18,
   },
   category: {
-    color: colors.textMuted,
+    color: colors.textSecondary,
     fontSize: 10,
     marginTop: 4,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 0.1,
   },
   priceRow: {
     flexDirection: 'row',
@@ -77,21 +69,17 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   price: {
-    color: colors.goldLight,
-    fontSize: 16,
+    color: colors.text,
+    fontSize: 17,
     fontWeight: '800',
+    letterSpacing: -0.3,
   },
   buyBtn: {
-    backgroundColor: colors.primaryDark,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    width: 30,
+    height: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primary,
     borderRadius: radius.full,
-    borderWidth: 1,
-    borderColor: colors.goldMuted,
-  },
-  buy: {
-    color: '#FFF',
-    fontSize: 11,
-    fontWeight: '700',
   },
 });

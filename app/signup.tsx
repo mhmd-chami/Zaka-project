@@ -16,7 +16,7 @@ import { AuthInput } from '@/components/AuthInput';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { ScreenBackground } from '@/components/ScreenBackground';
 import { ZakaLogo } from '@/components/ZakaLogo';
-import { colors, contentBottomPadding, radius } from '@/constants/theme';
+import { colors, contentBottomPadding, radius, shadows } from '@/constants/theme';
 import { signUp } from '@/services/authStorage';
 import { sendWelcomeNotification } from '@/services/notificationStorage';
 import { getHomeRoute } from '@/utils/routes';
@@ -47,7 +47,7 @@ export default function SignUpScreen() {
 
     await sendWelcomeNotification(result.session!.userId);
     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    Alert.alert('Account created! 🎉', 'Your wallet is ready with $150.', [
+    Alert.alert('Account created!', 'Your wallet is ready with $150.', [
       {
         text: 'Continue',
         onPress: () =>
@@ -76,7 +76,7 @@ export default function SignUpScreen() {
             <Text style={styles.title}>Create account</Text>
             <Text style={styles.subtitle}>Join ZakaPay and start sending money</Text>
 
-            <View style={styles.formCard}>
+            <View style={[styles.formCard, shadows.card]}>
               <AuthInput
                 label="Full name"
                 placeholder="Your name"
@@ -137,14 +137,15 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     paddingHorizontal: 24,
-    paddingTop: 16,
+    paddingTop: 20,
   },
   title: {
     color: colors.text,
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: '800',
     textAlign: 'center',
-    marginTop: 20,
+    marginTop: 24,
+    letterSpacing: -0.7,
   },
   subtitle: {
     color: colors.textSecondary,
@@ -154,11 +155,11 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   formCard: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceSoft,
     borderRadius: radius.xl,
     padding: 20,
     borderWidth: 1,
-    borderColor: colors.borderGold,
+    borderColor: colors.borderStrong,
   },
   footer: {
     flexDirection: 'row',
@@ -170,7 +171,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   link: {
-    color: colors.goldLight,
+    color: colors.primaryLight,
     fontSize: 14,
     fontWeight: '700',
   },

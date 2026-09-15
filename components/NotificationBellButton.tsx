@@ -1,7 +1,8 @@
+import { AppIcon } from '@/components/AppIcon';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors } from '@/constants/theme';
+import { colors, radius } from '@/constants/theme';
 import { getSession } from '@/services/authStorage';
 import { getUnreadCount } from '@/services/notificationStorage';
 
@@ -28,8 +29,10 @@ export function NotificationBellButton() {
       style={styles.btn}
       onPress={() => router.push('/notifications')}
       hitSlop={10}
+      accessibilityRole="button"
+      accessibilityLabel={unread ? `Notifications, ${unread} unread` : 'Notifications'}
     >
-      <Text style={styles.icon}>🔔</Text>
+      <AppIcon name="bell" size={22} />
       {unread > 0 ? (
         <View style={styles.badge}>
           <Text style={styles.badgeText}>
@@ -44,18 +47,19 @@ export function NotificationBellButton() {
 const styles = StyleSheet.create({
   btn: {
     marginRight: 16,
-    width: 36,
-    height: 36,
+    width: 38,
+    height: 38,
+    borderRadius: radius.md,
+    backgroundColor: colors.surfaceLight,
+    borderWidth: 1,
+    borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  icon: {
-    fontSize: 22,
-  },
   badge: {
     position: 'absolute',
-    top: 0,
-    right: 0,
+    top: -3,
+    right: -3,
     minWidth: 18,
     height: 18,
     borderRadius: 9,
@@ -64,7 +68,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 4,
     borderWidth: 1.5,
-    borderColor: colors.background,
+    borderColor: colors.surface,
   },
   badgeText: {
     color: '#FFF',

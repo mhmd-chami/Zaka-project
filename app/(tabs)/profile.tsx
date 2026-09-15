@@ -1,3 +1,5 @@
+import { AppIcon, IconLabel, type IconName } from '@/components/AppIcon';
+import { MoneyActionIcon } from '@/components/MoneyActionIcon';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
@@ -25,14 +27,14 @@ function roleLabel(role: AuthSession['role']): string {
   }
 }
 
-function roleEmoji(role: AuthSession['role']): string {
+function roleIcon(role: AuthSession['role']): IconName {
   switch (role) {
     case 'owner':
-      return '👑';
+      return 'crown';
     case 'admin':
-      return '🏪';
+      return 'store';
     default:
-      return '👤';
+      return 'user';
   }
 }
 
@@ -89,46 +91,59 @@ export default function ProfileScreen() {
       ]}
     >
       <View style={styles.avatarRing}>
-        <Text style={styles.avatar}>{roleEmoji(session.role)}</Text>
+        <AppIcon name={roleIcon(session.role)} size={40} />
       </View>
       <Text style={styles.name}>{profile.name}</Text>
       <View style={styles.roleBadge}>
         <Text style={styles.roleText}>{roleLabel(session.role)}</Text>
       </View>
 
-      <View style={styles.card}>
-        <Text style={styles.cardLabel}>ZakaPay number</Text>
-        <Text style={styles.cardValue}>{profile.phone}</Text>
-      </View>
-
-      <View style={styles.card}>
-        <Text style={styles.cardLabel}>Wallet balance</Text>
-        <Text style={styles.balance}>${profile.balance.toFixed(2)}</Text>
+      <View style={styles.summaryCard}>
+        <View style={styles.summaryBalance}>
+          <Text style={styles.cardLabel}>Wallet balance</Text>
+          <Text style={styles.balance}>${profile.balance.toFixed(2)}</Text>
+        </View>
+        <View style={styles.summaryDivider} />
+        <View style={styles.numberRow}>
+          <View style={styles.numberIcon}>
+            <AppIcon name="smartphone" size={19} color={colors.primaryLight} />
+          </View>
+          <View>
+            <Text style={styles.cardLabel}>ZakaPay number</Text>
+            <Text style={styles.cardValue}>{profile.phone}</Text>
+          </View>
+        </View>
       </View>
 
       <Pressable style={styles.menuItem} onPress={() => router.push('/receive')}>
-        <Text style={styles.menuEmoji}>📥</Text>
+        <View style={styles.menuIcon}>
+          <MoneyActionIcon action="receive" size={46} />
+        </View>
         <View style={styles.menuBody}>
           <Text style={styles.menuTitle}>Receive & QR</Text>
           <Text style={styles.menuSub}>Your payment number and QR code</Text>
         </View>
-        <Text style={styles.menuArrow}>→</Text>
+        <AppIcon name="chevron-right" size={20} />
       </Pressable>
 
       <Pressable
         style={styles.menuItem}
         onPress={() => router.push('/(tabs)/history')}
       >
-        <Text style={styles.menuEmoji}>📋</Text>
+        <View style={styles.menuIcon}>
+          <View style={styles.historyIcon}>
+            <AppIcon name="history" size={23} color={colors.primaryLight} />
+          </View>
+        </View>
         <View style={styles.menuBody}>
           <Text style={styles.menuTitle}>Transaction history</Text>
           <Text style={styles.menuSub}>View all past activity</Text>
         </View>
-        <Text style={styles.menuArrow}>→</Text>
+        <AppIcon name="chevron-right" size={20} />
       </Pressable>
 
       <Pressable style={styles.logoutBtn} onPress={handleLogout}>
-        <Text style={styles.logoutText}>Sign out</Text>
+        <IconLabel icon="logout" style={styles.logoutText}>Sign out</IconLabel>
       </Pressable>
     </ScrollView>
   );
@@ -140,7 +155,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   content: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 18,
     alignItems: 'center',
   },
   loading: {
@@ -153,50 +169,51 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   avatarRing: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
-    backgroundColor: colors.surfaceLight,
-    borderWidth: 2,
-    borderColor: colors.borderGold,
+    width: 82,
+    height: 82,
+    borderRadius: 27,
+    backgroundColor: colors.primarySoft,
+    borderWidth: 1,
+    borderColor: 'rgba(40,199,128,0.34)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 14,
   },
-  avatar: {
-    fontSize: 40,
-  },
   name: {
     color: colors.text,
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: '800',
     marginBottom: 8,
+    letterSpacing: -0.6,
   },
   roleBadge: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.primarySoft,
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: 'rgba(40,199,128,0.24)',
     marginBottom: 24,
   },
   roleText: {
-    color: colors.goldLight,
+    color: colors.primaryLight,
     fontSize: 12,
     fontWeight: '700',
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
+    letterSpacing: 0.1,
   },
-  card: {
+  summaryCard: {
     width: '100%',
-    backgroundColor: colors.surface,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
+    backgroundColor: colors.surfaceSoft,
+    borderRadius: 20,
+    padding: 18,
+    marginBottom: 18,
     borderWidth: 1,
     borderColor: colors.border,
   },
+  summaryBalance: { alignItems: 'flex-start' },
+  summaryDivider: { height: 1, backgroundColor: colors.border, marginVertical: 16 },
+  numberRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  numberIcon: { width: 40, height: 40, borderRadius: 13, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft },
   cardLabel: {
     color: colors.textSecondary,
     fontSize: 12,
@@ -205,29 +222,30 @@ const styles = StyleSheet.create({
   },
   cardValue: {
     color: colors.text,
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '700',
   },
   balance: {
-    color: colors.income,
-    fontSize: 28,
+    color: colors.text,
+    fontSize: 32,
     fontWeight: '800',
+    letterSpacing: -0.7,
   },
   menuItem: {
     width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderRadius: 16,
-    padding: 16,
+    backgroundColor: colors.surfaceSoft,
+    borderRadius: 18,
+    padding: 14,
     marginBottom: 10,
     borderWidth: 1,
     borderColor: colors.border,
   },
-  menuEmoji: {
-    fontSize: 24,
-    marginRight: 14,
+  menuIcon: {
+    marginRight: 13,
   },
+  historyIcon: { width: 46, height: 46, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft },
   menuBody: {
     flex: 1,
   },
@@ -241,19 +259,15 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 2,
   },
-  menuArrow: {
-    color: colors.goldLight,
-    fontSize: 18,
-    fontWeight: '700',
-  },
   logoutBtn: {
     width: '100%',
     marginTop: 20,
     padding: 16,
     borderRadius: 14,
     alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: colors.danger,
+    borderWidth: 1,
+    borderColor: 'rgba(255,99,118,0.45)',
+    backgroundColor: 'rgba(255,99,118,0.07)',
   },
   logoutText: {
     color: colors.danger,

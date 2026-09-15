@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, Text, ViewStyle } from 'react-native';
-import { colors, radius } from '@/constants/theme';
+import { colors, radius, shadows } from '@/constants/theme';
 
 interface Props {
   label: string;
@@ -20,6 +20,7 @@ export function PrimaryButton({
     <Pressable
       style={({ pressed }) => [
         styles.btn,
+        variant === 'primary' && shadows.glow,
         variant === 'gold' && styles.gold,
         variant === 'outline' && styles.outline,
         pressed && styles.pressed,
@@ -44,46 +45,43 @@ export function PrimaryButton({
 
 const styles = StyleSheet.create({
   btn: {
-    backgroundColor: colors.primaryDark,
-    paddingVertical: 17,
+    minHeight: 56,
+    backgroundColor: colors.primary,
+    paddingVertical: 16,
     paddingHorizontal: 24,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: colors.goldMuted,
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
   },
   gold: {
-    backgroundColor: colors.goldMuted,
-    borderColor: colors.goldLight,
+    backgroundColor: colors.gold,
+    borderColor: 'rgba(255,255,255,0.12)',
   },
   outline: {
-    backgroundColor: 'transparent',
-    borderColor: colors.borderGold,
+    backgroundColor: colors.surfaceSoft,
+    borderColor: colors.borderStrong,
     shadowOpacity: 0,
     elevation: 0,
   },
   pressed: {
-    opacity: 0.88,
-    transform: [{ scale: 0.98 }],
+    opacity: 0.9,
+    transform: [{ scale: 0.985 }],
   },
   disabled: {
     opacity: 0.55,
   },
   text: {
-    color: '#FFF',
+    color: '#06130D',
     fontSize: 16,
     fontWeight: '800',
-    letterSpacing: 0.3,
+    letterSpacing: 0.1,
   },
   goldText: {
     color: colors.background,
   },
   outlineText: {
-    color: colors.goldLight,
+    color: colors.text,
   },
 });

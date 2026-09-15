@@ -1,17 +1,19 @@
+import { AppIcon, type IconName } from '@/components/AppIcon';
 import { StyleSheet, Text, View } from 'react-native';
-import { colors, radius } from '@/constants/theme';
+import { colors, radius, shadows } from '@/constants/theme';
 
 interface Props {
-  emoji: string;
+  icon: IconName;
   label: string;
   value: string;
 }
 
-export function StatCard({ emoji, label, value }: Props) {
+export function StatCard({ icon, label, value }: Props) {
   return (
-    <View style={styles.card}>
-      <View style={styles.topLine} />
-      <Text style={styles.emoji}>{emoji}</Text>
+    <View style={[styles.card, shadows.soft]}>
+      <View style={styles.icon}>
+        <AppIcon name={icon} size={25} color={colors.primaryLight} />
+      </View>
       <Text style={styles.value}>{value}</Text>
       <Text style={styles.label}>{label}</Text>
     </View>
@@ -21,39 +23,26 @@ export function StatCard({ emoji, label, value }: Props) {
 const styles = StyleSheet.create({
   card: {
     flex: 1,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceSoft,
     borderRadius: radius.lg,
     padding: 16,
-    alignItems: 'center',
+    alignItems: 'flex-start',
     borderWidth: 1,
     borderColor: colors.border,
     minWidth: '45%',
-    overflow: 'hidden',
   },
-  topLine: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 2,
-    backgroundColor: colors.goldMuted,
-  },
-  emoji: {
-    fontSize: 28,
-    marginBottom: 8,
-    marginTop: 4,
-  },
+  icon: { width: 44, height: 44, borderRadius: 14, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
   value: {
-    color: colors.goldLight,
-    fontSize: 24,
+    color: colors.text,
+    fontSize: 26,
     fontWeight: '800',
+    letterSpacing: -0.6,
   },
   label: {
     color: colors.textSecondary,
     fontSize: 11,
-    marginTop: 4,
-    textAlign: 'center',
+    marginTop: 5,
     fontWeight: '600',
-    letterSpacing: 0.3,
+    letterSpacing: 0.1,
   },
 });

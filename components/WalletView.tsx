@@ -1,3 +1,4 @@
+import { AppIcon, IconLabel } from '@/components/AppIcon';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
@@ -97,34 +98,31 @@ export function WalletView({
 
       {session.role === 'admin' && location ? (
         <View style={styles.locationInfo}>
-          <Text style={styles.locationInfoText}>
-            🕐 Open {location.hours} · Accept cash & ZakaPay transfers here
-          </Text>
+          <IconLabel icon="clock" style={styles.locationInfoText}>
+            Open {location.hours} · Accept cash & ZakaPay transfers here
+          </IconLabel>
         </View>
       ) : null}
 
       <View style={styles.actions}>
         <ActionButton
-          emoji="📤"
+          icon="send"
           label="Send"
           onPress={() => router.push('/send')}
         />
         <ActionButton
-          emoji="📥"
+          icon="receive"
           label="Receive"
           onPress={() => router.push('/receive')}
         />
-      </View>
-
-      {showAddMoney ? (
-        <View style={styles.actions}>
+        {showAddMoney ? (
           <ActionButton
-            emoji="💰"
+            icon="add-money"
             label="Add Money"
             onPress={() => router.push('/add-money')}
           />
-        </View>
-      ) : null}
+        ) : null}
+      </View>
 
       {showLogout ? (
         <Pressable style={styles.logoutBtn} onPress={handleLogout}>
@@ -132,18 +130,23 @@ export function WalletView({
         </Pressable>
       ) : null}
 
-      <Pressable
-        style={styles.historyLink}
-        onPress={() => {
-          if (session.role === 'admin') router.push('/(admin)/history');
-          else if (session.role === 'owner') router.push('/(owner)/history');
-          else router.push('/(tabs)/history');
-        }}
-      >
-        <Text style={styles.historyLinkText}>View full history →</Text>
-      </Pressable>
-
-      <Text style={styles.sectionTitle}>Recent activity</Text>
+      <View style={styles.sectionHeader}>
+        <View>
+          <Text style={styles.sectionTitle}>Recent activity</Text>
+          <Text style={styles.sectionSubtitle}>Your latest wallet activity</Text>
+        </View>
+        <Pressable
+          style={styles.historyLink}
+          onPress={() => {
+            if (session.role === 'admin') router.push('/(admin)/history');
+            else if (session.role === 'owner') router.push('/(owner)/history');
+            else router.push('/(tabs)/history');
+          }}
+        >
+          <Text style={styles.historyLinkText}>See all</Text>
+          <AppIcon name="chevron-right" size={16} color={colors.primaryLight} />
+        </Pressable>
+      </View>
       {recent.length === 0 ? (
         <Text style={styles.empty}>No transactions yet</Text>
       ) : (
@@ -159,7 +162,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   content: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 18,
   },
   loading: {
     flex: 1,
@@ -171,10 +175,10 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   locationInfo: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 16,
+    backgroundColor: colors.surfaceSoft,
+    borderRadius: 14,
+    padding: 13,
+    marginBottom: 18,
     borderWidth: 1,
     borderColor: colors.border,
   },
@@ -186,7 +190,7 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: 'row',
     gap: 10,
-    marginBottom: 16,
+    marginBottom: 22,
   },
   logoutBtn: {
     alignSelf: 'flex-end',
@@ -198,22 +202,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
-  historyLink: {
-    marginBottom: 16,
-  },
+  sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 },
+  historyLink: { flexDirection: 'row', alignItems: 'center', gap: 2, paddingVertical: 7, paddingLeft: 10 },
   historyLinkText: {
-    color: colors.goldLight,
-    fontSize: 14,
-    fontWeight: '600',
+    color: colors.primaryLight,
+    fontSize: 13,
+    fontWeight: '700',
   },
   sectionTitle: {
-    fontSize: 14,
+    fontSize: 18,
     fontWeight: '800',
-    color: colors.goldLight,
-    marginBottom: 12,
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
+    color: colors.text,
+    letterSpacing: -0.3,
   },
+  sectionSubtitle: { color: colors.textMuted, fontSize: 12, marginTop: 2 },
   empty: {
     color: colors.textSecondary,
     fontSize: 14,

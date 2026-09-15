@@ -84,7 +84,7 @@ export async function createBranchTransfer(
   for (const admin of branchAdmins) {
     await sendNotificationToUser(
       admin.id,
-      'New branch send request 🏪',
+      'New branch send request',
       `${senderName} (${senderPhone}) wants to send $${amount.toFixed(2)} to ${locationName}. Ref: ${reference}`,
       'user'
     );
@@ -151,7 +151,7 @@ export async function acceptBranchTransfer(
 
   await sendNotificationToUser(
     transfer.senderUserId,
-    'Send completed ✅',
+    'Send completed',
     `$${transfer.amount.toFixed(2)} was received at ${transfer.locationName}. Ref: ${transfer.reference}`,
     'admin'
   );

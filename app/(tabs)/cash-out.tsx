@@ -1,4 +1,5 @@
 import * as Haptics from 'expo-haptics';
+import { IconLabel } from '@/components/AppIcon';
 import { useState } from 'react';
 import {
   Alert,
@@ -71,7 +72,7 @@ export default function CashOutScreen() {
 
     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     Alert.alert(
-      'Request sent 💵',
+      'Request sent',
       `$${value.toFixed(2)} cash out at ${location.name}.\n\nRef: ${result.reference}\n\nShow this reference to the agent. Your balance will update once they confirm.`,
       [{ text: 'Done', onPress: resetScan }]
     );
@@ -90,7 +91,7 @@ export default function CashOutScreen() {
           ]}
         >
           <View style={styles.branchCard}>
-            <Text style={styles.branchBadge}>🏪 Branch scanned</Text>
+            <IconLabel icon="store" style={styles.branchBadge}>Branch scanned</IconLabel>
             <Text style={styles.branchName}>{location.name}</Text>
             <Pressable onPress={resetScan}>
               <Text style={styles.rescan}>Scan a different QR</Text>
@@ -112,10 +113,10 @@ export default function CashOutScreen() {
             {QUICK.map((q) => (
               <Pressable
                 key={q}
-                style={styles.quickBtn}
+                style={[styles.quickBtn, amount === String(q) && styles.quickBtnActive]}
                 onPress={() => setAmount(String(q))}
               >
-                <Text style={styles.quickText}>${q}</Text>
+                <Text style={[styles.quickText, amount === String(q) && styles.quickTextActive]}>${q}</Text>
               </Pressable>
             ))}
           </View>
@@ -130,7 +131,7 @@ export default function CashOutScreen() {
             onPress={handleSubmit}
             disabled={loading}
           >
-            <Text style={styles.submitText}>💵 Request cash out</Text>
+            <IconLabel icon="banknote" style={styles.submitText}>Request cash out</IconLabel>
           </Pressable>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -165,12 +166,12 @@ const styles = StyleSheet.create({
   },
   formContainer: { padding: 20 },
   branchCard: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceSoft,
     borderRadius: 20,
     padding: 24,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: colors.borderGold,
+    borderColor: 'rgba(40,199,128,0.28)',
     marginBottom: 24,
   },
   branchBadge: {
@@ -186,7 +187,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   rescan: {
-    color: colors.goldLight,
+    color: colors.primaryLight,
     fontSize: 14,
     fontWeight: '600',
     marginTop: 14,
@@ -198,8 +199,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   input: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
+    backgroundColor: colors.surfaceSoft,
+    borderRadius: 14,
     padding: 16,
     fontSize: 22,
     color: colors.text,
@@ -214,15 +215,19 @@ const styles = StyleSheet.create({
   },
   quickBtn: {
     flex: 1,
-    backgroundColor: colors.surfaceLight,
+    backgroundColor: colors.surface,
     padding: 12,
-    borderRadius: 10,
+    borderRadius: 12,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'transparent',
   },
+  quickBtnActive: { backgroundColor: colors.primarySoft, borderColor: 'rgba(40,199,128,0.35)' },
   quickText: {
-    color: colors.goldLight,
+    color: colors.textSecondary,
     fontWeight: '700',
   },
+  quickTextActive: { color: colors.primaryLight },
   note: {
     color: colors.textSecondary,
     fontSize: 12,
@@ -230,17 +235,17 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   submitBtn: {
-    backgroundColor: colors.primaryDark,
+    backgroundColor: colors.primary,
     padding: 18,
     borderRadius: 16,
     alignItems: 'center',
     marginTop: 28,
-    borderWidth: 1.5,
-    borderColor: colors.goldMuted,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
   },
   disabled: { opacity: 0.7 },
   submitText: {
-    color: '#FFF',
+    color: '#06130D',
     fontSize: 16,
     fontWeight: '800',
   },

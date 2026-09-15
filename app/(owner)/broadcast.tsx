@@ -1,3 +1,4 @@
+import { IconLabel } from '@/components/AppIcon';
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
 import {
@@ -36,7 +37,7 @@ export default function OwnerNotifyScreen() {
     setLoading(false);
 
     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    Alert.alert('Broadcast sent! 👑', `Delivered to ${count} accounts.`);
+    Alert.alert('Broadcast sent!', `Delivered to ${count} accounts.`);
     setTitle('');
     setMessage('');
   }
@@ -49,27 +50,29 @@ export default function OwnerNotifyScreen() {
           style={[styles.targetBtn, target === 'users' && styles.targetActive]}
           onPress={() => setTarget('users')}
         >
-          <Text
+          <IconLabel
+            icon="users"
             style={[
               styles.targetText,
               target === 'users' && styles.targetTextActive,
             ]}
           >
-            👤 All users
-          </Text>
+            All users
+          </IconLabel>
         </Pressable>
         <Pressable
           style={[styles.targetBtn, target === 'admins' && styles.targetActive]}
           onPress={() => setTarget('admins')}
         >
-          <Text
+          <IconLabel
+            icon="shield"
             style={[
               styles.targetText,
               target === 'admins' && styles.targetTextActive,
             ]}
           >
-            🛡️ All admins
-          </Text>
+            All admins
+          </IconLabel>
         </Pressable>
       </View>
 
@@ -97,7 +100,7 @@ export default function OwnerNotifyScreen() {
         onPress={handleSend}
         disabled={loading}
       >
-        <Text style={styles.btnText}>👑 Broadcast notification</Text>
+        <IconLabel icon="crown" style={styles.btnText}>Broadcast notification</IconLabel>
       </Pressable>
     </ScrollView>
   );

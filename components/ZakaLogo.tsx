@@ -1,3 +1,4 @@
+import { AppIcon } from '@/components/AppIcon';
 import { StyleSheet, Text, View } from 'react-native';
 import { colors, logoText } from '@/constants/theme';
 
@@ -12,7 +13,14 @@ export function ZakaLogo({ size = 'md', showTagline = false }: Props) {
   return (
     <View style={styles.wrap}>
       <View style={[styles.badge, { transform: [{ scale }] }]}>
-        <Text style={styles.cedar}>🌲</Text>
+        <View style={styles.badgeInner}>
+          <AppIcon
+            name="cedar"
+            size={34}
+            color={colors.goldLight}
+            strokeWidth={1.7}
+          />
+        </View>
       </View>
       <View style={{ transform: [{ scale }] }}>
         <Text style={styles.brand}>
@@ -20,7 +28,9 @@ export function ZakaLogo({ size = 'md', showTagline = false }: Props) {
           <Text style={styles.pay}>Pay</Text>
         </Text>
         {showTagline ? (
-          <Text style={styles.tagline}>Lebanon's wallet · Send · Shop · Pay</Text>
+          <Text style={styles.tagline}>
+            Lebanon&apos;s wallet  ·  Send  ·  Shop  ·  Pay
+          </Text>
         ) : null}
       </View>
     </View>
@@ -33,29 +43,34 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   badge: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: colors.primaryMuted,
-    borderWidth: 2,
-    borderColor: colors.gold,
+    width: 70,
+    height: 70,
+    borderRadius: 24,
+    backgroundColor: colors.goldSoft,
+    borderWidth: 1,
+    borderColor: colors.borderGold,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: colors.gold,
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.4,
-    shadowRadius: 14,
-    elevation: 6,
+    shadowOpacity: 0.22,
+    shadowRadius: 16,
+    elevation: 4,
   },
-  cedar: {
-    fontSize: 32,
+  badgeInner: {
+    width: 54,
+    height: 54,
+    borderRadius: 18,
+    backgroundColor: colors.primaryMuted,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   brand: {
     ...logoText,
     textAlign: 'center',
   },
   zaka: {
-    color: colors.goldLight,
+    color: colors.gold,
   },
   pay: {
     color: colors.text,
@@ -65,6 +80,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     textAlign: 'center',
     marginTop: 6,
-    letterSpacing: 0.5,
+    letterSpacing: 0.1,
   },
 });

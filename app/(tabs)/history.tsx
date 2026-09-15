@@ -1,3 +1,4 @@
+import { AppIcon } from '@/components/AppIcon';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
@@ -23,7 +24,9 @@ export default function HistoryScreen() {
         contentContainerStyle={styles.list}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={styles.emptyEmoji}>📋</Text>
+            <View style={styles.emptyIcon}>
+              <AppIcon name="history" size={48} color={colors.textMuted} />
+            </View>
             <Text style={styles.emptyText}>No transactions yet</Text>
           </View>
         }
@@ -46,8 +49,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 60,
   },
-  emptyEmoji: {
-    fontSize: 48,
+  emptyIcon: {
     marginBottom: 12,
   },
   emptyText: {

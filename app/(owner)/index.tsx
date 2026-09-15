@@ -1,3 +1,4 @@
+import { AppIcon } from '@/components/AppIcon';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
@@ -64,20 +65,22 @@ export default function OwnerDashboard() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.banner}>
-        <Text style={styles.bannerEmoji}>👑</Text>
-        <Text style={styles.bannerTitle}>Owner Control Panel</Text>
-        <Text style={styles.bannerSub}>
-          Full access — manage admins, users, and system alerts
-        </Text>
+        <View style={styles.bannerIcon}>
+          <AppIcon name="crown" size={28} color={colors.owner} />
+        </View>
+        <View style={styles.bannerCopy}>
+          <Text style={styles.bannerTitle}>Owner control</Text>
+          <Text style={styles.bannerSub}>Manage admins, users and system alerts</Text>
+        </View>
       </View>
 
       <View style={styles.stats}>
-        <StatCard emoji="👤" label="Users" value={String(stats.users)} />
-        <StatCard emoji="🛡️" label="Admins" value={String(stats.admins)} />
+        <StatCard icon="user" label="Users" value={String(stats.users)} />
+        <StatCard icon="shield" label="Admins" value={String(stats.admins)} />
       </View>
       <View style={styles.stats}>
-        <StatCard emoji="📊" label="Total accounts" value={String(stats.total)} />
-        <StatCard emoji="🏪" label="Locations" value={String(stats.locations)} />
+        <StatCard icon="chart" label="Total accounts" value={String(stats.total)} />
+        <StatCard icon="store" label="Locations" value={String(stats.locations)} />
       </View>
 
       <Pressable style={styles.logoutBtn} onPress={signOut}>
@@ -89,19 +92,21 @@ export default function OwnerDashboard() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: 20, paddingBottom: 40 },
-  banner: { alignItems: 'center', marginBottom: 24 },
-  bannerEmoji: { fontSize: 44, marginBottom: 8 },
+  content: { paddingHorizontal: 20, paddingTop: 18, paddingBottom: 40 },
+  banner: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surfaceSoft, borderWidth: 1, borderColor: 'rgba(155,135,245,0.22)', borderRadius: 22, padding: 18, marginBottom: 24 },
+  bannerIcon: { width: 52, height: 52, borderRadius: 17, backgroundColor: 'rgba(155,135,245,0.13)', alignItems: 'center', justifyContent: 'center', marginRight: 14 },
+  bannerCopy: { flex: 1 },
   bannerTitle: {
-    color: colors.accent,
-    fontSize: 24,
+    color: colors.text,
+    fontSize: 20,
     fontWeight: '800',
+    letterSpacing: -0.35,
   },
   bannerSub: {
     color: colors.textSecondary,
     fontSize: 14,
-    textAlign: 'center',
-    marginTop: 6,
+    marginTop: 4,
+    lineHeight: 18,
   },
   stats: {
     flexDirection: 'row',
@@ -112,6 +117,10 @@ const styles = StyleSheet.create({
     marginTop: 24,
     alignItems: 'center',
     padding: 14,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255,99,118,0.07)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,99,118,0.25)',
   },
   logoutText: {
     color: colors.danger,

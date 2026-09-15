@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthSession, UserAccount, UserRole } from '@/types';
+import { GoogleIdentity, signOutFromGoogle } from '@/services/googleAuth';
 
 const USERS_KEY = '@zaka_users';
 const SESSION_KEY = '@zaka_session';
@@ -127,6 +128,8 @@ function toSession(user: UserAccount): AuthSession {
     phone: user.phone,
     role: normalizeRole(user.role),
     locationId: user.locationId,
+    authProvider: user.authProvider ?? 'password',
+    email: user.email,
   };
 }
 
@@ -147,6 +150,8 @@ export async function getSession(): Promise<AuthSession | null> {
     phone: parsed.phone ?? user?.phone ?? '',
     role: normalizeRole(parsed.role ?? user?.role),
     locationId: parsed.locationId ?? user?.locationId,
+    authProvider: parsed.authProvider ?? user?.authProvider ?? 'password',
+    email: parsed.email ?? user?.email,
   };
 
   await AsyncStorage.setItem(SESSION_KEY, JSON.stringify(session));
@@ -193,6 +198,57 @@ export async function signUp(
   return { ok: true, session };
 }
 
+export async function findGoogleAccount(
+  identity: GoogleIdentity
+): Promise<{ session?: AuthSession; needsPhone: boolean }> {
+  const users = await getAllUsers();
+  const user = users.find((account) => account.googleId === identity.id);
+  if (!user) return { needsPhone: true };
+
+  const session = toSession(user);
+  await AsyncStorage.setItem(SESSION_KEY, JSON.stringify(session));
+  return { session, needsPhone: false };
+}
+
+export async function completeGoogleSignUp(
+  identity: GoogleIdentity,
+  phone: string
+): Promise<{ ok: boolean; error?: string; session?: AuthSession }> {
+  const normalizedPhone = normalizePhone(phone);
+  if (normalizedPhone.length < 8) {
+    return { ok: false, error: 'Enter a valid phone number' };
+  }
+
+  const users = await getAllUsers();
+  const existingGoogle = users.find((account) => account.googleId === identity.id);
+  if (existingGoogle) {
+    const session = toSession(existingGoogle);
+    await AsyncStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    return { ok: true, session };
+  }
+  if (users.some((account) => normalizePhone(account.phone) === normalizedPhone)) {
+    return { ok: false, error: 'This phone number is already registered' };
+  }
+
+  const user: UserAccount = {
+    id: `user-google-${Date.now()}`,
+    name: identity.name,
+    phone: normalizedPhone,
+    password: '',
+    role: 'user',
+    authProvider: 'google',
+    googleId: identity.id,
+    email: identity.email,
+    createdAt: new Date().toISOString(),
+  };
+  users.push(user);
+  await saveUsers(users);
+
+  const session = toSession(user);
+  await AsyncStorage.setItem(SESSION_KEY, JSON.stringify(session));
+  return { ok: true, session };
+}
+
 export async function login(
   phone: string,
   password: string
@@ -221,7 +277,11 @@ export async function login(
 }
 
 export async function logout(): Promise<void> {
+  const session = await getSession();
   await AsyncStorage.removeItem(SESSION_KEY);
+  if (session?.authProvider === 'google') {
+    await signOutFromGoogle();
+  }
 }
 
 export async function setUserRole(

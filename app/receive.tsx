@@ -1,8 +1,11 @@
+import { IconLabel } from '@/components/AppIcon';
+import { MoneyActionIcon } from '@/components/MoneyActionIcon';
 import * as Haptics from 'expo-haptics';
 import { useEffect, useState } from 'react';
 import {
   Alert,
   Pressable,
+  ScrollView,
   Share,
   StyleSheet,
   Text,
@@ -40,7 +43,7 @@ export default function ReceiveScreen() {
     let message = '';
     if (isAdmin && location) {
       message =
-        `🏪 Send money to ${location.name}\n\n` +
+        `Send money to ${location.name}\n\n` +
         `ZakaPay Location Agent\n` +
         `Address: ${location.address}\n` +
         `Phone: ${profile.phone}\n` +
@@ -48,7 +51,7 @@ export default function ReceiveScreen() {
         `Pay in app or bring cash to this location.`;
     } else {
       message =
-        `Send me money on ZakaPay 💳\n\n` +
+        `Send me money on ZakaPay\n\n` +
         `My number: ${profile.phone}\n\n` +
         `Download ZakaPay to pay instantly.`;
     }
@@ -75,7 +78,7 @@ export default function ReceiveScreen() {
     await receiveMoney(fromLabel, amount);
     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setProfile(await getProfile());
-    Alert.alert('Received! 📥', `$${amount.toFixed(2)} added to your wallet.`);
+    Alert.alert('Received!', `$${amount.toFixed(2)} added to your wallet.`);
   }
 
   if (!profile) {
@@ -87,18 +90,26 @@ export default function ReceiveScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+    >
       <View style={[styles.card, isAdmin && styles.cardAdmin]}>
         {isAdmin && location ? (
           <>
-            <Text style={styles.locationBadge}>🏪 ZakaPay Location</Text>
+            <IconLabel icon="store" style={styles.locationBadge}>ZakaPay Location</IconLabel>
             <Text style={styles.locationName}>{location.name}</Text>
             <Text style={styles.locationAddr}>{location.address}</Text>
           </>
         ) : (
-          <Text style={styles.cardTitle}>
-            {isOwner ? 'Owner wallet number' : 'Your payment number'}
-          </Text>
+          <>
+            <MoneyActionIcon action="receive" size={54} />
+            <Text style={styles.cardTitle}>
+              {isOwner ? 'Owner wallet number' : 'Your payment number'}
+            </Text>
+          </>
         )}
         <Text style={styles.phone}>{profile.phone}</Text>
         <Text style={styles.hint}>
@@ -139,9 +150,9 @@ export default function ReceiveScreen() {
       </View>
 
       <Pressable style={styles.shareBtn} onPress={shareNumber}>
-        <Text style={styles.shareText}>
-          {isAdmin ? '📤 Share location details' : '📤 Share my number'}
-        </Text>
+        <IconLabel icon="share" style={styles.shareText}>
+          {isAdmin ? 'Share location details' : 'Share my number'}
+        </IconLabel>
       </Pressable>
 
       <View style={styles.demoBox}>
@@ -159,10 +170,12 @@ export default function ReceiveScreen() {
           placeholderTextColor={colors.textSecondary}
         />
         <Pressable style={styles.demoBtn} onPress={simulateReceive}>
-          <Text style={styles.demoBtnText}>📥 Receive ${demoAmount || '0'}</Text>
+          <IconLabel icon="receive" style={styles.demoBtnText}>
+            Receive ${demoAmount || '0'}
+          </IconLabel>
         </Pressable>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -170,7 +183,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  content: {
     padding: 20,
+    paddingBottom: 44,
   },
   loading: {
     flex: 1,
@@ -180,12 +196,12 @@ const styles = StyleSheet.create({
   },
   loadingText: { color: colors.textSecondary },
   card: {
-    backgroundColor: colors.surface,
-    borderRadius: 20,
+    backgroundColor: colors.surfaceSoft,
+    borderRadius: 22,
     padding: 24,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.borderStrong,
   },
   cardAdmin: {
     borderColor: colors.warning,
@@ -212,10 +228,11 @@ const styles = StyleSheet.create({
   cardTitle: {
     color: colors.textSecondary,
     fontSize: 14,
+    marginTop: 12,
   },
   phone: {
     color: colors.text,
-    fontSize: 28,
+    fontSize: 27,
     fontWeight: '800',
     marginTop: 8,
   },
@@ -228,8 +245,8 @@ const styles = StyleSheet.create({
   },
   qrSection: {
     marginTop: 20,
-    backgroundColor: colors.surface,
-    borderRadius: 20,
+    backgroundColor: colors.surfaceSoft,
+    borderRadius: 22,
     padding: 20,
     alignItems: 'center',
     borderWidth: 1,
@@ -239,16 +256,15 @@ const styles = StyleSheet.create({
     borderColor: colors.warning,
   },
   qrTitle: {
-    color: colors.goldLight,
-    fontSize: 14,
+    color: colors.text,
+    fontSize: 16,
     fontWeight: '800',
     marginBottom: 16,
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
+    letterSpacing: -0.15,
   },
   qrAmountInput: {
-    backgroundColor: colors.surfaceLight,
-    borderRadius: 12,
+    backgroundColor: colors.backgroundAlt,
+    borderRadius: 14,
     padding: 12,
     fontSize: 15,
     color: colors.text,
@@ -257,22 +273,24 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   shareBtn: {
-    backgroundColor: colors.primaryDark,
+    backgroundColor: colors.primary,
     padding: 18,
     borderRadius: 16,
     alignItems: 'center',
     marginTop: 20,
   },
   shareText: {
-    color: '#FFF',
+    color: '#06130D',
     fontSize: 16,
     fontWeight: '800',
   },
   demoBox: {
     marginTop: 32,
     padding: 16,
-    backgroundColor: colors.surfaceLight,
-    borderRadius: 16,
+    backgroundColor: colors.surfaceSoft,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   demoTitle: {
     color: colors.textSecondary,
@@ -280,8 +298,8 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   input: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
+    backgroundColor: colors.backgroundAlt,
+    borderRadius: 14,
     padding: 14,
     fontSize: 18,
     color: colors.text,
@@ -294,7 +312,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   demoBtnText: {
-    color: '#0B1220',
+    color: '#06130D',
     fontWeight: '800',
     fontSize: 15,
   },

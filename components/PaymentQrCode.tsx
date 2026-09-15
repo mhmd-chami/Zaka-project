@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
     borderWidth: 2,
-    borderColor: colors.goldMuted,
+    borderColor: colors.borderStrong,
   },
   hint: {
     color: colors.textSecondary,

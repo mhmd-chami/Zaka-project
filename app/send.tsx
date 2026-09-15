@@ -1,3 +1,4 @@
+import { AppIcon, IconLabel } from '@/components/AppIcon';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -14,6 +15,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { QrScannerModal } from '@/components/QrScannerModal';
+import { MoneyActionIcon } from '@/components/MoneyActionIcon';
 import { colors, contentBottomPadding } from '@/constants/theme';
 import { getLocationById, zakaLocations, ZakaLocation } from '@/data/locations';
 import { getSession } from '@/services/authStorage';
@@ -62,7 +64,7 @@ export default function SendScreen() {
 
     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     Alert.alert(
-      'Sent instantly! 💸',
+      'Sent instantly!',
       `$${value.toFixed(2)} sent to ${result.recipientName ?? phone.trim()} via ZakaPay.`,
       [{ text: 'OK', onPress: () => router.back() }]
     );
@@ -90,7 +92,7 @@ export default function SendScreen() {
 
     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     Alert.alert(
-      'Request sent to branch 🏪',
+      'Request sent to branch',
       `$${value.toFixed(2)} will be sent from your wallet once the branch accepts.\n\n` +
         `${location.name}\n${location.address}\n` +
         `Hours: ${location.hours}\n\n` +
@@ -113,16 +115,16 @@ export default function SendScreen() {
       >
         {session?.role === 'admin' && adminLocation ? (
           <View style={styles.staffBanner}>
-            <Text style={styles.staffBannerText}>
-              🏪 Sending from {adminLocation.name} location wallet
-            </Text>
+            <IconLabel icon="store" style={styles.staffBannerText}>
+              Sending from {adminLocation.name} location wallet
+            </IconLabel>
           </View>
         ) : null}
         {session?.role === 'owner' ? (
           <View style={[styles.staffBanner, styles.ownerBanner]}>
-            <Text style={styles.staffBannerText}>
-              👑 Sending from owner wallet
-            </Text>
+            <IconLabel icon="crown" style={styles.staffBannerText}>
+              Sending from owner wallet
+            </IconLabel>
           </View>
         ) : null}
 
@@ -135,8 +137,12 @@ export default function SendScreen() {
           <Pressable
             style={[styles.modeBtn, mode === 'p2p' && styles.modeBtnActive]}
             onPress={() => setMode('p2p')}
+            accessibilityRole="button"
+            accessibilityState={{ selected: mode === 'p2p' }}
           >
-            <Text style={styles.modeEmoji}>💸</Text>
+            <View style={styles.modeIcon}>
+              <MoneyActionIcon action="send" size={48} />
+            </View>
             <Text style={[styles.modeTitle, mode === 'p2p' && styles.modeTitleActive]}>
               ZakaPay → ZakaPay
             </Text>
@@ -146,8 +152,12 @@ export default function SendScreen() {
           <Pressable
             style={[styles.modeBtn, mode === 'location' && styles.modeBtnActive]}
             onPress={() => setMode('location')}
+            accessibilityRole="button"
+            accessibilityState={{ selected: mode === 'location' }}
           >
-            <Text style={styles.modeEmoji}>🏪</Text>
+            <View style={[styles.modeIcon, styles.branchModeIcon]}>
+              <AppIcon name="store" size={28} color={colors.goldLight} strokeWidth={2.1} />
+            </View>
             <Text
               style={[styles.modeTitle, mode === 'location' && styles.modeTitleActive]}
             >
@@ -181,7 +191,7 @@ export default function SendScreen() {
                 style={styles.scanBtn}
                 onPress={() => setScannerOpen(true)}
               >
-                <Text style={styles.scanEmoji}>📷</Text>
+                <AppIcon name="scan" size={22} />
                 <Text style={styles.scanLabel}>Scan QR</Text>
               </Pressable>
             </View>
@@ -202,10 +212,24 @@ export default function SendScreen() {
                   location.id === loc.id && styles.locationSelected,
                 ]}
                 onPress={() => setLocation(loc)}
+                accessibilityRole="button"
+                accessibilityState={{ selected: location.id === loc.id }}
               >
-                <Text style={styles.locationName}>{loc.name}</Text>
+                <View style={styles.locationHeader}>
+                  <Text style={styles.locationName}>{loc.name}</Text>
+                  <View
+                    style={[
+                      styles.selection,
+                      location.id === loc.id && styles.selectionActive,
+                    ]}
+                  >
+                    {location.id === loc.id ? (
+                      <AppIcon name="check" size={14} color={colors.background} strokeWidth={2.8} />
+                    ) : null}
+                  </View>
+                </View>
                 <Text style={styles.locationAddr}>{loc.address}</Text>
-                <Text style={styles.locationHours}>🕐 {loc.hours}</Text>
+                <IconLabel icon="clock" style={styles.locationHours}>{loc.hours}</IconLabel>
               </Pressable>
             ))}
           </View>
@@ -225,10 +249,10 @@ export default function SendScreen() {
           {QUICK.map((q) => (
             <Pressable
               key={q}
-              style={styles.quickBtn}
+              style={[styles.quickBtn, amount === String(q) && styles.quickBtnActive]}
               onPress={() => setAmount(String(q))}
             >
-              <Text style={styles.quickText}>${q}</Text>
+              <Text style={[styles.quickText, amount === String(q) && styles.quickTextActive]}>${q}</Text>
             </Pressable>
           ))}
         </View>
@@ -238,11 +262,14 @@ export default function SendScreen() {
           onPress={mode === 'p2p' || isStaff ? handleP2PSend : handleCashSend}
           disabled={loading}
         >
-          <Text style={styles.sendText}>
+          <IconLabel
+            icon={mode === 'p2p' || isStaff ? 'send' : 'store'}
+            style={styles.sendText}
+          >
             {mode === 'p2p' || isStaff
-              ? '💸 Send to ZakaPay user'
-              : '🏪 Send to branch'}
-          </Text>
+              ? 'Send to ZakaPay user'
+              : 'Send to branch'}
+          </IconLabel>
         </Pressable>
       </ScrollView>
 
@@ -260,14 +287,14 @@ export default function SendScreen() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.background },
-  container: { padding: 20 },
+  container: { paddingHorizontal: 20, paddingTop: 18 },
   staffBanner: {
     backgroundColor: colors.adminDark,
     borderRadius: 12,
     padding: 12,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: colors.borderGold,
+    borderColor: 'rgba(245,185,66,0.26)',
   },
   ownerBanner: {
     backgroundColor: colors.ownerDark,
@@ -291,19 +318,28 @@ const styles = StyleSheet.create({
   },
   modeBtn: {
     flex: 1,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceSoft,
     borderRadius: 16,
     padding: 14,
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: 'transparent',
   },
   modeBtnActive: {
-    borderColor: colors.gold,
-    backgroundColor: colors.surfaceLight,
+    borderColor: colors.primary,
+    backgroundColor: colors.primarySoft,
   },
-  modeEmoji: {
-    fontSize: 24,
+  modeIcon: {
     marginBottom: 6,
+  },
+  branchModeIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 15,
+    backgroundColor: '#3A3014',
+    borderWidth: 1,
+    borderColor: `${colors.goldLight}55`,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   modeTitle: {
     color: colors.textSecondary,
@@ -335,8 +371,8 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   input: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
+    backgroundColor: colors.surfaceSoft,
+    borderRadius: 14,
     padding: 16,
     fontSize: 18,
     color: colors.text,
@@ -352,40 +388,55 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scanBtn: {
-    backgroundColor: colors.surfaceLight,
-    borderRadius: 12,
+    backgroundColor: colors.surface,
+    borderRadius: 14,
     paddingHorizontal: 14,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: colors.borderGold,
+    borderColor: colors.borderStrong,
     minWidth: 72,
   },
-  scanEmoji: {
-    fontSize: 22,
-  },
   scanLabel: {
-    color: colors.goldLight,
+    color: colors.primaryLight,
     fontSize: 10,
     fontWeight: '700',
     marginTop: 2,
   },
   locationCard: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
+    backgroundColor: colors.surfaceSoft,
+    borderRadius: 16,
     padding: 14,
     marginBottom: 8,
     borderWidth: 2,
     borderColor: 'transparent',
   },
   locationSelected: {
-    borderColor: colors.gold,
-    backgroundColor: colors.surfaceLight,
+    borderColor: colors.primary,
+    backgroundColor: colors.primarySoft,
   },
   locationName: {
     color: colors.text,
     fontSize: 15,
     fontWeight: '700',
+  },
+  locationHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  selection: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 1.5,
+    borderColor: colors.textMuted,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  selectionActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   locationAddr: {
     color: colors.textSecondary,
@@ -404,27 +455,31 @@ const styles = StyleSheet.create({
   },
   quickBtn: {
     flex: 1,
-    backgroundColor: colors.surfaceLight,
+    backgroundColor: colors.surface,
     padding: 12,
-    borderRadius: 10,
+    borderRadius: 12,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'transparent',
   },
+  quickBtnActive: { backgroundColor: colors.primarySoft, borderColor: 'rgba(40,199,128,0.35)' },
   quickText: {
-    color: colors.goldLight,
+    color: colors.textSecondary,
     fontWeight: '700',
   },
+  quickTextActive: { color: colors.primaryLight },
   sendBtn: {
-    backgroundColor: colors.primaryDark,
+    backgroundColor: colors.primary,
     padding: 18,
     borderRadius: 16,
     alignItems: 'center',
     marginTop: 28,
-    borderWidth: 1.5,
-    borderColor: colors.goldMuted,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
   },
   disabled: { opacity: 0.7 },
   sendText: {
-    color: '#FFF',
+    color: '#06130D',
     fontSize: 16,
     fontWeight: '800',
   },

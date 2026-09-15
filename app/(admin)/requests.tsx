@@ -1,3 +1,4 @@
+import { AppIcon, IconLabel } from '@/components/AppIcon';
 import * as Haptics from 'expo-haptics';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
@@ -101,7 +102,7 @@ export default function AdminRequestsScreen() {
               Haptics.NotificationFeedbackType.Success
             );
             Alert.alert(
-              'Received ✅',
+              'Received',
               `$${item.amount.toFixed(2)} added to your branch wallet.`
             );
             load();
@@ -136,7 +137,7 @@ export default function AdminRequestsScreen() {
               Haptics.NotificationFeedbackType.Success
             );
             Alert.alert(
-              'Cash out done 💵',
+              'Cash out done',
               `$${item.amount.toFixed(2)} handed to ${item.userName}.`
             );
             load();
@@ -161,7 +162,9 @@ export default function AdminRequestsScreen() {
         }
         ListEmptyComponent={
           <View style={styles.emptyBox}>
-            <Text style={styles.emptyEmoji}>📭</Text>
+            <View style={styles.emptyIcon}>
+              <AppIcon name="inbox" size={48} color={colors.textMuted} />
+            </View>
             <Text style={styles.emptyTitle}>No pending requests</Text>
             <Text style={styles.emptySub}>
               Branch sends and cash out requests will appear here.
@@ -173,7 +176,7 @@ export default function AdminRequestsScreen() {
             const send = item.data;
             return (
               <View style={styles.card}>
-                <Text style={styles.typeBadge}>📥 Branch send</Text>
+                <IconLabel icon="receive" style={styles.typeBadge}>Branch send</IconLabel>
                 <View style={styles.cardTop}>
                   <Text style={styles.amount}>${send.amount.toFixed(2)}</Text>
                   <Text style={styles.ref}>{send.reference}</Text>
@@ -187,7 +190,9 @@ export default function AdminRequestsScreen() {
                   style={styles.acceptBtn}
                   onPress={() => handleAcceptSend(send)}
                 >
-                  <Text style={styles.acceptText}>✅ Accept & receive</Text>
+                  <IconLabel icon="check" style={styles.acceptText}>
+                    Accept & receive
+                  </IconLabel>
                 </Pressable>
               </View>
             );
@@ -196,7 +201,7 @@ export default function AdminRequestsScreen() {
           const cashOut = item.data;
           return (
             <View style={[styles.card, styles.cashOutCard]}>
-              <Text style={styles.typeBadgeCash}>💵 Cash out</Text>
+              <IconLabel icon="banknote" style={styles.typeBadgeCash}>Cash out</IconLabel>
               <View style={styles.cardTop}>
                 <Text style={styles.amount}>${cashOut.amount.toFixed(2)}</Text>
                 <Text style={styles.ref}>{cashOut.reference}</Text>
@@ -210,7 +215,9 @@ export default function AdminRequestsScreen() {
                 style={styles.cashOutBtn}
                 onPress={() => handleAcceptCashOut(cashOut)}
               >
-                <Text style={styles.acceptText}>💵 Confirm & hand cash</Text>
+                <IconLabel icon="banknote" style={styles.acceptText}>
+                  Confirm & hand cash
+                </IconLabel>
               </Pressable>
             </View>
           );
@@ -236,8 +243,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 60,
   },
-  emptyEmoji: {
-    fontSize: 48,
+  emptyIcon: {
     marginBottom: 12,
   },
   emptyTitle: {
@@ -311,13 +317,13 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   acceptBtn: {
-    backgroundColor: colors.primaryDark,
+    backgroundColor: colors.primary,
     borderRadius: 12,
     padding: 14,
     alignItems: 'center',
     marginTop: 14,
     borderWidth: 1.5,
-    borderColor: colors.goldMuted,
+    borderColor: 'rgba(255,255,255,0.08)',
   },
   cashOutBtn: {
     backgroundColor: colors.adminDark,
@@ -329,7 +335,7 @@ const styles = StyleSheet.create({
     borderColor: colors.warning,
   },
   acceptText: {
-    color: '#FFF',
+    color: '#06130D',
     fontSize: 15,
     fontWeight: '800',
   },

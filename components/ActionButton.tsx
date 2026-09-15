@@ -1,22 +1,25 @@
+import { MoneyActionIcon, type MoneyAction } from '@/components/MoneyActionIcon';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors, radius } from '@/constants/theme';
+import { colors, radius, shadows } from '@/constants/theme';
 
 interface Props {
-  emoji: string;
+  icon: MoneyAction;
   label: string;
   onPress: () => void;
 }
 
-export function ActionButton({ emoji, label, onPress }: Props) {
+export function ActionButton({ icon, label, onPress }: Props) {
   return (
     <Pressable
-      style={({ pressed }) => [styles.btn, pressed && styles.pressed]}
+      style={({ pressed }) => [styles.btn, shadows.soft, pressed && styles.pressed]}
       onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={label}
     >
-      <View style={styles.iconRing}>
-        <Text style={styles.emoji}>{emoji}</Text>
-      </View>
-      <Text style={styles.label}>{label}</Text>
+      <MoneyActionIcon action={icon} />
+      <Text style={styles.label} numberOfLines={1} adjustsFontSizeToFit>
+        {label}
+      </Text>
     </Pressable>
   );
 }
@@ -24,37 +27,28 @@ export function ActionButton({ emoji, label, onPress }: Props) {
 const styles = StyleSheet.create({
   btn: {
     flex: 1,
-    backgroundColor: colors.surface,
+    flexBasis: 0,
+    minWidth: 0,
+    backgroundColor: colors.surfaceSoft,
     borderRadius: radius.lg,
-    paddingVertical: 18,
-    paddingHorizontal: 8,
+    minHeight: 108,
+    paddingVertical: 14,
+    paddingHorizontal: 6,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.borderStrong,
   },
   pressed: {
-    opacity: 0.85,
-    transform: [{ scale: 0.96 }],
-    borderColor: colors.borderGold,
-  },
-  iconRing: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: colors.surfaceLight,
-    borderWidth: 1.5,
-    borderColor: colors.borderGold,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 10,
-  },
-  emoji: {
-    fontSize: 24,
+    opacity: 0.9,
+    transform: [{ scale: 0.975 }],
+    borderColor: colors.primary,
   },
   label: {
     color: colors.text,
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '700',
-    letterSpacing: 0.3,
+    letterSpacing: 0,
+    marginTop: 10,
+    textAlign: 'center',
   },
 });

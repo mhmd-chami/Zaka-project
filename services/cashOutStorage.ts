@@ -86,7 +86,7 @@ export async function createCashOutRequest(
   for (const admin of branchAdmins) {
     await sendNotificationToUser(
       admin.id,
-      'Cash out request 💵',
+      'Cash out request',
       `${session.name} (${session.phone}) wants to cash out $${amount.toFixed(2)} at ${locationName}. Ref: ${reference}`,
       'user'
     );
@@ -138,7 +138,7 @@ export async function acceptCashOutRequest(
 
   await sendNotificationToUser(
     request.userId,
-    'Cash out complete 💵',
+    'Cash out complete',
     `$${request.amount.toFixed(2)} was handed to you at ${request.locationName}. Ref: ${request.reference}`,
     'admin'
   );

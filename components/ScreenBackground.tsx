@@ -10,9 +10,9 @@ interface Props {
 export function ScreenBackground({ children, style }: Props) {
   return (
     <View style={[styles.root, style]}>
-      <View style={styles.glowTop} />
-      <View style={styles.glowBottom} />
-      <View style={styles.ring} />
+      <View pointerEvents="none" style={styles.glowTop} />
+      <View pointerEvents="none" style={styles.glowBottom} />
+      <View pointerEvents="none" style={styles.accentLine} />
       {children}
     </View>
   );
@@ -25,33 +25,32 @@ const styles = StyleSheet.create({
   },
   glowTop: {
     position: 'absolute',
-    top: -80,
-    right: -60,
-    width: 220,
-    height: 220,
-    borderRadius: 110,
-    backgroundColor: colors.primaryDark,
-    opacity: 0.18,
+    top: -130,
+    right: -90,
+    width: 310,
+    height: 310,
+    borderRadius: 155,
+    backgroundColor: colors.primary,
+    opacity: 0.1,
   },
   glowBottom: {
     position: 'absolute',
-    bottom: 120,
-    left: -90,
-    width: 260,
-    height: 260,
-    borderRadius: 130,
-    backgroundColor: colors.goldMuted,
-    opacity: 0.08,
+    bottom: -120,
+    left: -130,
+    width: 330,
+    height: 330,
+    borderRadius: 165,
+    backgroundColor: colors.gold,
+    opacity: 0.055,
   },
-  ring: {
+  accentLine: {
     position: 'absolute',
-    top: '35%',
-    right: -40,
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    borderWidth: 1,
-    borderColor: colors.borderGold,
-    opacity: 0.5,
+    top: 0,
+    left: '28%',
+    width: '44%',
+    height: 2,
+    borderRadius: 2,
+    backgroundColor: colors.gold,
+    opacity: 0.45,
   },
 });

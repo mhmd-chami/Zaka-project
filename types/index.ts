@@ -1,3 +1,5 @@
+import type { BrandName } from '@/constants/brands';
+
 export type UserRole = 'owner' | 'admin' | 'user';
 
 export type TransactionType =
@@ -64,7 +66,7 @@ export interface BranchTransfer {
 export interface ShopItem {
   id: string;
   name: string;
-  emoji: string;
+  brand: BrandName;
   price: number;
   category: string;
 }
@@ -72,7 +74,7 @@ export interface ShopItem {
 export interface Carrier {
   id: string;
   name: string;
-  emoji: string;
+  brand: BrandName;
   minAmount: number;
   maxAmount: number;
 }
@@ -90,6 +92,9 @@ export interface UserAccount {
   password: string;
   role: UserRole;
   locationId?: string;
+  authProvider?: 'password' | 'google';
+  googleId?: string;
+  email?: string;
   createdAt: string;
 }
 
@@ -99,6 +104,8 @@ export interface AuthSession {
   phone: string;
   role: UserRole;
   locationId?: string;
+  authProvider?: 'password' | 'google';
+  email?: string;
 }
 
 export interface AppNotification {

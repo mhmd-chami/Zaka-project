@@ -1,3 +1,4 @@
+import { AppIcon } from '@/components/AppIcon';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
@@ -62,7 +63,9 @@ export default function NotificationsScreen() {
         contentContainerStyle={styles.list}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={styles.emptyEmoji}>🔔</Text>
+            <View style={styles.emptyIcon}>
+              <AppIcon name="bell" size={48} color={colors.textMuted} />
+            </View>
             <Text style={styles.emptyTitle}>No notifications</Text>
             <Text style={styles.emptySub}>
               You'll see alerts from ZakaPay here
@@ -103,8 +106,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 60,
   },
-  emptyEmoji: {
-    fontSize: 48,
+  emptyIcon: {
     marginBottom: 12,
   },
   emptyTitle: {

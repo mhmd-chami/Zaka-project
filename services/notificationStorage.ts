@@ -101,7 +101,7 @@ export async function broadcastNotification(
 export async function sendWelcomeNotification(userId: string): Promise<void> {
   await sendNotificationToUser(
     userId,
-    'Welcome to ZakaPay! 🎉',
+    'Welcome to ZakaPay!',
     'Your wallet is ready. You start with $150 balance.',
     'admin'
   );

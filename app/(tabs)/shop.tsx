@@ -1,3 +1,5 @@
+import { IconLabel } from '@/components/AppIcon';
+import { BrandMark } from '@/components/BrandMark';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -47,7 +49,7 @@ export default function ShopScreen() {
             Haptics.NotificationFeedbackType.Success
           );
           Alert.alert(
-            'Success! 🎉',
+            'Success!',
             `${name} purchased.\nNew balance: $${(profile.balance - price).toFixed(2)}`
           );
           router.push('/(tabs)/history');
@@ -81,7 +83,7 @@ export default function ShopScreen() {
 
     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     Alert.alert(
-      `${carrier.name} recharge purchased! 📱`,
+      `${carrier.name} recharge purchased!`,
       `Redeem code: ${result.redeemCode}\n\nYour code was also sent to Notifications.`,
       [
         { text: 'View notifications', onPress: () => router.push('/notifications') },
@@ -109,7 +111,9 @@ export default function ShopScreen() {
               ]}
               onPress={() => setCarrier(c)}
             >
-              <Text style={styles.carrierEmoji}>{c.emoji}</Text>
+              <View style={styles.carrierIcon}>
+                <BrandMark brand={c.brand} size={42} />
+              </View>
               <Text
                 style={[
                   styles.carrierName,
@@ -146,10 +150,10 @@ export default function ShopScreen() {
           {QUICK.map((q) => (
             <Pressable
               key={q}
-              style={styles.quickBtn}
+              style={[styles.quickBtn, amount === String(q) && styles.quickBtnActive]}
               onPress={() => setAmount(String(q))}
             >
-              <Text style={styles.quickText}>${q}</Text>
+              <Text style={[styles.quickText, amount === String(q) && styles.quickTextActive]}>${q}</Text>
             </Pressable>
           ))}
         </View>
@@ -159,9 +163,9 @@ export default function ShopScreen() {
           onPress={handleRecharge}
           disabled={rechargeLoading}
         >
-          <Text style={styles.rechargeBtnText}>
-            📱 Buy {carrier.name} — ${amount || '0'}
-          </Text>
+          <IconLabel icon="smartphone" style={styles.rechargeBtnText}>
+            Buy {carrier.name} — ${amount || '0'}
+          </IconLabel>
         </Pressable>
       </View>
 
@@ -191,15 +195,15 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   content: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 18,
     paddingBottom: 40,
   },
   sectionTitle: {
-    color: colors.goldLight,
-    fontSize: 14,
+    color: colors.text,
+    fontSize: 20,
     fontWeight: '800',
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
+    letterSpacing: -0.35,
     marginBottom: 6,
   },
   sectionTitleSpaced: {
@@ -212,9 +216,9 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   rechargeBox: {
-    backgroundColor: colors.surface,
-    borderRadius: 20,
-    padding: 16,
+    backgroundColor: colors.surfaceSoft,
+    borderRadius: 22,
+    padding: 17,
     borderWidth: 1,
     borderColor: colors.border,
   },
@@ -225,18 +229,18 @@ const styles = StyleSheet.create({
   },
   carrierBtn: {
     flex: 1,
-    backgroundColor: colors.surfaceLight,
+    backgroundColor: colors.surface,
     borderRadius: 14,
     padding: 12,
     alignItems: 'center',
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: 'transparent',
   },
   carrierSelected: {
     borderColor: colors.primary,
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: colors.primarySoft,
   },
-  carrierEmoji: { fontSize: 22, marginBottom: 4 },
+  carrierIcon: { marginBottom: 8 },
   carrierName: {
     color: colors.textSecondary,
     fontSize: 12,
@@ -252,8 +256,8 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: colors.backgroundAlt,
-    borderRadius: 12,
-    padding: 14,
+    borderRadius: 14,
+    padding: 15,
     fontSize: 16,
     color: colors.text,
     borderWidth: 1,
@@ -266,26 +270,30 @@ const styles = StyleSheet.create({
   },
   quickBtn: {
     flex: 1,
-    backgroundColor: colors.surfaceLight,
+    backgroundColor: colors.surface,
     padding: 10,
-    borderRadius: 10,
+    borderRadius: 12,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'transparent',
   },
+  quickBtnActive: { backgroundColor: colors.primarySoft, borderColor: 'rgba(40,199,128,0.35)' },
   quickText: {
-    color: colors.warning,
+    color: colors.textSecondary,
     fontWeight: '700',
   },
+  quickTextActive: { color: colors.primaryLight },
   rechargeBtn: {
-    backgroundColor: colors.primaryDark,
+    backgroundColor: colors.primary,
     padding: 16,
     borderRadius: 14,
     alignItems: 'center',
     marginTop: 18,
-    borderWidth: 1.5,
-    borderColor: colors.goldMuted,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
   },
   rechargeBtnText: {
-    color: '#FFF',
+    color: '#06130D',
     fontSize: 15,
     fontWeight: '800',
   },

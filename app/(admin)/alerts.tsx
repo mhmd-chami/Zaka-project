@@ -1,3 +1,4 @@
+import { IconLabel } from '@/components/AppIcon';
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
 import {
@@ -34,7 +35,7 @@ export default function AdminNotifyScreen() {
     setLoading(false);
 
     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    Alert.alert('Sent! 📢', `Notification sent to ${count} users.`);
+    Alert.alert('Sent!', `Notification sent to ${count} users.`);
     setTitle('');
     setMessage('');
   }
@@ -69,7 +70,7 @@ export default function AdminNotifyScreen() {
         onPress={handleSend}
         disabled={loading}
       >
-        <Text style={styles.btnText}>📢 Send to all users</Text>
+        <IconLabel icon="megaphone" style={styles.btnText}>Send to all users</IconLabel>
       </Pressable>
     </ScrollView>
   );

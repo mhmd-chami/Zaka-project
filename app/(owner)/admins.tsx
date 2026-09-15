@@ -129,13 +129,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   promoteBtn: {
-    backgroundColor: colors.primaryDark,
+    backgroundColor: colors.primary,
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 10,
   },
   promoteText: {
-    color: '#FFF',
+    color: '#06130D',
     fontWeight: '700',
     fontSize: 13,
   },

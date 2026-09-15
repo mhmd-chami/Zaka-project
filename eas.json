@@ -1,0 +1,33 @@
+{
+  "cli": {
+    "version": ">= 16.18.0"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "credentialsSource": "local",
+      "env": {
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "868733254861-lkgv5nli04an55k48a2mmnkhuirhrhjs.apps.googleusercontent.com"
+      },
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "868733254861-lkgv5nli04an55k48a2mmnkhuirhrhjs.apps.googleusercontent.com"
+      },
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "production": {
+      "env": {
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "868733254861-lkgv5nli04an55k48a2mmnkhuirhrhjs.apps.googleusercontent.com"
+      },
+      "autoIncrement": true
+    }
+  }
+}

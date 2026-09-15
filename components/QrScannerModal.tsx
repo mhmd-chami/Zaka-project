@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { AppIcon } from '@/components/AppIcon';
 import {
   Modal,
   Pressable,
@@ -39,8 +40,13 @@ export function QrScannerModal({ visible, onClose, onScan }: Props) {
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.title}>Scan ZakaPay QR</Text>
-          <Pressable onPress={handleClose} hitSlop={12}>
-            <Text style={styles.close}>✕</Text>
+          <Pressable
+            onPress={handleClose}
+            hitSlop={12}
+            accessibilityRole="button"
+            accessibilityLabel="Close scanner"
+          >
+            <AppIcon name="close" size={22} color={colors.goldLight} />
           </Pressable>
         </View>
 
@@ -73,10 +79,5 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: 18,
     fontWeight: '800',
-  },
-  close: {
-    color: colors.goldLight,
-    fontSize: 22,
-    fontWeight: '700',
   },
 });

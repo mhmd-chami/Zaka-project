@@ -1,3 +1,4 @@
+import { AppIcon, IconLabel } from '@/components/AppIcon';
 import * as Haptics from 'expo-haptics';
 import { useEffect, useState } from 'react';
 import {
@@ -92,7 +93,7 @@ export default function AddMoneyScreen() {
     setExpiry('');
     setCvv('');
     Alert.alert(
-      'Money added! 💳',
+      'Money added!',
       `$${value.toFixed(2)} was added to your wallet from your card.`
     );
   }
@@ -126,7 +127,9 @@ export default function AddMoneyScreen() {
             style={[styles.modeBtn, mode === 'qr' && styles.modeBtnActive]}
             onPress={() => setMode('qr')}
           >
-            <Text style={styles.modeEmoji}>📱</Text>
+            <View style={styles.modeIcon}>
+              <AppIcon name="scan" size={24} color={mode === 'qr' ? colors.goldLight : colors.textSecondary} />
+            </View>
             <Text
               style={[styles.modeTitle, mode === 'qr' && styles.modeTitleActive]}
             >
@@ -139,7 +142,9 @@ export default function AddMoneyScreen() {
             style={[styles.modeBtn, mode === 'card' && styles.modeBtnActive]}
             onPress={() => setMode('card')}
           >
-            <Text style={styles.modeEmoji}>💳</Text>
+            <View style={styles.modeIcon}>
+              <AppIcon name="credit-card" size={24} color={mode === 'card' ? colors.goldLight : colors.textSecondary} />
+            </View>
             <Text
               style={[
                 styles.modeTitle,
@@ -194,10 +199,10 @@ export default function AddMoneyScreen() {
               {QUICK.map((q) => (
                 <Pressable
                   key={q}
-                  style={styles.quickBtn}
+                  style={[styles.quickBtn, amount === String(q) && styles.quickBtnActive]}
                   onPress={() => setAmount(String(q))}
                 >
-                  <Text style={styles.quickText}>${q}</Text>
+                  <Text style={[styles.quickText, amount === String(q) && styles.quickTextActive]}>${q}</Text>
                 </Pressable>
               ))}
             </View>
@@ -251,7 +256,9 @@ export default function AddMoneyScreen() {
               onPress={handleCardDeposit}
               disabled={loading}
             >
-              <Text style={styles.submitText}>💳 Add money to wallet</Text>
+              <IconLabel icon="credit-card" style={styles.submitText}>
+                Add money to wallet
+              </IconLabel>
             </Pressable>
           </View>
         )}
@@ -262,7 +269,7 @@ export default function AddMoneyScreen() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.background },
-  container: { padding: 20 },
+  container: { paddingHorizontal: 20, paddingTop: 18 },
   loading: {
     flex: 1,
     alignItems: 'center',
@@ -289,17 +296,17 @@ const styles = StyleSheet.create({
   },
   modeBtn: {
     flex: 1,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceSoft,
     borderRadius: 16,
     padding: 14,
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: 'transparent',
   },
   modeBtnActive: {
-    borderColor: colors.gold,
-    backgroundColor: colors.surfaceLight,
+    borderColor: colors.primary,
+    backgroundColor: colors.primarySoft,
   },
-  modeEmoji: { fontSize: 24, marginBottom: 6 },
+  modeIcon: { marginBottom: 6 },
   modeTitle: {
     color: colors.textSecondary,
     fontSize: 13,
@@ -313,7 +320,7 @@ const styles = StyleSheet.create({
   },
   section: { marginTop: 4 },
   card: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceSoft,
     borderRadius: 20,
     padding: 24,
     alignItems: 'center',
@@ -340,8 +347,8 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   input: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
+    backgroundColor: colors.surfaceSoft,
+    borderRadius: 14,
     padding: 16,
     fontSize: 16,
     color: colors.text,
@@ -355,15 +362,19 @@ const styles = StyleSheet.create({
   },
   quickBtn: {
     flex: 1,
-    backgroundColor: colors.surfaceLight,
+    backgroundColor: colors.surface,
     padding: 12,
-    borderRadius: 10,
+    borderRadius: 12,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'transparent',
   },
+  quickBtnActive: { backgroundColor: colors.primarySoft, borderColor: 'rgba(40,199,128,0.35)' },
   quickText: {
-    color: colors.goldLight,
+    color: colors.textSecondary,
     fontWeight: '700',
   },
+  quickTextActive: { color: colors.primaryLight },
   row: {
     flexDirection: 'row',
     gap: 12,
@@ -376,17 +387,17 @@ const styles = StyleSheet.create({
     marginTop: 14,
   },
   submitBtn: {
-    backgroundColor: colors.primaryDark,
+    backgroundColor: colors.primary,
     padding: 18,
     borderRadius: 16,
     alignItems: 'center',
     marginTop: 24,
-    borderWidth: 1.5,
-    borderColor: colors.goldMuted,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
   },
   disabled: { opacity: 0.7 },
   submitText: {
-    color: '#FFF',
+    color: '#06130D',
     fontSize: 16,
     fontWeight: '800',
   },

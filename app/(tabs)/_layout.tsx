@@ -1,12 +1,8 @@
+import { AppIcon } from '@/components/AppIcon';
 import { Tabs } from 'expo-router';
-import { Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NotificationBellButton } from '@/components/NotificationBellButton';
 import { colors, tabScreenOptions } from '@/constants/theme';
-
-function TabIcon({ emoji }: { emoji: string }) {
-  return <Text style={{ fontSize: 22 }}>{emoji}</Text>;
-}
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
@@ -14,7 +10,7 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        ...tabScreenOptions(colors.goldLight, insets.bottom),
+        ...tabScreenOptions(colors.primaryLight, insets.bottom),
         headerRight: () => <NotificationBellButton />,
         sceneStyle: { flex: 1, backgroundColor: colors.background },
       }}
@@ -24,14 +20,14 @@ export default function TabLayout() {
         options={{
           title: 'ZakaPay',
           tabBarLabel: 'Wallet',
-          tabBarIcon: () => <TabIcon emoji="💳" />,
+          tabBarIcon: ({ color, size }) => <AppIcon name="wallet" color={color} size={size} />,
         }}
       />
       <Tabs.Screen
         name="shop"
         options={{
           title: 'Shop',
-          tabBarIcon: () => <TabIcon emoji="🛍️" />,
+          tabBarIcon: ({ color, size }) => <AppIcon name="shop" color={color} size={size} />,
         }}
       />
       <Tabs.Screen
@@ -39,21 +35,21 @@ export default function TabLayout() {
         options={{
           title: 'Cash Out',
           tabBarLabel: 'Cash Out',
-          tabBarIcon: () => <TabIcon emoji="💵" />,
+          tabBarIcon: ({ color, size }) => <AppIcon name="banknote" color={color} size={size} />,
         }}
       />
       <Tabs.Screen
         name="history"
         options={{
           title: 'History',
-          tabBarIcon: () => <TabIcon emoji="📋" />,
+          tabBarIcon: ({ color, size }) => <AppIcon name="history" color={color} size={size} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: () => <TabIcon emoji="👤" />,
+          tabBarIcon: ({ color, size }) => <AppIcon name="user" color={color} size={size} />,
         }}
       />
     </Tabs>

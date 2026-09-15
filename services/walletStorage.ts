@@ -310,7 +310,7 @@ export async function topUpPhone(
 
   await sendNotificationToUser(
     session.userId,
-    `${carrier} redeem code 🎫`,
+    `${carrier} redeem code`,
     `Your $${amount.toFixed(2)} ${carrier} recharge for ${phone} is ready.\n\nRedeem code: ${redeemCode}\n\nUse this code with ${carrier} to top up your line.`,
     'admin'
   );

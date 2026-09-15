@@ -1,16 +1,18 @@
+import { AppIcon, type IconName } from '@/components/AppIcon';
+import { withoutEmoji } from '@/utils/displayText';
 import { StyleSheet, Text, View } from 'react-native';
 import { colors, radius } from '@/constants/theme';
 import { Transaction } from '@/types';
 
-const icons: Record<string, string> = {
-  send: '📤',
-  send_p2p: '💸',
-  send_cash: '🏪',
-  cash_out: '💵',
-  receive: '📥',
-  deposit: '💳',
-  topup: '📱',
-  purchase: '🛒',
+const icons: Record<Transaction['type'], IconName> = {
+  send: 'send',
+  send_p2p: 'send',
+  send_cash: 'store',
+  cash_out: 'banknote',
+  receive: 'receive',
+  deposit: 'credit-card',
+  topup: 'smartphone',
+  purchase: 'shop',
 };
 
 const stripeColors: Record<string, string> = {
@@ -35,14 +37,16 @@ export function TransactionRow({ tx }: Props) {
     tx.status === 'pending';
   const sign = isIncome ? '+' : '-';
   const stripe = stripeColors[tx.type] ?? colors.border;
+  const amountLabel = `${isCashPending ? '' : sign}$${tx.amount.toFixed(2)}`;
 
   return (
     <View style={styles.row}>
-      <View style={[styles.stripe, { backgroundColor: stripe }]} />
-      <Text style={styles.icon}>{icons[tx.type]}</Text>
+      <View style={[styles.icon, { backgroundColor: `${stripe}16` }]}>
+        <AppIcon name={icons[tx.type]} size={22} color={stripe} />
+      </View>
       <View style={styles.body}>
-        <Text style={styles.title}>{tx.title}</Text>
-        <Text style={styles.sub}>{tx.subtitle}</Text>
+        <Text style={styles.title}>{withoutEmoji(tx.title)}</Text>
+        <Text style={styles.sub}>{withoutEmoji(tx.subtitle)}</Text>
       </View>
       <View style={styles.right}>
         <Text
@@ -51,11 +55,12 @@ export function TransactionRow({ tx }: Props) {
             isIncome ? styles.income : isCashPending ? styles.pending : styles.expense,
           ]}
         >
-          {isCashPending ? '' : sign}${tx.amount.toFixed(2)}
-          {isCashPending ? `$${tx.amount.toFixed(2)}` : ''}
+          {amountLabel}
         </Text>
         {isCashPending ? (
-          <Text style={styles.pendingLabel}>Pending</Text>
+          <View style={styles.pendingPill}>
+            <Text style={styles.pendingLabel}>Pending</Text>
+          </View>
         ) : null}
         <Text style={styles.date}>
           {new Date(tx.createdAt).toLocaleDateString()}
@@ -69,26 +74,14 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    padding: 14,
-    marginBottom: 10,
+    backgroundColor: colors.surfaceSoft,
+    borderRadius: radius.lg,
+    padding: 15,
+    marginBottom: 9,
     borderWidth: 1,
     borderColor: colors.border,
-    overflow: 'hidden',
   },
-  stripe: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    bottom: 0,
-    width: 3,
-  },
-  icon: {
-    fontSize: 22,
-    marginRight: 12,
-    marginLeft: 4,
-  },
+  icon: { width: 44, height: 44, borderRadius: 15, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
   body: {
     flex: 1,
   },
@@ -96,18 +89,21 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: 14,
     fontWeight: '700',
+    letterSpacing: -0.1,
   },
   sub: {
     color: colors.textSecondary,
-    fontSize: 11,
-    marginTop: 3,
+    fontSize: 12,
+    marginTop: 4,
   },
   right: {
     alignItems: 'flex-end',
+    marginLeft: 10,
   },
   amount: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '800',
+    letterSpacing: -0.25,
   },
   income: {
     color: colors.income,
@@ -118,16 +114,22 @@ const styles = StyleSheet.create({
   pending: {
     color: colors.pending,
   },
+  pendingPill: {
+    backgroundColor: 'rgba(245,185,66,0.12)',
+    borderRadius: radius.full,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    marginTop: 4,
+  },
   pendingLabel: {
     color: colors.pending,
     fontSize: 9,
     fontWeight: '700',
     letterSpacing: 0.5,
-    marginTop: 2,
   },
   date: {
     color: colors.textMuted,
     fontSize: 10,
-    marginTop: 2,
+    marginTop: 4,
   },
 });

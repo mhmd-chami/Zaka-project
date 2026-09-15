@@ -25,6 +25,12 @@
         {
           "cameraPermission": "Allow ZakaPay to scan payment QR codes."
         }
+      ],
+      [
+        "react-native-nitro-google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.zakapay-development"
+        }
       ]
     ],
     "experiments": {
