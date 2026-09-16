@@ -34,8 +34,9 @@ export async function startGoogleSignIn(webCredential?: string): Promise<GoogleA
   const setupIssue = getGoogleSetupIssue();
   if (setupIssue) return { ok: false, error: setupIssue };
 
+  let google: typeof import('react-native-nitro-google-signin') | undefined;
   try {
-    const google = await import('react-native-nitro-google-signin');
+    google = await import('react-native-nitro-google-signin');
     google.GoogleOneTapSignIn.configure({
       webClientId: googleWebClientId!,
       autoSelectOnSignIn: false,
@@ -72,8 +73,7 @@ export async function startGoogleSignIn(webCredential?: string): Promise<GoogleA
       },
     };
   } catch (error) {
-    const google = await import('react-native-nitro-google-signin');
-    if (google.isErrorWithCode(error)) {
+    if (google && google.isErrorWithCode(error)) {
       if (error.code === google.statusCodes.SIGN_IN_CANCELLED) {
         return { ok: false, cancelled: true };
       }
@@ -87,10 +87,7 @@ export async function startGoogleSignIn(webCredential?: string): Promise<GoogleA
         return { ok: false, error: 'Google Play services are unavailable or need an update.' };
       }
     }
-    return {
-      ok: false,
-      error: error instanceof Error ? error.message : 'Could not sign in with Google.',
-    };
+    return { ok: false, error: error instanceof Error ? error.message : 'Could not sign in with Google.' };
   }
 }
 

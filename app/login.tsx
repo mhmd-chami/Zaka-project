@@ -33,6 +33,7 @@ export default function LoginScreen() {
   const [googleIdentity, setGoogleIdentity] = useState<GoogleIdentity | null>(null);
   const [googlePhone, setGooglePhone] = useState('');
   const [error, setError] = useState('');
+  const showDemoAccounts = __DEV__ || process.env.EXPO_PUBLIC_SHOW_DEMO_ACCOUNTS === 'true';
 
   async function openSession(session: NonNullable<Awaited<ReturnType<typeof login>>['session']>) {
     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -57,7 +58,14 @@ export default function LoginScreen() {
   async function handleGoogleLogin(credential?: string) {
     setError('');
     setGoogleLoading(true);
-    const result = await startGoogleSignIn(credential);
+    let result: Awaited<ReturnType<typeof startGoogleSignIn>>;
+    try {
+      result = await startGoogleSignIn(credential);
+    } catch (error) {
+      setGoogleLoading(false);
+      setError(error instanceof Error ? error.message : 'Google sign-in could not start.');
+      return;
+    }
     if (!result.ok) {
       setGoogleLoading(false);
       if (!result.cancelled) setError(result.error || 'Google sign-in did not complete.');
@@ -186,7 +194,7 @@ export default function LoginScreen() {
                   </Link>
                 </View>
 
-                {process.env.EXPO_PUBLIC_SHOW_DEMO_ACCOUNTS === 'true' ? <View style={styles.demoBox}>
+                {showDemoAccounts ? <View style={styles.demoBox}>
                   <Text style={styles.demoTitle}>Demo accounts</Text>
                   <IconLabel icon="crown" style={styles.demoLine}>
                     Owner: +96170000001 / owner123

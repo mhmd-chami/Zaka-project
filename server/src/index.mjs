@@ -11,7 +11,7 @@ const environment = process.env.VERIFF_ENVIRONMENT || 'test';
 if (!['test', 'live'].includes(environment)) throw new Error('VERIFF_ENVIRONMENT must be test or live.');
 const { server, db } = await createApp({
   production, origins, databasePath: resolve(process.env.DATABASE_PATH || './data/zaka.sqlite'),
-  seedDemo: process.env.SEED_DEMO_ACCOUNTS === 'true',
+  seedDemo: !production && process.env.SEED_DEMO_ACCOUNTS !== 'false',
   owner: { name: process.env.OWNER_NAME, phone: process.env.OWNER_PHONE, password: process.env.OWNER_PASSWORD },
   googleClientIds: (process.env.GOOGLE_CLIENT_IDS || '').split(',').map((value) => value.trim()).filter(Boolean),
   veriff: { baseUrl: veriffBase.href.replace(/\/$/, ''), apiKey: process.env.VERIFF_API_KEY, secret: process.env.VERIFF_SHARED_SECRET, callbackUrl, environment },
