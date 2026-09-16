@@ -94,8 +94,8 @@ export default function VerificationScreen() {
           <Switch accessibilityLabel="Consent to identity verification with Veriff" value={consent} onValueChange={setConsent} />
           <Text style={[styles.note, { flex: 1, color: colors.textSecondary }]}>I agree to send my document and selfie to Veriff for identity verification.</Text>
         </View>
-        {launchUrl ? <PrimaryButton label="Open camera verification" onPress={openCamera} disabled={!consent} /> : <PrimaryButton label={busy ? 'Preparing verification…' : verification?.status === 'pending' || verification?.status === 'resubmission_requested' ? 'Resume verification' : 'Start verification'} onPress={start} disabled={!consent || busy} />}
-        {launchUrl ? <Text style={[styles.note, { color: colors.textSecondary }]}>The camera opens on Veriff’s secure page. Return here after finishing to see your result.</Text> : null}
+        {launchUrl ? <PrimaryButton label="Scan ID with secure camera" onPress={openCamera} disabled={!consent} /> : <PrimaryButton label={busy ? 'Preparing verification…' : verification?.status === 'pending' || verification?.status === 'resubmission_requested' ? 'Resume verification' : 'Start verification'} onPress={start} disabled={!consent || busy} />}
+        {launchUrl ? <Text style={[styles.note, { color: colors.textSecondary }]}>The secure camera flow supports the document types enabled for this account, including Lebanese IDs when enabled by Veriff. Return here after the ID and selfie checks to see your result.</Text> : null}
       </> : null}
       <Pressable accessibilityRole="button" onPress={refresh} style={styles.refresh}><Text style={{ color: colors.primaryLight, fontWeight: '700' }}>Refresh status</Text></Pressable>
     </ScrollView>

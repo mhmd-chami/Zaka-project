@@ -23,7 +23,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow ZakaPay to scan payment QR codes."
+          "cameraPermission": "Allow ZakaPay to capture your identity document and selfie for verification."
         }
       ],
       [

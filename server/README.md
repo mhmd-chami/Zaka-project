@@ -26,7 +26,7 @@ Existing device-local accounts are not silently imported. Create a backend accou
 3. Configure the **decision webhook** in the Veriff dashboard as `https://YOUR-PUBLIC-API/v1/webhooks/veriff`. Veriff cannot reach localhost; use a deployed HTTPS API or a development HTTPS tunnel. For a tunnel, point it at port 3001.
 4. Set `VERIFF_CALLBACK_URL` to your reachable app verification page, such as `https://YOUR-APP/verification`. This is the customer's browser return URL, not the webhook. Native users can switch back to the app after capture; the app refreshes status when resumed.
 5. Keep `VERIFF_ENVIRONMENT=test` while using test integration keys. A test approval is clearly labeled and **never displays the identity-verified badge**. Once the provider account is live, use live integration keys and `VERIFF_ENVIRONMENT=live`. Users can start a fresh live session after a test approval.
-6. Restart the API. In the app, open **Profile > Verify identity**, consent, start a session, then choose **Open camera verification**. No photo is uploaded until the user proceeds in Veriff.
+6. Restart the API. In the app, open **Profile > Verify identity**, consent, start a session, then choose **Scan ID with secure camera**. Veriff's hosted camera flow captures the ID and selfie; no photo is uploaded to ZakaPay.
 
 Lebanese passports and IDs are listed in [Veriff's coverage table](https://www.veriff.com/supported-countries). **Arabic/non-Latin Lebanese identity cards require support enabled on the Enterprise plan.** Confirm document coverage with Veriff before relying on it. This integration cannot activate coverage on your behalf.
 
