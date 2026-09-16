@@ -1,191 +1,115 @@
 import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
-import {
-  Alert,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { useCallback, useRef, useState } from 'react';
+import { AppState, Linking, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppIcon } from '@/components/AppIcon';
-import { IdentityDocumentScanner } from '@/components/IdentityDocumentScanner';
 import { PrimaryButton } from '@/components/PrimaryButton';
-import { contentBottomPadding, radius } from '@/constants/theme';
+import { contentBottomPadding } from '@/constants/theme';
 import { useSettings } from '@/contexts/SettingsContext';
-import { getSession, getUserAccount, submitIdentityVerification } from '@/services/authStorage';
-import { IdentityDocumentType, IdentityVerification } from '@/types';
+import { api, ApiError } from '@/services/api';
+import { IdentityVerification } from '@/types';
 
-const DOCUMENTS: { type: IdentityDocumentType; label: string; description: string }[] = [
-  { type: 'lebanese_id', label: 'Lebanese ID', description: 'Your Lebanese national identity card' },
-  { type: 'passport', label: 'Passport', description: 'A valid passport issued by any country' },
-  { type: 'residence_permit', label: 'Residence permit', description: 'A valid residence permit' },
-];
-
-function documentLabel(type: IdentityDocumentType): string {
-  return DOCUMENTS.find((document) => document.type === type)?.label ?? 'Identity document';
-}
+interface VerificationState { configured: boolean; environment: 'test' | 'live'; verification: IdentityVerification | null }
 
 export default function VerificationScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { colors } = useSettings();
-  const styles = makeStyles(colors);
-  const [userId, setUserId] = useState<string | null>(null);
-  const [verification, setVerification] = useState<IdentityVerification>();
-  const [documentType, setDocumentType] = useState<IdentityDocumentType>('lebanese_id');
-  const [documentNumber, setDocumentNumber] = useState('');
-  const [scannerVisible, setScannerVisible] = useState(false);
-  const [capturedPhotoUri, setCapturedPhotoUri] = useState<string>();
-  const [extractedDetails, setExtractedDetails] = useState<{
-    fullName?: string;
-    dateOfBirth?: string;
-    expiryDate?: string;
-    nationality?: string;
-  }>({});
-  const [loading, setLoading] = useState(false);
+  const [state, setState] = useState<VerificationState>();
+  const [consent, setConsent] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const [launchUrl, setLaunchUrl] = useState('');
+  const refreshing = useRef(false);
+  const focused = useRef(false);
+
+  const refresh = useCallback(async () => {
+    if (refreshing.current) return;
+    refreshing.current = true;
+    try {
+      const next = await api<VerificationState>('/verification');
+      if (focused.current) {
+        setState(next); setError('');
+        if (next.verification && (['approved', 'rejected', 'expired'].includes(next.verification.status) || next.verification.providerStatus === 'review')) setLaunchUrl('');
+      }
+    } catch (error) {
+      if (!focused.current) return;
+      if (error instanceof ApiError && error.status === 401) router.replace('/login');
+      else setError(error instanceof Error ? error.message : 'Could not check verification status.');
+    } finally { refreshing.current = false; }
+  }, [router]);
 
   useFocusEffect(useCallback(() => {
-    let active = true;
-    async function load() {
-      const session = await getSession();
-      if (!session) {
-        router.replace('/login');
-        return;
-      }
-      const account = await getUserAccount(session.userId);
-      if (active) {
-        setUserId(session.userId);
-        setVerification(account?.identityVerification);
-        if (account?.identityVerification) {
-          setDocumentType(account.identityVerification.documentType);
-          setDocumentNumber(account.identityVerification.documentNumber);
-        }
-      }
-    }
-    load();
-    return () => { active = false; };
-  }, [router]));
+    focused.current = true;
+    void refresh();
+    const timer = setInterval(() => { if (AppState.currentState === 'active') void refresh(); }, 15000);
+    const subscription = AppState.addEventListener('change', (status) => { if (status === 'active') void refresh(); });
+    return () => { focused.current = false; clearInterval(timer); subscription.remove(); };
+  }, [refresh]));
 
-  async function handleSubmit() {
-    if (!userId) return;
-    setLoading(true);
-    const result = await submitIdentityVerification(userId, documentType, documentNumber, {
-      documentPhotoUri: capturedPhotoUri,
-      ...extractedDetails,
-    });
-    setLoading(false);
-    if (!result.ok) {
-      Alert.alert('Unable to submit', result.error);
-      return;
-    }
-    setVerification(result.verification);
-    Alert.alert('Submitted for review', 'We will review your identity document before approving your account.');
+  async function start() {
+    setBusy(true); setError('');
+    try {
+      const result = await api<{ verification: IdentityVerification; url?: string }>('/verification/session', { method: 'POST', body: { consent } });
+      setState((current) => current ? { ...current, verification: result.verification } : current);
+      setLaunchUrl(result.url || '');
+    } catch (error) { setError(error instanceof Error ? error.message : 'Could not start verification.'); }
+    finally { setBusy(false); }
   }
 
-  const locked = verification?.status === 'pending' || verification?.status === 'approved';
-  const statusText = verification?.status === 'approved'
-    ? 'Your identity has been approved.'
-    : verification?.status === 'pending'
-      ? 'Your document is waiting for review.'
-      : 'Submit one government-issued document to verify your account.';
+  async function openCamera() {
+    try { await Linking.openURL(launchUrl); }
+    catch { setError('Could not open the verification link. Please try again.'); }
+  }
+
+  const verification = state?.verification;
+  const approved = verification?.status === 'approved' && verification.environment === state?.environment;
+  const underReview = verification?.providerStatus === 'review';
+  const testMode = (verification?.environment || state?.environment) === 'test';
+  const descriptions: Record<string, string> = {
+    pending: 'Continue the camera check below, then return here. The result will update automatically.',
+    approved: testMode ? 'The test verification passed. This does not verify a real identity.' : 'Your identity has been verified by Veriff.',
+    rejected: 'Veriff could not approve this verification. You can try again with a valid document.',
+    resubmission_requested: 'Veriff needs another capture. Resume your session and follow the instructions.',
+    expired: 'This session has ended. Start a new verification when you are ready.',
+  };
 
   return (
-    <ScrollView
-      style={{ backgroundColor: colors.background }}
-      contentContainerStyle={[styles.container, { paddingBottom: contentBottomPadding(insets.bottom, 20) }]}
-      keyboardShouldPersistTaps="handled"
-    >
-      <View style={styles.headerIcon}>
-        <AppIcon name="shield" size={30} color={colors.primaryLight} />
+    <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={[styles.content, { paddingBottom: contentBottomPadding(insets.bottom, 20) }]}>
+      <View style={styles.heading}><AppIcon name="shield" size={36} color={colors.primaryLight} /><Text style={[styles.title, { color: colors.text }]}>Verify your identity</Text></View>
+      <Text style={[styles.body, { color: colors.textSecondary }]}>{underReview ? 'Your verification needs further review. We will update your status when a decision is available.' : verification ? descriptions[verification.status] : 'Use your camera to capture a government-issued ID and a selfie with Veriff.'}</Text>
+      {testMode ? <Text style={[styles.note, { color: colors.warning }]}>Test environment — results do not grant an identity-verified badge.</Text> : null}
+      <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <Text style={[styles.section, { color: colors.text }]}>What you will need</Text>
+        <Text style={[styles.body, { color: colors.textSecondary }]}>1. Your original, valid ID card, passport or residence permit.{ '\n' }2. Good lighting and permission to use your camera.{ '\n' }3. A selfie, following the instructions on screen.</Text>
+        <Text style={[styles.note, { color: colors.textSecondary }]}>Choose the issuing country and document in Veriff. Supported documents depend on the service plan. Lebanese Arabic-only ID support must be enabled by the operator.</Text>
+        <Text style={[styles.note, { color: colors.textMuted }]}>Document images and your selfie are processed by Veriff. ZakaPay stores your verification status and session reference, not the captured images. A camera scan alone does not mark your account verified.</Text>
+        <Pressable accessibilityRole="link" onPress={() => Linking.openURL('https://www.veriff.com/privacy-notice').catch(() => setError('Could not open the privacy notice.'))}><Text style={{ color: colors.primaryLight }}>Veriff privacy notice</Text></Pressable>
       </View>
-      <Text style={styles.title}>Verify your identity</Text>
-      <Text style={styles.subtitle}>{statusText}</Text>
-
-      <View style={styles.card}>
-        <Pressable style={styles.scanButton} onPress={() => setScannerVisible(true)} disabled={locked}>
-          <AppIcon name="scan" size={20} color={colors.primaryLight} />
-          <View style={styles.scanText}>
-            <Text style={styles.scanTitle}>Scan with camera</Text>
-            <Text style={styles.scanSubtitle}>Read a barcode or capture your document</Text>
-          </View>
-        </Pressable>
-        <Text style={styles.label}>Document type</Text>
-        {DOCUMENTS.map((document) => (
-          <Pressable
-            key={document.type}
-            style={[styles.option, documentType === document.type && styles.optionSelected]}
-            onPress={() => setDocumentType(document.type)}
-            disabled={locked}
-          >
-            <View style={styles.optionText}>
-              <Text style={styles.optionLabel}>{document.label}</Text>
-              <Text style={styles.optionDescription}>{document.description}</Text>
-            </View>
-            <View style={[styles.radio, documentType === document.type && styles.radioSelected]} />
-          </Pressable>
-        ))}
-
-        <Text style={[styles.label, styles.numberLabel]}>Document number</Text>
-        <TextInput
-          style={styles.input}
-          value={documentNumber}
-          onChangeText={setDocumentNumber}
-          placeholder={`Enter your ${documentLabel(documentType).toLowerCase()} number`}
-          placeholderTextColor={colors.textMuted}
-          autoCapitalize="characters"
-          editable={!locked}
-        />
-        {capturedPhotoUri && <Text style={styles.captured}>Document photo captured and attached for review.</Text>}
-        <Text style={styles.privacy}>Your document number is stored securely on this device for this demo.</Text>
-
-        {!locked && <PrimaryButton label="Submit for review" onPress={handleSubmit} disabled={loading} />}
-        {locked && <Text style={styles.pending}>Status: {verification?.status === 'approved' ? 'Approved' : 'Pending review'}</Text>}
-      </View>
-      <IdentityDocumentScanner
-        visible={scannerVisible}
-        onClose={() => setScannerVisible(false)}
-        onScan={(result) => {
-          if (result.documentNumber) setDocumentNumber(result.documentNumber);
-          if (result.photoUri) setCapturedPhotoUri(result.photoUri);
-          setExtractedDetails({
-            fullName: result.fullName,
-            dateOfBirth: result.dateOfBirth,
-            expiryDate: result.expiryDate,
-            nationality: result.nationality,
-          });
-          setScannerVisible(false);
-        }}
-      />
+      {error ? <Text accessibilityLiveRegion="polite" style={{ color: colors.danger }}>{error}</Text> : null}
+      {!state && !error ? <Text style={{ color: colors.textSecondary }}>Checking verification service…</Text> : null}
+      {state && !state.configured ? <Text style={[styles.note, { color: colors.warning }]}>Identity verification has not been enabled yet. Please return once the service is available.</Text> : null}
+      {state?.configured && !approved && !underReview ? <>
+        <View style={styles.consent}>
+          <Switch accessibilityLabel="Consent to identity verification with Veriff" value={consent} onValueChange={setConsent} />
+          <Text style={[styles.note, { flex: 1, color: colors.textSecondary }]}>I agree to send my document and selfie to Veriff for identity verification.</Text>
+        </View>
+        {launchUrl ? <PrimaryButton label="Open camera verification" onPress={openCamera} disabled={!consent} /> : <PrimaryButton label={busy ? 'Preparing verification…' : verification?.status === 'pending' || verification?.status === 'resubmission_requested' ? 'Resume verification' : 'Start verification'} onPress={start} disabled={!consent || busy} />}
+        {launchUrl ? <Text style={[styles.note, { color: colors.textSecondary }]}>The camera opens on Veriff’s secure page. Return here after finishing to see your result.</Text> : null}
+      </> : null}
+      <Pressable accessibilityRole="button" onPress={refresh} style={styles.refresh}><Text style={{ color: colors.primaryLight, fontWeight: '700' }}>Refresh status</Text></Pressable>
     </ScrollView>
   );
 }
 
-function makeStyles(colors: ReturnType<typeof useSettings>['colors']) {
-  return StyleSheet.create({
-    container: { padding: 24 },
-    headerIcon: { alignSelf: 'center', marginTop: 12, marginBottom: 12 },
-    title: { color: colors.text, fontSize: 26, fontWeight: '800', textAlign: 'center' },
-    subtitle: { color: colors.textSecondary, fontSize: 14, lineHeight: 21, textAlign: 'center', marginTop: 8, marginBottom: 24 },
-    card: { backgroundColor: colors.surfaceSoft, borderColor: colors.borderStrong, borderRadius: radius.xl, borderWidth: 1, padding: 18 },
-    scanButton: { alignItems: 'center', borderColor: colors.primaryLight, borderRadius: radius.md, borderWidth: 1, flexDirection: 'row', marginBottom: 20, padding: 14 },
-    scanText: { marginLeft: 12 },
-    scanTitle: { color: colors.text, fontSize: 15, fontWeight: '700' },
-    scanSubtitle: { color: colors.textSecondary, fontSize: 12, marginTop: 3 },
-    label: { color: colors.text, fontSize: 14, fontWeight: '700', marginBottom: 10 },
-    option: { alignItems: 'center', borderColor: colors.border, borderRadius: radius.md, borderWidth: 1, flexDirection: 'row', marginBottom: 10, padding: 13 },
-    optionSelected: { borderColor: colors.primaryLight, backgroundColor: colors.surface },
-    optionText: { flex: 1 },
-    optionLabel: { color: colors.text, fontSize: 15, fontWeight: '700' },
-    optionDescription: { color: colors.textSecondary, fontSize: 12, marginTop: 3 },
-    radio: { borderColor: colors.textMuted, borderRadius: 10, borderWidth: 2, height: 20, marginLeft: 10, width: 20 },
-    radioSelected: { backgroundColor: colors.primaryLight, borderColor: colors.primaryLight },
-    numberLabel: { marginTop: 12 },
-    input: { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.md, borderWidth: 1, color: colors.text, fontSize: 15, padding: 14 },
-    privacy: { color: colors.textMuted, fontSize: 12, lineHeight: 17, marginBottom: 18, marginTop: 10 },
-    captured: { color: colors.primaryLight, fontSize: 12, marginTop: 10 },
-    pending: { color: colors.primaryLight, fontSize: 14, fontWeight: '700', textAlign: 'center' },
-  });
-}
+const styles = StyleSheet.create({
+  content: { padding: 24, gap: 18 },
+  heading: { alignItems: 'center', gap: 12, marginTop: 12 },
+  title: { fontSize: 26, fontWeight: '800' },
+  body: { fontSize: 15, lineHeight: 24 },
+  card: { borderWidth: 1, borderRadius: 18, padding: 18, gap: 14 },
+  section: { fontSize: 17, fontWeight: '700' },
+  note: { fontSize: 13, lineHeight: 20 },
+  consent: { flexDirection: 'row', gap: 12, alignItems: 'center' },
+  refresh: { alignItems: 'center', padding: 14 },
+});

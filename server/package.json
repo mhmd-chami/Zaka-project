@@ -1,0 +1,10 @@
+{
+  "name": "zakapay-api",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22.16.0" },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env src/index.mjs",
+    "test": "node test/api.test.mjs"
+  }
+}

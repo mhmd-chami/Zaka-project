@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "main": "expo-router/entry",
   "scripts": {
+    "backend": "npm --prefix server start",
+    "test:backend": "npm --prefix server test",
     "start": "expo start --go --clear --max-workers 1",
     "start:offline": "expo start --go --offline --clear --max-workers 1",
     "start:dev": "expo start --dev-client --max-workers 1",

@@ -32,6 +32,7 @@ export default function LoginScreen() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [googleIdentity, setGoogleIdentity] = useState<GoogleIdentity | null>(null);
   const [googlePhone, setGooglePhone] = useState('');
+  const [error, setError] = useState('');
 
   async function openSession(session: NonNullable<Awaited<ReturnType<typeof login>>['session']>) {
     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -39,11 +40,13 @@ export default function LoginScreen() {
   }
 
   async function handleLogin() {
+    setError('');
     setLoading(true);
     const result = await login(phone, password);
     setLoading(false);
 
     if (!result.ok) {
+      setError(result.error || 'Could not sign in.');
       Alert.alert('Login failed', result.error);
       return;
     }
@@ -51,22 +54,24 @@ export default function LoginScreen() {
     await openSession(result.session!);
   }
 
-  async function handleGoogleLogin() {
+  async function handleGoogleLogin(credential?: string) {
+    setError('');
     setGoogleLoading(true);
-    const result = await startGoogleSignIn();
+    const result = await startGoogleSignIn(credential);
     if (!result.ok) {
       setGoogleLoading(false);
-      if (!result.cancelled) Alert.alert('Google sign-in', result.error);
+      if (!result.cancelled) setError(result.error || 'Google sign-in did not complete.');
       return;
     }
 
     const account = await findGoogleAccount(result.identity);
     setGoogleLoading(false);
+    if (account.error) { setError(account.error); return; }
     if (account.session) {
       await openSession(account.session);
       return;
     }
-    setGoogleIdentity(result.identity);
+    setGoogleIdentity({ ...result.identity, ...account.identity });
   }
 
   async function handleCompleteGoogleSignUp() {
@@ -75,6 +80,7 @@ export default function LoginScreen() {
     const result = await completeGoogleSignUp(googleIdentity, googlePhone);
     setGoogleLoading(false);
     if (!result.ok) {
+      setError(result.error || 'Could not create account.');
       Alert.alert('Could not create account', result.error);
       return;
     }
@@ -97,6 +103,7 @@ export default function LoginScreen() {
             showsVerticalScrollIndicator={false}
           >
             <ZakaLogo size="md" showTagline />
+            {error ? <Text accessibilityLiveRegion="polite" style={{ color: colors.danger, marginVertical: 12, textAlign: 'center' }}>{error}</Text> : null}
 
             <Text style={styles.title}>
               {googleIdentity ? 'One last step' : 'Welcome back'}
@@ -179,7 +186,7 @@ export default function LoginScreen() {
                   </Link>
                 </View>
 
-                <View style={styles.demoBox}>
+                {process.env.EXPO_PUBLIC_SHOW_DEMO_ACCOUNTS === 'true' ? <View style={styles.demoBox}>
                   <Text style={styles.demoTitle}>Demo accounts</Text>
                   <IconLabel icon="crown" style={styles.demoLine}>
                     Owner: +96170000001 / owner123
@@ -196,7 +203,7 @@ export default function LoginScreen() {
                   <IconLabel icon="shield" style={styles.demoLine}>
                     Saida: +96170000005 / admin123
                   </IconLabel>
-                </View>
+                </View> : null}
               </>
             )}
           </ScrollView>

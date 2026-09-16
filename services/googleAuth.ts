@@ -5,6 +5,7 @@ export interface GoogleIdentity {
   id: string;
   email: string;
   name: string;
+  idToken: string;
 }
 
 type GoogleAuthResult =
@@ -14,9 +15,7 @@ type GoogleAuthResult =
 const googleWebClientId = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID?.trim();
 
 export function getGoogleSetupIssue(): string | null {
-  if (Platform.OS === 'web') {
-    return 'Google sign-in is currently configured for the Android and iOS apps.';
-  }
+  if (Platform.OS === 'web') return googleWebClientId ? null : 'Google sign-in has not been configured yet.';
   if (Constants.executionEnvironment === 'storeClient') {
     return 'Google sign-in needs a ZakaPay development build. Expo Go cannot load native Google sign-in.';
   }
@@ -26,7 +25,12 @@ export function getGoogleSetupIssue(): string | null {
   return null;
 }
 
-export async function startGoogleSignIn(): Promise<GoogleAuthResult> {
+export async function startGoogleSignIn(webCredential?: string): Promise<GoogleAuthResult> {
+  if (Platform.OS === 'web') {
+    return webCredential
+      ? { ok: true, identity: { id: '', name: '', email: '', idToken: webCredential } }
+      : { ok: false, error: 'Use the Google sign-in button to continue.' };
+  }
   const setupIssue = getGoogleSetupIssue();
   if (setupIssue) return { ok: false, error: setupIssue };
 
@@ -53,7 +57,7 @@ export async function startGoogleSignIn(): Promise<GoogleAuthResult> {
       return { ok: false, error: 'Google sign-in did not complete. Please try again.' };
     }
 
-    const { user } = response.data;
+    const { user, idToken } = response.data;
     if (!user.email) {
       return { ok: false, error: 'Google did not return an email address for this account.' };
     }
@@ -64,6 +68,7 @@ export async function startGoogleSignIn(): Promise<GoogleAuthResult> {
         id: user.id,
         email: user.email,
         name: user.name?.trim() || user.email.split('@')[0],
+        idToken,
       },
     };
   } catch (error) {
@@ -90,6 +95,7 @@ export async function startGoogleSignIn(): Promise<GoogleAuthResult> {
 }
 
 export async function signOutFromGoogle(): Promise<void> {
+  if (Platform.OS === 'web') return;
   if (getGoogleSetupIssue()) return;
   try {
     const { GoogleOneTapSignIn } = await import('react-native-nitro-google-signin');

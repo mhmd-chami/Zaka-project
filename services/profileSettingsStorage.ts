@@ -6,7 +6,7 @@ const KEY_PREFIX = '@zaka_profile_settings_';
 
 const DEFAULTS: ProfileSettings = {
   avatarEmoji: '👤',
-  verified: true,
+  verified: false,
   notificationSound: true,
   notificationVibration: true,
   requirePinForSend: false,

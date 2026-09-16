@@ -17,7 +17,7 @@ export function GoogleSignInButton({
   onPress,
   loading = false,
 }: {
-  onPress: () => void;
+  onPress: (credential?: string) => void;
   loading?: boolean;
 }) {
   return (
@@ -25,7 +25,7 @@ export function GoogleSignInButton({
       accessibilityRole="button"
       accessibilityLabel="Continue with Google"
       disabled={loading}
-      onPress={onPress}
+      onPress={() => onPress()}
       style={({ pressed }) => [
         styles.button,
         pressed && !loading && styles.pressed,

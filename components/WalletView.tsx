@@ -126,6 +126,21 @@ export function WalletView({
         ) : null}
       </View>
 
+      <Pressable
+        accessibilityRole="button"
+        style={styles.agentCard}
+        onPress={() => router.push('/locations')}
+      >
+        <View style={styles.agentIconWrap}>
+          <AppIcon name="store" size={20} color={colors.primaryLight} />
+        </View>
+        <View style={styles.agentTextWrap}>
+          <Text style={styles.agentTitle}>Branch locations</Text>
+          <Text style={styles.agentSub}>View the map, opening hours and directions</Text>
+        </View>
+        <AppIcon name="chevron-right" size={18} color={colors.primaryLight} />
+      </Pressable>
+
       {session.role === 'user' ? (
         <Pressable
           style={styles.agentCard}

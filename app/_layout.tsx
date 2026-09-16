@@ -27,6 +27,8 @@ function RootNavigator() {
         <Stack.Screen name="send" options={{ title: 'Send Money' }} />
         <Stack.Screen name="receive" options={{ title: 'Receive Money' }} />
         <Stack.Screen name="add-money" options={{ title: 'Add Money' }} />
+        <Stack.Screen name="locations" options={{ title: 'Branch Locations' }} />
+        <Stack.Screen name="verification" options={{ title: 'Identity Verification' }} />
         <Stack.Screen name="notifications" options={{ title: 'Notifications' }} />
         <Stack.Screen name="support-agent" options={{ title: 'Zaka Assistant' }} />
       </Stack>

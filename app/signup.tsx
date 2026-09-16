@@ -29,9 +29,12 @@ export default function SignUpScreen() {
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   async function handleSignUp() {
+    setError('');
     if (password !== confirm) {
+      setError('Passwords do not match.');
       Alert.alert('Password mismatch', 'Passwords do not match.');
       return;
     }
@@ -41,12 +44,14 @@ export default function SignUpScreen() {
     setLoading(false);
 
     if (!result.ok) {
+      setError(result.error || 'Could not create account.');
       Alert.alert('Sign up failed', result.error);
       return;
     }
 
     await sendWelcomeNotification(result.session!.userId);
     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    router.replace(getHomeRoute(result.session!.role));
     Alert.alert('Account created!', 'Your wallet is ready with $150.', [
       {
         text: 'Continue',
@@ -72,6 +77,7 @@ export default function SignUpScreen() {
             showsVerticalScrollIndicator={false}
           >
             <ZakaLogo size="md" />
+            {error ? <Text accessibilityLiveRegion="polite" style={{ color: colors.danger, marginVertical: 12 }}>{error}</Text> : null}
 
             <Text style={styles.title}>Create account</Text>
             <Text style={styles.subtitle}>Join ZakaPay and start sending money</Text>
@@ -96,7 +102,7 @@ export default function SignUpScreen() {
 
               <AuthInput
                 label="Password"
-                placeholder="At least 4 characters"
+                placeholder="At least 10 characters"
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry

@@ -23,14 +23,34 @@
 
 ```bash
 npm install
+npm run backend
+```
+
+In a second terminal:
+
+```bash
 npm start
 ```
 
 Scan QR with **Expo Go** on your phone.
 
+Authentication now uses the Node/SQLite API. See [backend setup](server/README.md) for server environment variables, Veriff activation, Google login and local demo accounts. The camera verification flow is ready for Veriff credentials; live verification requires an activated provider account. Wallet payments remain a local demo.
+
 If the school network blocks Expo services, use `npm run start:offline` after dependencies are installed.
 
 If Expo Go reports an SDK mismatch, install the Android build for SDK 57 from [Expo's official download page](https://expo.dev/go?device=true&platform=android&sdkVersion=57), then restart `npm start`.
+
+## Branch locations
+
+Open **Wallet > Branch locations** to drag or zoom the map, show all four demo branches, open Google Maps, get directions, or share the selected location. The same coordinates are used for the pin and all external links. These are demo neighborhood/city points, not verified storefronts; edit `data/locations.ts` when real branch coordinates are available.
+
+The web and Expo Go map use Esri street tiles and require internet. No additional native package or API key is needed. Sharing opens the device share sheet; browsers without sharing support copy the location or display a selectable link. A failed map connection leaves those actions available and offers a retry.
+
+Map geometry and link regression checks (Node 22):
+
+```bash
+node --experimental-strip-types tests/branchMap.test.mjs
+```
 
 ## Google sign-in (Android)
 

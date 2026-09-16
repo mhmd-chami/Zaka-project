@@ -203,7 +203,7 @@ export default function ProfileScreen() {
             <AppIcon name={roleIcon(session.role)} size={12} color={colors.primaryLight} />
             <Text style={styles.roleText}>{roleLabel(session.role, t)}</Text>
           </View>
-          {(settings.verified || account?.identityVerification?.status === 'approved') && (
+          {account?.identityVerification?.status === 'approved' && account.identityVerification.environment === 'live' && (
             <View style={styles.verifiedBadge}>
               <Text style={styles.verifiedText}>✓ {t('verified')}</Text>
             </View>
@@ -249,7 +249,7 @@ export default function ProfileScreen() {
               <AppIcon name="shield" size={23} color={colors.primaryLight} />
             </View>
           }
-          title={account?.identityVerification?.status === 'approved' ? 'Identity verified' : 'Verify identity'}
+          title={account?.identityVerification?.status === 'approved' && account.identityVerification.environment === 'live' ? 'Identity verified' : 'Verify identity'}
           subtitle={
             account?.identityVerification?.status === 'pending'
               ? 'Your documents are under review'
