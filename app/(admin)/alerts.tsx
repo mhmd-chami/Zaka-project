@@ -10,11 +10,13 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { colors } from '@/constants/theme';
+import { useSettings } from '@/contexts/SettingsContext';
 import { getSession } from '@/services/authStorage';
 import { broadcastNotification } from '@/services/notificationStorage';
 
 export default function AdminNotifyScreen() {
+  const { colors } = useSettings();
+  const styles = makeStyles(colors);
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -76,45 +78,47 @@ export default function AdminNotifyScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: 20, paddingBottom: 40 },
-  info: {
-    color: colors.textSecondary,
-    fontSize: 14,
-    marginBottom: 20,
-    lineHeight: 20,
-  },
-  label: {
-    color: colors.text,
-    fontWeight: '700',
-    marginBottom: 8,
-    marginTop: 12,
-  },
-  input: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: 14,
-    color: colors.text,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  textArea: {
-    minHeight: 100,
-    textAlignVertical: 'top',
-  },
-  btn: {
-    backgroundColor: colors.warning,
-    padding: 18,
-    borderRadius: 14,
-    alignItems: 'center',
-    marginTop: 24,
-  },
-  disabled: { opacity: 0.7 },
-  btnText: {
-    color: '#0B1220',
-    fontSize: 16,
-    fontWeight: '800',
-  },
-});
+function makeStyles(colors: ReturnType<typeof useSettings>['colors']) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    content: { padding: 20, paddingBottom: 40 },
+    info: {
+      color: colors.textSecondary,
+      fontSize: 14,
+      marginBottom: 20,
+      lineHeight: 20,
+    },
+    label: {
+      color: colors.text,
+      fontWeight: '700',
+      marginBottom: 8,
+      marginTop: 12,
+    },
+    input: {
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      padding: 14,
+      color: colors.text,
+      fontSize: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    textArea: {
+      minHeight: 100,
+      textAlignVertical: 'top',
+    },
+    btn: {
+      backgroundColor: colors.warning,
+      padding: 18,
+      borderRadius: 14,
+      alignItems: 'center',
+      marginTop: 24,
+    },
+    disabled: { opacity: 0.7 },
+    btnText: {
+      color: '#0B1220',
+      fontSize: 16,
+      fontWeight: '800',
+    },
+  });
+}

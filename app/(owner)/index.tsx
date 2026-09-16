@@ -11,7 +11,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { colors } from '@/constants/theme';
+import { useSettings } from '@/contexts/SettingsContext';
 import { getAllUsers, getSession, logout } from '@/services/authStorage';
 import { getProfileByUserId } from '@/services/walletStorage';
 import { zakaLocations } from '@/data/locations';
@@ -25,6 +25,8 @@ const tileTints = {
 
 export default function OwnerDashboard() {
   const router = useRouter();
+  const { colors } = useSettings();
+  const styles = makeStyles(colors);
   const [stats, setStats] = useState({
     users: 0,
     admins: 0,
@@ -151,76 +153,78 @@ export default function OwnerDashboard() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { paddingHorizontal: 20, paddingTop: 18, paddingBottom: 40 },
-  banner: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surfaceSoft, borderWidth: 1, borderColor: 'rgba(155,135,245,0.22)', borderRadius: 18, padding: 18, marginBottom: 24 },
-  bannerIcon: { width: 52, height: 52, borderRadius: 17, backgroundColor: 'rgba(155,135,245,0.13)', alignItems: 'center', justifyContent: 'center', marginRight: 14 },
-  bannerCopy: { flex: 1 },
-  bannerTitle: {
-    color: colors.text,
-    fontSize: 20,
-    fontWeight: '800',
-    letterSpacing: -0.35,
-  },
-  bannerSub: {
-    color: colors.textSecondary,
-    fontSize: 14,
-    marginTop: 4,
-    lineHeight: 18,
-  },
-  stats: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 12,
-  },
-  floatCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surfaceSoft,
-    borderWidth: 1,
-    borderColor: 'rgba(155,135,245,0.22)',
-    borderRadius: 16,
-    padding: 16,
-    marginTop: 12,
-    marginBottom: 24,
-  },
-  floatIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    backgroundColor: 'rgba(155,135,245,0.13)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 14,
-  },
-  floatCopy: { flex: 1 },
-  floatLabel: { color: colors.textSecondary, fontSize: 13 },
-  floatValue: { color: colors.text, fontSize: 22, fontWeight: '800', letterSpacing: -0.4, marginTop: 2 },
-  sectionTitle: {
-    color: colors.textSecondary,
-    fontSize: 12,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 1.1,
-    marginBottom: 12,
-  },
-  tiles: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 12,
-  },
-  logoutBtn: {
-    marginTop: 24,
-    alignItems: 'center',
-    padding: 14,
-    borderRadius: 14,
-    backgroundColor: 'rgba(255,99,118,0.07)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,99,118,0.25)',
-  },
-  logoutText: {
-    color: colors.danger,
-    fontWeight: '600',
-  },
-});
+function makeStyles(colors: ReturnType<typeof useSettings>['colors']) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    content: { paddingHorizontal: 20, paddingTop: 18, paddingBottom: 40 },
+    banner: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surfaceSoft, borderWidth: 1, borderColor: 'rgba(155,135,245,0.22)', borderRadius: 18, padding: 18, marginBottom: 24 },
+    bannerIcon: { width: 52, height: 52, borderRadius: 17, backgroundColor: 'rgba(155,135,245,0.13)', alignItems: 'center', justifyContent: 'center', marginRight: 14 },
+    bannerCopy: { flex: 1 },
+    bannerTitle: {
+      color: colors.text,
+      fontSize: 20,
+      fontWeight: '800',
+      letterSpacing: -0.35,
+    },
+    bannerSub: {
+      color: colors.textSecondary,
+      fontSize: 14,
+      marginTop: 4,
+      lineHeight: 18,
+    },
+    stats: {
+      flexDirection: 'row',
+      gap: 12,
+      marginBottom: 12,
+    },
+    floatCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.surfaceSoft,
+      borderWidth: 1,
+      borderColor: 'rgba(155,135,245,0.22)',
+      borderRadius: 16,
+      padding: 16,
+      marginTop: 12,
+      marginBottom: 24,
+    },
+    floatIcon: {
+      width: 44,
+      height: 44,
+      borderRadius: 14,
+      backgroundColor: 'rgba(155,135,245,0.13)',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: 14,
+    },
+    floatCopy: { flex: 1 },
+    floatLabel: { color: colors.textSecondary, fontSize: 13 },
+    floatValue: { color: colors.text, fontSize: 22, fontWeight: '800', letterSpacing: -0.4, marginTop: 2 },
+    sectionTitle: {
+      color: colors.textSecondary,
+      fontSize: 12,
+      fontWeight: '700',
+      textTransform: 'uppercase',
+      letterSpacing: 1.1,
+      marginBottom: 12,
+    },
+    tiles: {
+      flexDirection: 'row',
+      gap: 12,
+      marginBottom: 12,
+    },
+    logoutBtn: {
+      marginTop: 24,
+      alignItems: 'center',
+      padding: 14,
+      borderRadius: 14,
+      backgroundColor: 'rgba(255,99,118,0.07)',
+      borderWidth: 1,
+      borderColor: 'rgba(255,99,118,0.25)',
+    },
+    logoutText: {
+      color: colors.danger,
+      fontWeight: '600',
+    },
+  });
+}

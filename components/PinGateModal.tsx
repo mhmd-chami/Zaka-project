@@ -7,7 +7,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { colors } from '@/constants/theme';
+import { useSettings } from '@/contexts/SettingsContext';
 
 interface Props {
   visible: boolean;
@@ -16,6 +16,8 @@ interface Props {
 }
 
 export function PinGateModal({ visible, onClose, onSubmit }: Props) {
+  const { colors } = useSettings();
+  const styles = makeStyles(colors);
   const [pin, setPin] = useState('');
 
   function handleClose() {
@@ -62,59 +64,61 @@ export function PinGateModal({ visible, onClose, onSubmit }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.55)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  card: {
-    width: '100%',
-    maxWidth: 340,
-    backgroundColor: colors.surface,
-    borderRadius: 20,
-    padding: 22,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  title: {
-    color: colors.text,
-    fontSize: 18,
-    fontWeight: '800',
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  input: {
-    backgroundColor: colors.surfaceSoft,
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 24,
-    color: colors.text,
-    textAlign: 'center',
-    letterSpacing: 8,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginBottom: 18,
-  },
-  row: { flexDirection: 'row', gap: 10 },
-  cancelBtn: {
-    flex: 1,
-    padding: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  cancelText: { color: colors.textSecondary, fontWeight: '700' },
-  okBtn: {
-    flex: 1,
-    padding: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-    backgroundColor: colors.primaryDark,
-  },
-  okText: { color: '#FFF', fontWeight: '800' },
-  disabled: { opacity: 0.5 },
-});
+function makeStyles(colors: ReturnType<typeof useSettings>['colors']) {
+  return StyleSheet.create({
+    overlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.55)',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: 24,
+    },
+    card: {
+      width: '100%',
+      maxWidth: 340,
+      backgroundColor: colors.surface,
+      borderRadius: 20,
+      padding: 22,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    title: {
+      color: colors.text,
+      fontSize: 18,
+      fontWeight: '800',
+      marginBottom: 16,
+      textAlign: 'center',
+    },
+    input: {
+      backgroundColor: colors.surfaceSoft,
+      borderRadius: 12,
+      padding: 16,
+      fontSize: 24,
+      color: colors.text,
+      textAlign: 'center',
+      letterSpacing: 8,
+      borderWidth: 1,
+      borderColor: colors.border,
+      marginBottom: 18,
+    },
+    row: { flexDirection: 'row', gap: 10 },
+    cancelBtn: {
+      flex: 1,
+      padding: 14,
+      borderRadius: 12,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    cancelText: { color: colors.textSecondary, fontWeight: '700' },
+    okBtn: {
+      flex: 1,
+      padding: 14,
+      borderRadius: 12,
+      alignItems: 'center',
+      backgroundColor: colors.primaryDark,
+    },
+    okText: { color: colors.background, fontWeight: '800' },
+    disabled: { opacity: 0.5 },
+  });
+}

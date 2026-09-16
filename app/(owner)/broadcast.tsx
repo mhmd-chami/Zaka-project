@@ -10,12 +10,14 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { colors } from '@/constants/theme';
+import { useSettings } from '@/contexts/SettingsContext';
 import { broadcastNotification } from '@/services/notificationStorage';
 
 type Target = 'users' | 'admins';
 
 export default function OwnerNotifyScreen() {
+  const { colors } = useSettings();
+  const styles = makeStyles(colors);
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
   const [target, setTarget] = useState<Target>('users');
@@ -106,64 +108,66 @@ export default function OwnerNotifyScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: 20, paddingBottom: 40 },
-  label: {
-    color: colors.text,
-    fontWeight: '700',
-    marginBottom: 8,
-    marginTop: 12,
-  },
-  targetRow: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  targetBtn: {
-    flex: 1,
-    backgroundColor: colors.surface,
-    padding: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'transparent',
-  },
-  targetActive: {
-    borderColor: colors.accent,
-    backgroundColor: colors.surfaceLight,
-  },
-  targetText: {
-    color: colors.textSecondary,
-    fontWeight: '600',
-    fontSize: 13,
-  },
-  targetTextActive: {
-    color: colors.text,
-  },
-  input: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: 14,
-    color: colors.text,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  textArea: {
-    minHeight: 100,
-    textAlignVertical: 'top',
-  },
-  btn: {
-    backgroundColor: colors.accent,
-    padding: 18,
-    borderRadius: 14,
-    alignItems: 'center',
-    marginTop: 24,
-  },
-  disabled: { opacity: 0.7 },
-  btnText: {
-    color: '#0B1220',
-    fontSize: 16,
-    fontWeight: '800',
-  },
-});
+function makeStyles(colors: ReturnType<typeof useSettings>['colors']) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    content: { padding: 20, paddingBottom: 40 },
+    label: {
+      color: colors.text,
+      fontWeight: '700',
+      marginBottom: 8,
+      marginTop: 12,
+    },
+    targetRow: {
+      flexDirection: 'row',
+      gap: 10,
+    },
+    targetBtn: {
+      flex: 1,
+      backgroundColor: colors.surface,
+      padding: 14,
+      borderRadius: 12,
+      alignItems: 'center',
+      borderWidth: 2,
+      borderColor: 'transparent',
+    },
+    targetActive: {
+      borderColor: colors.accent,
+      backgroundColor: colors.surfaceLight,
+    },
+    targetText: {
+      color: colors.textSecondary,
+      fontWeight: '600',
+      fontSize: 13,
+    },
+    targetTextActive: {
+      color: colors.text,
+    },
+    input: {
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      padding: 14,
+      color: colors.text,
+      fontSize: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    textArea: {
+      minHeight: 100,
+      textAlignVertical: 'top',
+    },
+    btn: {
+      backgroundColor: colors.accent,
+      padding: 18,
+      borderRadius: 14,
+      alignItems: 'center',
+      marginTop: 24,
+    },
+    disabled: { opacity: 0.7 },
+    btnText: {
+      color: '#0B1220',
+      fontSize: 16,
+      fontWeight: '800',
+    },
+  });
+}

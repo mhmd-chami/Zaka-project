@@ -134,27 +134,28 @@ export const goldTopBorder: ViewStyle = {
 };
 
 export function tabScreenOptions(
-  accent = colors.primary,
+  palette: typeof colors = colors,
+  accent = palette.primary,
   bottomInset = 0
 ) {
   const tabPaddingBottom = Math.max(bottomInset, 8);
 
   return {
     headerStyle: {
-      backgroundColor: colors.background,
+      backgroundColor: palette.background,
     },
-    headerTintColor: colors.text,
+    headerTintColor: palette.text,
     headerTitleStyle: {
       fontSize: 17,
       fontWeight: '700' as const,
-      color: colors.text,
+      color: palette.text,
       letterSpacing: -0.2,
     },
     headerShadowVisible: false,
     tabBarStyle: {
       height: 56 + tabPaddingBottom,
-      backgroundColor: colors.surface,
-      borderTopColor: colors.border,
+      backgroundColor: palette.surface,
+      borderTopColor: palette.border,
       borderTopWidth: 1,
       paddingTop: 6,
       paddingBottom: tabPaddingBottom,
@@ -170,7 +171,7 @@ export function tabScreenOptions(
     },
     tabBarActiveBackgroundColor: `${accent}15`,
     tabBarActiveTintColor: accent,
-    tabBarInactiveTintColor: colors.textMuted,
+    tabBarInactiveTintColor: palette.textMuted,
     tabBarLabelStyle: {
       fontSize: 9,
       fontWeight: '700' as const,

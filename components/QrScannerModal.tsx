@@ -8,7 +8,7 @@ import {
   View,
 } from 'react-native';
 import { CameraQrScanner } from '@/components/CameraQrScanner';
-import { colors } from '@/constants/theme';
+import { useSettings } from '@/contexts/SettingsContext';
 import { parsePaymentQrPayload } from '@/utils/paymentQr';
 
 interface Props {
@@ -18,6 +18,8 @@ interface Props {
 }
 
 export function QrScannerModal({ visible, onClose, onScan }: Props) {
+  const { colors } = useSettings();
+  const styles = makeStyles(colors);
   const [scanned, setScanned] = useState(false);
 
   function handleClose() {
@@ -62,22 +64,24 @@ export function QrScannerModal({ visible, onClose, onScan }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 56,
-    paddingBottom: 16,
-  },
-  title: {
-    color: colors.text,
-    fontSize: 18,
-    fontWeight: '800',
-  },
-});
+function makeStyles(colors: ReturnType<typeof useSettings>['colors']) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 20,
+      paddingTop: 56,
+      paddingBottom: 16,
+    },
+    title: {
+      color: colors.text,
+      fontSize: 18,
+      fontWeight: '800',
+    },
+  });
+}

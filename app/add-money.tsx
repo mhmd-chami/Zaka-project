@@ -14,7 +14,8 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PaymentQrCode } from '@/components/PaymentQrCode';
-import { colors, contentBottomPadding } from '@/constants/theme';
+import { contentBottomPadding } from '@/constants/theme';
+import { useSettings } from '@/contexts/SettingsContext';
 import { getSession } from '@/services/authStorage';
 import { addMoneyViaCard, getProfile } from '@/services/walletStorage';
 import { AddMoneyMode, AuthSession, WalletProfile } from '@/types';
@@ -34,6 +35,8 @@ function formatExpiry(value: string): string {
 
 export default function AddMoneyScreen() {
   const insets = useSafeAreaInsets();
+  const { colors } = useSettings();
+  const styles = makeStyles(colors);
   const [mode, setMode] = useState<AddMoneyMode>('qr');
   const [session, setSession] = useState<AuthSession | null>(null);
   const [profile, setProfile] = useState<WalletProfile | null>(null);
@@ -267,138 +270,140 @@ export default function AddMoneyScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: colors.background },
-  container: { paddingHorizontal: 20, paddingTop: 18 },
-  loading: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.background,
-  },
-  loadingText: { color: colors.textSecondary },
-  heading: {
-    color: colors.text,
-    fontSize: 20,
-    fontWeight: '800',
-    marginBottom: 6,
-  },
-  subheading: {
-    color: colors.textSecondary,
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 20,
-  },
-  modeRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 20,
-  },
-  modeBtn: {
-    flex: 1,
-    backgroundColor: colors.surfaceSoft,
-    borderRadius: 16,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: 'transparent',
-  },
-  modeBtnActive: {
-    borderColor: colors.primary,
-    backgroundColor: colors.primarySoft,
-  },
-  modeIcon: { marginBottom: 6 },
-  modeTitle: {
-    color: colors.textSecondary,
-    fontSize: 13,
-    fontWeight: '800',
-  },
-  modeTitleActive: { color: colors.text },
-  modeSub: {
-    color: colors.textSecondary,
-    fontSize: 11,
-    marginTop: 4,
-  },
-  section: { marginTop: 4 },
-  card: {
-    backgroundColor: colors.surfaceSoft,
-    borderRadius: 16,
-    padding: 24,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginBottom: 20,
-  },
-  cardLabel: {
-    color: colors.textSecondary,
-    fontSize: 13,
-    marginBottom: 4,
-  },
-  phone: {
-    color: colors.text,
-    fontSize: 18,
-    fontWeight: '800',
-    marginBottom: 20,
-  },
-  label: {
-    color: colors.text,
-    fontSize: 14,
-    fontWeight: '700',
-    marginBottom: 8,
-    marginTop: 12,
-  },
-  input: {
-    backgroundColor: colors.surfaceSoft,
-    borderRadius: 14,
-    padding: 16,
-    fontSize: 16,
-    color: colors.text,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  quickRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginTop: 12,
-  },
-  quickBtn: {
-    flex: 1,
-    backgroundColor: colors.surface,
-    padding: 12,
-    borderRadius: 12,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'transparent',
-  },
-  quickBtnActive: { backgroundColor: colors.primarySoft, borderColor: 'rgba(42,140,137,0.35)' },
-  quickText: {
-    color: colors.textSecondary,
-    fontWeight: '700',
-  },
-  quickTextActive: { color: colors.primaryLight },
-  row: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  half: { flex: 1 },
-  note: {
-    color: colors.textSecondary,
-    fontSize: 12,
-    lineHeight: 18,
-    marginTop: 14,
-  },
-  submitBtn: {
-    backgroundColor: colors.primary,
-    padding: 18,
-    borderRadius: 16,
-    alignItems: 'center',
-    marginTop: 24,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-  },
-  disabled: { opacity: 0.7 },
-  submitText: {
-    color: '#06120D',
-    fontSize: 16,
-    fontWeight: '800',
-  },
-});
+function makeStyles(colors: ReturnType<typeof useSettings>['colors']) {
+  return StyleSheet.create({
+    flex: { flex: 1, backgroundColor: colors.background },
+    container: { paddingHorizontal: 20, paddingTop: 18 },
+    loading: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.background,
+    },
+    loadingText: { color: colors.textSecondary },
+    heading: {
+      color: colors.text,
+      fontSize: 20,
+      fontWeight: '800',
+      marginBottom: 6,
+    },
+    subheading: {
+      color: colors.textSecondary,
+      fontSize: 14,
+      lineHeight: 20,
+      marginBottom: 20,
+    },
+    modeRow: {
+      flexDirection: 'row',
+      gap: 10,
+      marginBottom: 20,
+    },
+    modeBtn: {
+      flex: 1,
+      backgroundColor: colors.surfaceSoft,
+      borderRadius: 16,
+      padding: 14,
+      borderWidth: 1,
+      borderColor: 'transparent',
+    },
+    modeBtnActive: {
+      borderColor: colors.primary,
+      backgroundColor: colors.primarySoft,
+    },
+    modeIcon: { marginBottom: 6 },
+    modeTitle: {
+      color: colors.textSecondary,
+      fontSize: 13,
+      fontWeight: '800',
+    },
+    modeTitleActive: { color: colors.text },
+    modeSub: {
+      color: colors.textSecondary,
+      fontSize: 11,
+      marginTop: 4,
+    },
+    section: { marginTop: 4 },
+    card: {
+      backgroundColor: colors.surfaceSoft,
+      borderRadius: 16,
+      padding: 24,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: colors.border,
+      marginBottom: 20,
+    },
+    cardLabel: {
+      color: colors.textSecondary,
+      fontSize: 13,
+      marginBottom: 4,
+    },
+    phone: {
+      color: colors.text,
+      fontSize: 18,
+      fontWeight: '800',
+      marginBottom: 20,
+    },
+    label: {
+      color: colors.text,
+      fontSize: 14,
+      fontWeight: '700',
+      marginBottom: 8,
+      marginTop: 12,
+    },
+    input: {
+      backgroundColor: colors.surfaceSoft,
+      borderRadius: 14,
+      padding: 16,
+      fontSize: 16,
+      color: colors.text,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    quickRow: {
+      flexDirection: 'row',
+      gap: 8,
+      marginTop: 12,
+    },
+    quickBtn: {
+      flex: 1,
+      backgroundColor: colors.surface,
+      padding: 12,
+      borderRadius: 12,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: 'transparent',
+    },
+    quickBtnActive: { backgroundColor: colors.primarySoft, borderColor: 'rgba(42,140,137,0.35)' },
+    quickText: {
+      color: colors.textSecondary,
+      fontWeight: '700',
+    },
+    quickTextActive: { color: colors.primaryLight },
+    row: {
+      flexDirection: 'row',
+      gap: 12,
+    },
+    half: { flex: 1 },
+    note: {
+      color: colors.textSecondary,
+      fontSize: 12,
+      lineHeight: 18,
+      marginTop: 14,
+    },
+    submitBtn: {
+      backgroundColor: colors.primary,
+      padding: 18,
+      borderRadius: 16,
+      alignItems: 'center',
+      marginTop: 24,
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.08)',
+    },
+    disabled: { opacity: 0.7 },
+    submitText: {
+      color: '#06120D',
+      fontSize: 16,
+      fontWeight: '800',
+    },
+  });
+}

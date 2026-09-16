@@ -14,13 +14,15 @@ import {
 } from 'react-native';
 import { LocationQrCode } from '@/components/LocationQrCode';
 import { PaymentQrCode } from '@/components/PaymentQrCode';
-import { colors } from '@/constants/theme';
+import { useSettings } from '@/contexts/SettingsContext';
 import { getLocationById } from '@/data/locations';
 import { getSession } from '@/services/authStorage';
 import { getProfile, receiveMoney } from '@/services/walletStorage';
 import { AuthSession, WalletProfile } from '@/types';
 
 export default function ReceiveScreen() {
+  const { colors } = useSettings();
+  const styles = makeStyles(colors);
   const [session, setSession] = useState<AuthSession | null>(null);
   const [profile, setProfile] = useState<WalletProfile | null>(null);
   const [demoAmount, setDemoAmount] = useState('25');
@@ -179,141 +181,143 @@ export default function ReceiveScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  content: {
-    padding: 20,
-    paddingBottom: 44,
-  },
-  loading: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.background,
-  },
-  loadingText: { color: colors.textSecondary },
-  card: {
-    backgroundColor: colors.surfaceSoft,
-    borderRadius: 18,
-    padding: 24,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.borderStrong,
-  },
-  cardAdmin: {
-    borderColor: colors.warning,
-  },
-  locationBadge: {
-    color: colors.warning,
-    fontSize: 13,
-    fontWeight: '700',
-    marginBottom: 6,
-  },
-  locationName: {
-    color: colors.text,
-    fontSize: 20,
-    fontWeight: '800',
-    textAlign: 'center',
-  },
-  locationAddr: {
-    color: colors.textSecondary,
-    fontSize: 13,
-    marginTop: 4,
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  cardTitle: {
-    color: colors.textSecondary,
-    fontSize: 14,
-    marginTop: 12,
-  },
-  phone: {
-    color: colors.text,
-    fontSize: 27,
-    fontWeight: '800',
-    marginTop: 8,
-  },
-  hint: {
-    color: colors.textSecondary,
-    fontSize: 13,
-    textAlign: 'center',
-    marginTop: 12,
-    lineHeight: 18,
-  },
-  qrSection: {
-    marginTop: 20,
-    backgroundColor: colors.surfaceSoft,
-    borderRadius: 18,
-    padding: 20,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  cashOutQrSection: {
-    borderColor: colors.warning,
-  },
-  qrTitle: {
-    color: colors.text,
-    fontSize: 16,
-    fontWeight: '800',
-    marginBottom: 16,
-    letterSpacing: -0.15,
-  },
-  qrAmountInput: {
-    backgroundColor: colors.backgroundAlt,
-    borderRadius: 14,
-    padding: 12,
-    fontSize: 15,
-    color: colors.text,
-    marginTop: 14,
-    width: '100%',
-    textAlign: 'center',
-  },
-  shareBtn: {
-    backgroundColor: colors.primary,
-    padding: 18,
-    borderRadius: 16,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  shareText: {
-    color: colors.background,
-    fontSize: 16,
-    fontWeight: '800',
-  },
-  demoBox: {
-    marginTop: 32,
-    padding: 16,
-    backgroundColor: colors.surfaceSoft,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  demoTitle: {
-    color: colors.textSecondary,
-    fontSize: 13,
-    marginBottom: 12,
-  },
-  input: {
-    backgroundColor: colors.backgroundAlt,
-    borderRadius: 14,
-    padding: 14,
-    fontSize: 18,
-    color: colors.text,
-    marginBottom: 12,
-  },
-  demoBtn: {
-    backgroundColor: colors.accent,
-    padding: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  demoBtnText: {
-    color: colors.background,
-    fontWeight: '800',
-    fontSize: 15,
-  },
-});
+function makeStyles(colors: ReturnType<typeof useSettings>['colors']) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    content: {
+      padding: 20,
+      paddingBottom: 44,
+    },
+    loading: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.background,
+    },
+    loadingText: { color: colors.textSecondary },
+    card: {
+      backgroundColor: colors.surfaceSoft,
+      borderRadius: 18,
+      padding: 24,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: colors.borderStrong,
+    },
+    cardAdmin: {
+      borderColor: colors.warning,
+    },
+    locationBadge: {
+      color: colors.warning,
+      fontSize: 13,
+      fontWeight: '700',
+      marginBottom: 6,
+    },
+    locationName: {
+      color: colors.text,
+      fontSize: 20,
+      fontWeight: '800',
+      textAlign: 'center',
+    },
+    locationAddr: {
+      color: colors.textSecondary,
+      fontSize: 13,
+      marginTop: 4,
+      marginBottom: 12,
+      textAlign: 'center',
+    },
+    cardTitle: {
+      color: colors.textSecondary,
+      fontSize: 14,
+      marginTop: 12,
+    },
+    phone: {
+      color: colors.text,
+      fontSize: 27,
+      fontWeight: '800',
+      marginTop: 8,
+    },
+    hint: {
+      color: colors.textSecondary,
+      fontSize: 13,
+      textAlign: 'center',
+      marginTop: 12,
+      lineHeight: 18,
+    },
+    qrSection: {
+      marginTop: 20,
+      backgroundColor: colors.surfaceSoft,
+      borderRadius: 18,
+      padding: 20,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    cashOutQrSection: {
+      borderColor: colors.warning,
+    },
+    qrTitle: {
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: '800',
+      marginBottom: 16,
+      letterSpacing: -0.15,
+    },
+    qrAmountInput: {
+      backgroundColor: colors.backgroundAlt,
+      borderRadius: 14,
+      padding: 12,
+      fontSize: 15,
+      color: colors.text,
+      marginTop: 14,
+      width: '100%',
+      textAlign: 'center',
+    },
+    shareBtn: {
+      backgroundColor: colors.primary,
+      padding: 18,
+      borderRadius: 16,
+      alignItems: 'center',
+      marginTop: 20,
+    },
+    shareText: {
+      color: colors.background,
+      fontSize: 16,
+      fontWeight: '800',
+    },
+    demoBox: {
+      marginTop: 32,
+      padding: 16,
+      backgroundColor: colors.surfaceSoft,
+      borderRadius: 18,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    demoTitle: {
+      color: colors.textSecondary,
+      fontSize: 13,
+      marginBottom: 12,
+    },
+    input: {
+      backgroundColor: colors.backgroundAlt,
+      borderRadius: 14,
+      padding: 14,
+      fontSize: 18,
+      color: colors.text,
+      marginBottom: 12,
+    },
+    demoBtn: {
+      backgroundColor: colors.accent,
+      padding: 14,
+      borderRadius: 12,
+      alignItems: 'center',
+    },
+    demoBtnText: {
+      color: colors.background,
+      fontWeight: '800',
+      fontSize: 15,
+    },
+  });
+}

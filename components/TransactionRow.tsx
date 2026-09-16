@@ -1,7 +1,8 @@
 import { AppIcon, type IconName } from '@/components/AppIcon';
 import { withoutEmoji } from '@/utils/displayText';
 import { StyleSheet, Text, View } from 'react-native';
-import { colors, radius } from '@/constants/theme';
+import { radius } from '@/constants/theme';
+import { useSettings } from '@/contexts/SettingsContext';
 import { Transaction } from '@/types';
 
 const icons: Record<Transaction['type'], IconName> = {
@@ -15,28 +16,36 @@ const icons: Record<Transaction['type'], IconName> = {
   purchase: 'shop',
 };
 
-const stripeColors: Record<string, string> = {
-  send: colors.expense,
-  send_p2p: colors.expense,
-  send_cash: colors.pending,
-  cash_out: colors.expense,
-  receive: colors.income,
-  deposit: colors.income,
-  topup: colors.accent,
-  purchase: colors.gold,
-};
+function stripeColor(
+  colors: ReturnType<typeof useSettings>['colors'],
+  type: Transaction['type']
+): string {
+  const map: Record<Transaction['type'], string> = {
+    send: colors.expense,
+    send_p2p: colors.expense,
+    send_cash: colors.pending,
+    cash_out: colors.expense,
+    receive: colors.income,
+    deposit: colors.income,
+    topup: colors.accent,
+    purchase: colors.gold,
+  };
+  return map[type] ?? colors.border;
+}
 
 interface Props {
   tx: Transaction;
 }
 
 export function TransactionRow({ tx }: Props) {
+  const { colors } = useSettings();
+  const styles = makeStyles(colors);
   const isIncome = tx.type === 'receive' || tx.type === 'deposit';
   const isCashPending =
     (tx.type === 'send_cash' || tx.type === 'cash_out') &&
     tx.status === 'pending';
   const sign = isIncome ? '+' : '-';
-  const stripe = stripeColors[tx.type] ?? colors.border;
+  const stripe = stripeColor(colors, tx.type);
   const amountLabel = `${isCashPending ? '' : sign}$${tx.amount.toFixed(2)}`;
 
   return (
@@ -70,66 +79,68 @@ export function TransactionRow({ tx }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surfaceSoft,
-    borderRadius: radius.lg,
-    padding: 15,
-    marginBottom: 9,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  icon: { width: 44, height: 44, borderRadius: 15, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
-  body: {
-    flex: 1,
-  },
-  title: {
-    color: colors.text,
-    fontSize: 14,
-    fontWeight: '700',
-    letterSpacing: -0.1,
-  },
-  sub: {
-    color: colors.textSecondary,
-    fontSize: 12,
-    marginTop: 4,
-  },
-  right: {
-    alignItems: 'flex-end',
-    marginLeft: 10,
-  },
-  amount: {
-    fontSize: 16,
-    fontWeight: '800',
-    letterSpacing: -0.25,
-  },
-  income: {
-    color: colors.income,
-  },
-  expense: {
-    color: colors.expense,
-  },
-  pending: {
-    color: colors.pending,
-  },
-  pendingPill: {
-    backgroundColor: 'rgba(201,169,97,0.12)',
-    borderRadius: radius.full,
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    marginTop: 4,
-  },
-  pendingLabel: {
-    color: colors.pending,
-    fontSize: 9,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  date: {
-    color: colors.textMuted,
-    fontSize: 10,
-    marginTop: 4,
-  },
-});
+function makeStyles(colors: ReturnType<typeof useSettings>['colors']) {
+  return StyleSheet.create({
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.surfaceSoft,
+      borderRadius: radius.lg,
+      padding: 15,
+      marginBottom: 9,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    icon: { width: 44, height: 44, borderRadius: 15, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
+    body: {
+      flex: 1,
+    },
+    title: {
+      color: colors.text,
+      fontSize: 14,
+      fontWeight: '700',
+      letterSpacing: -0.1,
+    },
+    sub: {
+      color: colors.textSecondary,
+      fontSize: 12,
+      marginTop: 4,
+    },
+    right: {
+      alignItems: 'flex-end',
+      marginLeft: 10,
+    },
+    amount: {
+      fontSize: 16,
+      fontWeight: '800',
+      letterSpacing: -0.25,
+    },
+    income: {
+      color: colors.income,
+    },
+    expense: {
+      color: colors.expense,
+    },
+    pending: {
+      color: colors.pending,
+    },
+    pendingPill: {
+      backgroundColor: `${colors.pending}1F`,
+      borderRadius: radius.full,
+      paddingHorizontal: 7,
+      paddingVertical: 2,
+      marginTop: 4,
+    },
+    pendingLabel: {
+      color: colors.pending,
+      fontSize: 9,
+      fontWeight: '700',
+      letterSpacing: 0.5,
+    },
+    date: {
+      color: colors.textMuted,
+      fontSize: 10,
+      marginTop: 4,
+    },
+  });
+}

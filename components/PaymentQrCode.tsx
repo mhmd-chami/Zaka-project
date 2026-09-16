@@ -1,6 +1,6 @@
 import QRCode from 'react-native-qrcode-svg';
 import { StyleSheet, Text, View } from 'react-native';
-import { colors } from '@/constants/theme';
+import { useSettings } from '@/contexts/SettingsContext';
 import { buildPaymentQrPayload } from '@/utils/paymentQr';
 
 interface Props {
@@ -11,6 +11,8 @@ interface Props {
 }
 
 export function PaymentQrCode({ phone, name, amount, size = 200 }: Props) {
+  const { colors } = useSettings();
+  const styles = makeStyles(colors);
   const payload = buildPaymentQrPayload(phone, name, amount);
 
   return (
@@ -32,23 +34,25 @@ export function PaymentQrCode({ phone, name, amount, size = 200 }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: {
-    alignItems: 'center',
-  },
-  qrBox: {
-    padding: 16,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    borderWidth: 2,
-    borderColor: colors.borderStrong,
-  },
-  hint: {
-    color: colors.textSecondary,
-    fontSize: 13,
-    textAlign: 'center',
-    marginTop: 14,
-    lineHeight: 18,
-    paddingHorizontal: 12,
-  },
-});
+function makeStyles(colors: ReturnType<typeof useSettings>['colors']) {
+  return StyleSheet.create({
+    wrap: {
+      alignItems: 'center',
+    },
+    qrBox: {
+      padding: 16,
+      backgroundColor: '#FFFFFF',
+      borderRadius: 20,
+      borderWidth: 2,
+      borderColor: colors.borderStrong,
+    },
+    hint: {
+      color: colors.textSecondary,
+      fontSize: 13,
+      textAlign: 'center',
+      marginTop: 14,
+      lineHeight: 18,
+      paddingHorizontal: 12,
+    },
+  });
+}

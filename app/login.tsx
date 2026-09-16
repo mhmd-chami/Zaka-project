@@ -1,5 +1,4 @@
 import { IconLabel } from '@/components/AppIcon';
-import { GoogleSignInButton } from '@/components/GoogleSignInButton';
 import * as Haptics from 'expo-haptics';
 import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -18,20 +17,19 @@ import { AuthInput } from '@/components/AuthInput';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { ScreenBackground } from '@/components/ScreenBackground';
 import { ZakaLogo } from '@/components/ZakaLogo';
-import { colors, contentBottomPadding, radius, shadows } from '@/constants/theme';
-import { completeGoogleSignUp, findGoogleAccount, login } from '@/services/authStorage';
-import { GoogleIdentity, startGoogleSignIn } from '@/services/googleAuth';
+import { contentBottomPadding, shadows } from '@/constants/theme';
+import { useSettings } from '@/contexts/SettingsContext';
+import { login } from '@/services/authStorage';
 import { getHomeRoute } from '@/utils/routes';
 
 export default function LoginScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { colors, theme, setTheme, t } = useSettings();
+  const styles = makeStyles(colors);
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
-  const [googleIdentity, setGoogleIdentity] = useState<GoogleIdentity | null>(null);
-  const [googlePhone, setGooglePhone] = useState('');
   const [error, setError] = useState('');
   const showDemoAccounts = __DEV__ || process.env.EXPO_PUBLIC_SHOW_DEMO_ACCOUNTS === 'true';
 
@@ -55,46 +53,6 @@ export default function LoginScreen() {
     await openSession(result.session!);
   }
 
-  async function handleGoogleLogin(credential?: string) {
-    setError('');
-    setGoogleLoading(true);
-    let result: Awaited<ReturnType<typeof startGoogleSignIn>>;
-    try {
-      result = await startGoogleSignIn(credential);
-    } catch (error) {
-      setGoogleLoading(false);
-      setError(error instanceof Error ? error.message : 'Google sign-in could not start.');
-      return;
-    }
-    if (!result.ok) {
-      setGoogleLoading(false);
-      if (!result.cancelled) setError(result.error || 'Google sign-in did not complete.');
-      return;
-    }
-
-    const account = await findGoogleAccount(result.identity);
-    setGoogleLoading(false);
-    if (account.error) { setError(account.error); return; }
-    if (account.session) {
-      await openSession(account.session);
-      return;
-    }
-    setGoogleIdentity({ ...result.identity, ...account.identity });
-  }
-
-  async function handleCompleteGoogleSignUp() {
-    if (!googleIdentity) return;
-    setGoogleLoading(true);
-    const result = await completeGoogleSignUp(googleIdentity, googlePhone);
-    setGoogleLoading(false);
-    if (!result.ok) {
-      setError(result.error || 'Could not create account.');
-      Alert.alert('Could not create account', result.error);
-      return;
-    }
-    await openSession(result.session!);
-  }
-
   return (
     <ScreenBackground>
       <SafeAreaView style={styles.flex} edges={['top', 'bottom']}>
@@ -110,110 +68,77 @@ export default function LoginScreen() {
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+              onPress={() => void setTheme(theme === 'dark' ? 'light' : 'dark')}
+              style={styles.themeToggle}
+            >
+              <Text style={styles.themeToggleText}>{theme === 'light' ? 'Dark' : 'Light'}</Text>
+            </Pressable>
             <ZakaLogo size="md" showTagline />
-            {error ? <Text accessibilityLiveRegion="polite" style={{ color: colors.danger, marginVertical: 12, textAlign: 'center' }}>{error}</Text> : null}
+            {error ? (
+              <Text
+                accessibilityLiveRegion="polite"
+                style={{ color: colors.danger, marginVertical: 12, textAlign: 'center' }}
+              >
+                {error}
+              </Text>
+            ) : null}
 
-            <Text style={styles.title}>
-              {googleIdentity ? 'One last step' : 'Welcome back'}
-            </Text>
-            <Text style={styles.subtitle}>
-              {googleIdentity
-                ? `Add the phone number for ${googleIdentity.email}`
-                : 'Sign in to your wallet'}
-            </Text>
+            <Text style={styles.title}>Welcome back</Text>
+            <Text style={styles.subtitle}>Sign in to your wallet</Text>
 
-            {googleIdentity ? (
-              <View style={[styles.formCard, shadows.card]}>
-                <View style={styles.googleAccount}>
-                  <Text style={styles.googleAccountName}>{googleIdentity.name}</Text>
-                  <Text style={styles.googleAccountEmail}>{googleIdentity.email}</Text>
-                </View>
-                <AuthInput
-                  label="Phone number"
-                  placeholder="+961 70 123 456"
-                  value={googlePhone}
-                  onChangeText={setGooglePhone}
-                  keyboardType="phone-pad"
-                  autoCapitalize="none"
-                />
-                <PrimaryButton
-                  label="Create my wallet"
-                  onPress={handleCompleteGoogleSignUp}
-                  disabled={googleLoading}
-                />
-                <Pressable
-                  accessibilityRole="button"
-                  onPress={() => {
-                    setGoogleIdentity(null);
-                    setGooglePhone('');
-                  }}
-                >
-                  <Text style={styles.cancelGoogle}>Use another sign-in method</Text>
+            <View style={[styles.formCard, shadows.card]}>
+              <AuthInput
+                label="Phone number"
+                placeholder="+961 70 123 456"
+                value={phone}
+                onChangeText={setPhone}
+                keyboardType="phone-pad"
+                autoCapitalize="none"
+              />
+
+              <AuthInput
+                label="Password"
+                placeholder="Enter your password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+              />
+
+              <PrimaryButton label="Sign in" onPress={handleLogin} disabled={loading} />
+            </View>
+
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>Don't have an account? </Text>
+              <Link href="/signup" asChild>
+                <Pressable>
+                  <Text style={styles.link}>Create account</Text>
                 </Pressable>
+              </Link>
+            </View>
+
+            {showDemoAccounts ? (
+              <View style={styles.demoBox}>
+                <Text style={styles.demoTitle}>Demo accounts</Text>
+                <IconLabel icon="crown" style={styles.demoLine}>
+                  Owner: +96170000001 / owner123
+                </IconLabel>
+                <IconLabel icon="shield" style={styles.demoLine}>
+                  Hamra: +96170000002 / admin123
+                </IconLabel>
+                <IconLabel icon="shield" style={styles.demoLine}>
+                  Verdun: +96170000003 / admin123
+                </IconLabel>
+                <IconLabel icon="shield" style={styles.demoLine}>
+                  Tripoli: +96170000004 / admin123
+                </IconLabel>
+                <IconLabel icon="shield" style={styles.demoLine}>
+                  Saida: +96170000005 / admin123
+                </IconLabel>
               </View>
-            ) : (
-              <>
-                <View style={[styles.formCard, shadows.card]}>
-                  <AuthInput
-                    label="Phone number"
-                    placeholder="+961 70 123 456"
-                    value={phone}
-                    onChangeText={setPhone}
-                    keyboardType="phone-pad"
-                    autoCapitalize="none"
-                  />
-
-                  <AuthInput
-                    label="Password"
-                    placeholder="Enter your password"
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry
-                  />
-
-                  <PrimaryButton
-                    label="Sign in"
-                    onPress={handleLogin}
-                    disabled={loading || googleLoading}
-                  />
-                </View>
-
-                <View style={styles.dividerRow}>
-                  <View style={styles.divider} />
-                  <Text style={styles.dividerText}>OR</Text>
-                  <View style={styles.divider} />
-                </View>
-                <GoogleSignInButton onPress={handleGoogleLogin} loading={googleLoading} />
-
-                <View style={styles.footer}>
-                  <Text style={styles.footerText}>Don't have an account? </Text>
-                  <Link href="/signup" asChild>
-                    <Pressable>
-                      <Text style={styles.link}>Create account</Text>
-                    </Pressable>
-                  </Link>
-                </View>
-
-                {showDemoAccounts ? <View style={styles.demoBox}>
-                  <Text style={styles.demoTitle}>Demo accounts</Text>
-                  <IconLabel icon="crown" style={styles.demoLine}>
-                    Owner: +96170000001 / owner123
-                  </IconLabel>
-                  <IconLabel icon="shield" style={styles.demoLine}>
-                    Hamra: +96170000002 / admin123
-                  </IconLabel>
-                  <IconLabel icon="shield" style={styles.demoLine}>
-                    Verdun: +96170000003 / admin123
-                  </IconLabel>
-                  <IconLabel icon="shield" style={styles.demoLine}>
-                    Tripoli: +96170000004 / admin123
-                  </IconLabel>
-                  <IconLabel icon="shield" style={styles.demoLine}>
-                    Saida: +96170000005 / admin123
-                  </IconLabel>
-                </View> : null}
-              </>
-            )}
+            ) : null}
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
@@ -221,126 +146,87 @@ export default function LoginScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  flex: { flex: 1 },
-  container: {
-    flexGrow: 1,
-    paddingHorizontal: 24,
-    paddingTop: 24,
-  },
-  title: {
-    color: colors.text,
-    fontSize: 28,
-    fontWeight: '800',
-    textAlign: 'center',
-    marginTop: 20,
-    letterSpacing: -0.6,
-  },
-  subtitle: {
-    color: colors.textSecondary,
-    fontSize: 14,
-    textAlign: 'center',
-    marginBottom: 24,
-    marginTop: 6,
-    lineHeight: 20,
-  },
-  formCard: {
-    backgroundColor: colors.surface,
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: colors.borderStrong,
-  },
-  dividerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginVertical: 22,
-  },
-  divider: {
-    height: 1,
-    flex: 1,
-    backgroundColor: colors.border,
-  },
-  dividerText: {
-    color: colors.textMuted,
-    fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 1.0,
-  },
-  setupNote: {
-    backgroundColor: colors.surfaceElevated,
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 14,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  setupNoteText: {
-    color: colors.textSecondary,
-    fontSize: 12,
-    lineHeight: 17,
-    textAlign: 'center',
-  },
-  googleAccount: {
-    backgroundColor: colors.surfaceSoft,
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 18,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  googleAccountName: {
-    color: colors.text,
-    fontSize: 16,
-    fontWeight: '800',
-  },
-  googleAccountEmail: {
-    color: colors.textSecondary,
-    fontSize: 13,
-    marginTop: 3,
-  },
-  cancelGoogle: {
-    color: colors.textSecondary,
-    fontSize: 13,
-    fontWeight: '700',
-    textAlign: 'center',
-    marginTop: 20,
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 20,
-    marginBottom: 12,
-  },
-  footerText: {
-    color: colors.textSecondary,
-    fontSize: 14,
-  },
-  link: {
-    color: colors.primaryLight,
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  demoBox: {
-    backgroundColor: colors.surfaceSoft,
-    borderRadius: 12,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderLeftWidth: 3,
-    borderLeftColor: colors.primary,
-  },
-  demoTitle: {
-    color: colors.text,
-    fontWeight: '800',
-    fontSize: 12,
-    marginBottom: 8,
-    letterSpacing: 0.1,
-  },
-  demoLine: {
-    color: colors.textSecondary,
-    fontSize: 12,
-    marginTop: 4,
-  },
-});
+function makeStyles(colors: ReturnType<typeof useSettings>['colors']) {
+  return StyleSheet.create({
+    flex: { flex: 1 },
+    container: {
+      flexGrow: 1,
+      paddingHorizontal: 24,
+      paddingTop: 24,
+    },
+    themeToggle: {
+      alignSelf: 'flex-end',
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderRadius: 999,
+      backgroundColor: colors.surfaceSoft,
+      borderWidth: 1,
+      borderColor: colors.border,
+      marginBottom: 8,
+    },
+    themeToggleText: {
+      color: colors.textSecondary,
+      fontSize: 12,
+      fontWeight: '800',
+    },
+    title: {
+      color: colors.text,
+      fontSize: 28,
+      fontWeight: '800',
+      textAlign: 'center',
+      marginTop: 20,
+      letterSpacing: -0.6,
+    },
+    subtitle: {
+      color: colors.textSecondary,
+      fontSize: 14,
+      textAlign: 'center',
+      marginBottom: 24,
+      marginTop: 6,
+      lineHeight: 20,
+    },
+    formCard: {
+      backgroundColor: colors.surface,
+      borderRadius: 16,
+      padding: 20,
+      borderWidth: 1,
+      borderColor: colors.borderStrong,
+    },
+    footer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      marginTop: 20,
+      marginBottom: 12,
+    },
+    footerText: {
+      color: colors.textSecondary,
+      fontSize: 14,
+    },
+    link: {
+      color: colors.primaryLight,
+      fontSize: 14,
+      fontWeight: '700',
+    },
+    demoBox: {
+      backgroundColor: colors.surfaceSoft,
+      borderRadius: 12,
+      padding: 14,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderLeftWidth: 3,
+      borderLeftColor: colors.primary,
+    },
+    demoTitle: {
+      color: colors.text,
+      fontWeight: '800',
+      fontSize: 12,
+      marginBottom: 8,
+      letterSpacing: 0.1,
+    },
+    demoLine: {
+      color: colors.textSecondary,
+      fontSize: 12,
+      marginTop: 4,
+    },
+  });
+}

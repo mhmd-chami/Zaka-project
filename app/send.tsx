@@ -1,7 +1,7 @@
 import { AppIcon, IconLabel } from '@/components/AppIcon';
 import * as Haptics from 'expo-haptics';
-import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -17,9 +17,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PinGateModal } from '@/components/PinGateModal';
 import { QrScannerModal } from '@/components/QrScannerModal';
 import { MoneyActionIcon } from '@/components/MoneyActionIcon';
-import { colors, contentBottomPadding } from '@/constants/theme';
+import { contentBottomPadding } from '@/constants/theme';
+import { useSettings } from '@/contexts/SettingsContext';
 import { getLocationById, zakaLocations, ZakaLocation } from '@/data/locations';
 import { getSession } from '@/services/authStorage';
+import {
+  getSendBlockReason,
+  sendBlockTranslationKey,
+  type SendBlockReason,
+} from '@/services/verificationGate';
 import {
   getDefaultSendMode,
   getProfileSettings,
@@ -33,7 +39,10 @@ const QUICK = [5, 10, 20, 50];
 export default function SendScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { colors, t } = useSettings();
+  const styles = makeStyles(colors);
   const [mode, setMode] = useState<SendMode>('p2p');
+  const [sendBlockReason, setSendBlockReason] = useState<SendBlockReason | null>(null);
   const [phone, setPhone] = useState('');
   const [amount, setAmount] = useState('');
   const [location, setLocation] = useState<ZakaLocation>(zakaLocations[0]);
@@ -51,6 +60,37 @@ export default function SendScreen() {
     getDefaultSendMode().then(setMode);
   }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      getSession().then(async (nextSession) => {
+        setSession(nextSession);
+        if (nextSession?.role === 'user') {
+          setSendBlockReason(await getSendBlockReason());
+        } else {
+          setSendBlockReason(null);
+        }
+      });
+    }, [])
+  );
+
+  function sendErrorMessage(error?: string): string {
+    if (!error) return t('sendRequiresVerification');
+    if (['not_verified', 'pending', 'rejected', 'not_logged_in'].includes(error)) {
+      return t(sendBlockTranslationKey(error as SendBlockReason));
+    }
+    return error;
+  }
+
+  function promptVerification(reason: SendBlockReason) {
+    Alert.alert(t('sendVerificationRequiredTitle'), t(sendBlockTranslationKey(reason)), [
+      { text: t('cancel'), style: 'cancel' },
+      {
+        text: t('sendVerifyNow'),
+        onPress: () => router.push('/verification'),
+      },
+    ]);
+  }
+
   async function handleP2PSend() {
     const value = parseFloat(amount);
     if (!phone.trim()) {
@@ -67,7 +107,7 @@ export default function SendScreen() {
     setLoading(false);
 
     if (!result.ok) {
-      Alert.alert('Send failed', result.error);
+      Alert.alert('Send failed', sendErrorMessage(result.error));
       return;
     }
 
@@ -80,6 +120,15 @@ export default function SendScreen() {
   }
 
   async function requestSend() {
+    if (!isStaff) {
+      const block = sendBlockReason ?? (await getSendBlockReason());
+      if (block) {
+        setSendBlockReason(block);
+        promptVerification(block);
+        return;
+      }
+    }
+
     const settings = await getProfileSettings();
     if (settings?.requirePinForSend && settings.pinCode) {
       setPendingSend(mode === 'p2p' ? 'p2p' : 'cash');
@@ -119,7 +168,7 @@ export default function SendScreen() {
     setLoading(false);
 
     if (!result.ok) {
-      Alert.alert('Could not create send', result.error);
+      Alert.alert('Could not create send', sendErrorMessage(result.error));
       return;
     }
 
@@ -158,6 +207,17 @@ export default function SendScreen() {
             <IconLabel icon="crown" style={styles.staffBannerText}>
               Sending from owner wallet
             </IconLabel>
+          </View>
+        ) : null}
+
+        {sendBlockReason ? (
+          <View style={styles.verifyBanner}>
+            <IconLabel icon="shield" style={styles.verifyBannerText}>
+              {t(sendBlockTranslationKey(sendBlockReason))}
+            </IconLabel>
+            <Pressable style={styles.verifyBannerBtn} onPress={() => router.push('/verification')}>
+              <Text style={styles.verifyBannerBtnText}>{t('sendVerifyNow')}</Text>
+            </Pressable>
           </View>
         ) : null}
 
@@ -291,9 +351,12 @@ export default function SendScreen() {
         </View>
 
         <Pressable
-          style={[styles.sendBtn, loading && styles.disabled]}
+          style={[
+            styles.sendBtn,
+            (loading || (!isStaff && sendBlockReason)) && styles.disabled,
+          ]}
           onPress={requestSend}
-          disabled={loading}
+          disabled={loading || (!isStaff && Boolean(sendBlockReason))}
         >
           <IconLabel
             icon={mode === 'p2p' || isStaff ? 'send' : 'store'}
@@ -327,202 +390,231 @@ export default function SendScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: colors.background },
-  container: { paddingHorizontal: 20, paddingTop: 18 },
-  staffBanner: {
-    backgroundColor: colors.adminDark,
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(245,185,66,0.26)',
-  },
-  ownerBanner: {
-    backgroundColor: colors.ownerDark,
-  },
-  staffBannerText: {
-    color: '#FFF',
-    fontSize: 13,
-    fontWeight: '700',
-    textAlign: 'center',
-  },
-  heading: {
-    color: colors.text,
-    fontSize: 16,
-    fontWeight: '700',
-    marginBottom: 12,
-  },
-  modeRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 20,
-  },
-  modeBtn: {
-    flex: 1,
-    backgroundColor: colors.surfaceSoft,
-    borderRadius: 16,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: 'transparent',
-  },
-  modeBtnActive: {
-    borderColor: colors.primary,
-    backgroundColor: colors.primarySoft,
-  },
-  modeIcon: {
-    marginBottom: 6,
-  },
-  branchModeIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 15,
-    backgroundColor: colors.goldMuted,
-    borderWidth: 1,
-    borderColor: `${colors.goldLight}55`,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  modeTitle: {
-    color: colors.textSecondary,
-    fontSize: 13,
-    fontWeight: '800',
-  },
-  modeTitleActive: {
-    color: colors.text,
-  },
-  modeSub: {
-    color: colors.textSecondary,
-    fontSize: 11,
-    marginTop: 4,
-  },
-  form: {
-    marginBottom: 8,
-  },
-  info: {
-    color: colors.textSecondary,
-    fontSize: 13,
-    lineHeight: 19,
-    marginBottom: 12,
-  },
-  label: {
-    color: colors.text,
-    fontSize: 14,
-    fontWeight: '700',
-    marginBottom: 8,
-    marginTop: 12,
-  },
-  input: {
-    backgroundColor: colors.surfaceSoft,
-    borderRadius: 14,
-    padding: 16,
-    fontSize: 18,
-    color: colors.text,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  phoneRow: {
-    flexDirection: 'row',
-    gap: 10,
-    alignItems: 'stretch',
-  },
-  phoneInput: {
-    flex: 1,
-  },
-  scanBtn: {
-    backgroundColor: colors.surface,
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: colors.borderStrong,
-    minWidth: 72,
-  },
-  scanLabel: {
-    color: colors.primaryLight,
-    fontSize: 10,
-    fontWeight: '700',
-    marginTop: 2,
-  },
-  locationCard: {
-    backgroundColor: colors.surfaceSoft,
-    borderRadius: 16,
-    padding: 14,
-    marginBottom: 8,
-    borderWidth: 2,
-    borderColor: 'transparent',
-  },
-  locationSelected: {
-    borderColor: colors.primary,
-    backgroundColor: colors.primarySoft,
-  },
-  locationName: {
-    color: colors.text,
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  locationHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  selection: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 1.5,
-    borderColor: colors.textMuted,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  selectionActive: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  locationAddr: {
-    color: colors.textSecondary,
-    fontSize: 12,
-    marginTop: 4,
-  },
-  locationHours: {
-    color: colors.accentSoft,
-    fontSize: 11,
-    marginTop: 4,
-  },
-  quickRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginTop: 16,
-  },
-  quickBtn: {
-    flex: 1,
-    backgroundColor: colors.surface,
-    padding: 12,
-    borderRadius: 12,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'transparent',
-  },
-  quickBtnActive: { backgroundColor: colors.primarySoft, borderColor: 'rgba(42,140,137,0.35)' },
-  quickText: {
-    color: colors.textSecondary,
-    fontWeight: '700',
-  },
-  quickTextActive: { color: colors.primaryLight },
-  sendBtn: {
-    backgroundColor: colors.primary,
-    padding: 18,
-    borderRadius: 16,
-    alignItems: 'center',
-    marginTop: 28,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-  },
-  disabled: { opacity: 0.7 },
-  sendText: {
-    color: colors.background,
-    fontSize: 16,
-    fontWeight: '800',
-  },
-});
+function makeStyles(colors: ReturnType<typeof useSettings>['colors']) {
+  return StyleSheet.create({
+    flex: { flex: 1, backgroundColor: colors.background },
+    container: { paddingHorizontal: 20, paddingTop: 18 },
+    staffBanner: {
+      backgroundColor: colors.adminDark,
+      borderRadius: 12,
+      padding: 12,
+      marginBottom: 16,
+      borderWidth: 1,
+      borderColor: 'rgba(245,185,66,0.26)',
+    },
+    ownerBanner: {
+      backgroundColor: colors.ownerDark,
+    },
+    verifyBanner: {
+      backgroundColor: colors.primarySoft,
+      borderRadius: 12,
+      padding: 14,
+      marginBottom: 16,
+      borderWidth: 1,
+      borderColor: colors.primaryLight,
+      gap: 10,
+    },
+    verifyBannerText: {
+      color: colors.text,
+      fontSize: 13,
+      lineHeight: 19,
+      fontWeight: '600',
+    },
+    verifyBannerBtn: {
+      alignSelf: 'flex-start',
+      backgroundColor: colors.primary,
+      borderRadius: 10,
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+    },
+    verifyBannerBtnText: {
+      color: colors.background,
+      fontSize: 13,
+      fontWeight: '800',
+    },
+    staffBannerText: {
+      color: '#FFF',
+      fontSize: 13,
+      fontWeight: '700',
+      textAlign: 'center',
+    },
+    heading: {
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: '700',
+      marginBottom: 12,
+    },
+    modeRow: {
+      flexDirection: 'row',
+      gap: 10,
+      marginBottom: 20,
+    },
+    modeBtn: {
+      flex: 1,
+      backgroundColor: colors.surfaceSoft,
+      borderRadius: 16,
+      padding: 14,
+      borderWidth: 1,
+      borderColor: 'transparent',
+    },
+    modeBtnActive: {
+      borderColor: colors.primary,
+      backgroundColor: colors.primarySoft,
+    },
+    modeIcon: {
+      marginBottom: 6,
+    },
+    branchModeIcon: {
+      width: 48,
+      height: 48,
+      borderRadius: 15,
+      backgroundColor: colors.goldMuted,
+      borderWidth: 1,
+      borderColor: `${colors.goldLight}55`,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    modeTitle: {
+      color: colors.textSecondary,
+      fontSize: 13,
+      fontWeight: '800',
+    },
+    modeTitleActive: {
+      color: colors.text,
+    },
+    modeSub: {
+      color: colors.textSecondary,
+      fontSize: 11,
+      marginTop: 4,
+    },
+    form: {
+      marginBottom: 8,
+    },
+    info: {
+      color: colors.textSecondary,
+      fontSize: 13,
+      lineHeight: 19,
+      marginBottom: 12,
+    },
+    label: {
+      color: colors.text,
+      fontSize: 14,
+      fontWeight: '700',
+      marginBottom: 8,
+      marginTop: 12,
+    },
+    input: {
+      backgroundColor: colors.surfaceSoft,
+      borderRadius: 14,
+      padding: 16,
+      fontSize: 18,
+      color: colors.text,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    phoneRow: {
+      flexDirection: 'row',
+      gap: 10,
+      alignItems: 'stretch',
+    },
+    phoneInput: {
+      flex: 1,
+    },
+    scanBtn: {
+      backgroundColor: colors.surface,
+      borderRadius: 14,
+      paddingHorizontal: 14,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: colors.borderStrong,
+      minWidth: 72,
+    },
+    scanLabel: {
+      color: colors.primaryLight,
+      fontSize: 10,
+      fontWeight: '700',
+      marginTop: 2,
+    },
+    locationCard: {
+      backgroundColor: colors.surfaceSoft,
+      borderRadius: 16,
+      padding: 14,
+      marginBottom: 8,
+      borderWidth: 2,
+      borderColor: 'transparent',
+    },
+    locationSelected: {
+      borderColor: colors.primary,
+      backgroundColor: colors.primarySoft,
+    },
+    locationName: {
+      color: colors.text,
+      fontSize: 15,
+      fontWeight: '700',
+    },
+    locationHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    selection: {
+      width: 22,
+      height: 22,
+      borderRadius: 11,
+      borderWidth: 1.5,
+      borderColor: colors.textMuted,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    selectionActive: {
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
+    },
+    locationAddr: {
+      color: colors.textSecondary,
+      fontSize: 12,
+      marginTop: 4,
+    },
+    locationHours: {
+      color: colors.accentSoft,
+      fontSize: 11,
+      marginTop: 4,
+    },
+    quickRow: {
+      flexDirection: 'row',
+      gap: 8,
+      marginTop: 16,
+    },
+    quickBtn: {
+      flex: 1,
+      backgroundColor: colors.surface,
+      padding: 12,
+      borderRadius: 12,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: 'transparent',
+    },
+    quickBtnActive: { backgroundColor: colors.primarySoft, borderColor: 'rgba(42,140,137,0.35)' },
+    quickText: {
+      color: colors.textSecondary,
+      fontWeight: '700',
+    },
+    quickTextActive: { color: colors.primaryLight },
+    sendBtn: {
+      backgroundColor: colors.primary,
+      padding: 18,
+      borderRadius: 16,
+      alignItems: 'center',
+      marginTop: 28,
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.08)',
+    },
+    disabled: { opacity: 0.7 },
+    sendText: {
+      color: colors.background,
+      fontSize: 16,
+      fontWeight: '800',
+    },
+  });
+}

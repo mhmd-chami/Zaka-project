@@ -1,6 +1,7 @@
 import { AppIcon, IconLabel } from '@/components/AppIcon';
 import { StyleSheet, Text, View } from 'react-native';
-import { colors, radius, shadows } from '@/constants/theme';
+import { radius, shadows } from '@/constants/theme';
+import { useSettings } from '@/contexts/SettingsContext';
 import { UserRole } from '@/types';
 
 interface Props {
@@ -20,6 +21,8 @@ export function BalanceCard({
   locationName,
   locationAddress,
 }: Props) {
+  const { colors } = useSettings();
+  const styles = makeStyles(colors);
   const isAdmin = role === 'admin';
   const isOwner = role === 'owner';
   const accent = isAdmin
@@ -87,7 +90,7 @@ export function BalanceCard({
             <AppIcon
               name='smartphone'
               size={13}
-              color='rgba(255,255,255,0.55)'
+              color={colors.textSecondary}
             />
             <Text style={styles.phone}>{phone}</Text>
           </View>
@@ -108,123 +111,125 @@ export function BalanceCard({
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: '#123B2B',
-    borderRadius: radius.lg,
-    marginBottom: 20,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(101,227,167,0.20)',
-  },
-  cardAdmin: {
-    backgroundColor: '#392B13',
-    borderColor: 'rgba(245,185,66,0.22)',
-  },
-  cardOwner: {
-    backgroundColor: '#2C2450',
-    borderColor: 'rgba(155,135,245,0.22)',
-  },
-  content: {
-    minHeight: 190,
-    padding: 20,
-  },
-  topRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    minHeight: 44,
-  },
-  identity: {
-    flex: 1,
-    paddingRight: 10,
-  },
-  walletMark: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  badge: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: radius.full,
-    marginBottom: 6,
-  },
-  badgeText: {
-    fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 0.1,
-  },
-  locationName: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '800',
-  },
-  greeting: {
-    color: 'rgba(255,255,255,0.72)',
-    fontSize: 14,
-    fontWeight: '600',
-    marginTop: 3,
-  },
-  label: {
-    color: 'rgba(255,255,255,0.50)',
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 0.2,
-    marginTop: 8,
-  },
-  balance: {
-    color: '#FFFFFF',
-    fontSize: 40,
-    fontWeight: '800',
-    marginTop: 1,
-    letterSpacing: -1.2,
-  },
-  footerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 14,
-  },
-  phoneRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-  },
-  phone: {
-    color: 'rgba(255,255,255,0.65)',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  locationAddr: {
-    flex: 1,
-    color: 'rgba(255,255,255,0.55)',
-    fontSize: 10,
-    textAlign: 'right',
-    marginLeft: 8,
-  },
-  activePill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: 'rgba(0,0,0,0.12)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: radius.full,
-  },
-  activeDot: {
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
-    backgroundColor: colors.primaryLight,
-  },
-  activeText: {
-    color: 'rgba(255,255,255,0.65)',
-    fontSize: 9,
-    fontWeight: '700',
-  },
-});
+function makeStyles(colors: ReturnType<typeof useSettings>['colors']) {
+  return StyleSheet.create({
+    card: {
+      backgroundColor: colors.primaryDark,
+      borderRadius: radius.lg,
+      marginBottom: 20,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: `${colors.primaryLight}33`,
+    },
+    cardAdmin: {
+      backgroundColor: colors.adminDark,
+      borderColor: `${colors.warning}38`,
+    },
+    cardOwner: {
+      backgroundColor: colors.ownerDark,
+      borderColor: `${colors.owner}38`,
+    },
+    content: {
+      minHeight: 190,
+      padding: 20,
+    },
+    topRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      minHeight: 44,
+    },
+    identity: {
+      flex: 1,
+      paddingRight: 10,
+    },
+    walletMark: {
+      width: 36,
+      height: 36,
+      borderRadius: 12,
+      backgroundColor: `${colors.text}0F`,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    badge: {
+      alignSelf: 'flex-start',
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: radius.full,
+      marginBottom: 6,
+    },
+    badgeText: {
+      fontSize: 10,
+      fontWeight: '700',
+      letterSpacing: 0.1,
+    },
+    locationName: {
+      color: colors.text,
+      fontSize: 18,
+      fontWeight: '800',
+    },
+    greeting: {
+      color: colors.textSecondary,
+      fontSize: 14,
+      fontWeight: '600',
+      marginTop: 3,
+    },
+    label: {
+      color: colors.textMuted,
+      fontSize: 11,
+      fontWeight: '600',
+      letterSpacing: 0.2,
+      marginTop: 8,
+    },
+    balance: {
+      color: colors.text,
+      fontSize: 40,
+      fontWeight: '800',
+      marginTop: 1,
+      letterSpacing: -1.2,
+    },
+    footerRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginTop: 14,
+    },
+    phoneRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 5,
+    },
+    phone: {
+      color: colors.textSecondary,
+      fontSize: 12,
+      fontWeight: '600',
+    },
+    locationAddr: {
+      flex: 1,
+      color: colors.textMuted,
+      fontSize: 10,
+      textAlign: 'right',
+      marginLeft: 8,
+    },
+    activePill: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      backgroundColor: `${colors.background}1F`,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: radius.full,
+    },
+    activeDot: {
+      width: 5,
+      height: 5,
+      borderRadius: 2.5,
+      backgroundColor: colors.primaryLight,
+    },
+    activeText: {
+      color: colors.textSecondary,
+      fontSize: 9,
+      fontWeight: '700',
+    },
+  });
+}

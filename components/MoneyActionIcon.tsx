@@ -1,29 +1,33 @@
 import { StyleSheet, View } from 'react-native';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
-import { colors } from '@/constants/theme';
+import { useSettings } from '@/contexts/SettingsContext';
 
 export type MoneyAction = 'send' | 'receive' | 'add-money';
 
-const palettes: Record<MoneyAction, { background: string; accent: string; soft: string }> = {
-  send: {
-    background: '#123B2B',
-    accent: colors.primaryLight,
-    soft: '#D9F5E7',
-  },
-  receive: {
-    background: '#102F3B',
-    accent: '#62D6EA',
-    soft: '#D9F7FB',
-  },
-  'add-money': {
-    background: '#3B3115',
-    accent: colors.goldLight,
-    soft: '#FFF4C7',
-  },
-};
+function getPalettes(colors: ReturnType<typeof useSettings>['colors']) {
+  return {
+    send: {
+      background: colors.primaryDark,
+      accent: colors.primaryLight,
+      soft: colors.accentSoft,
+    },
+    receive: {
+      background: colors.primaryMuted,
+      accent: colors.accent,
+      soft: colors.accentSoft,
+    },
+    'add-money': {
+      background: colors.goldMuted,
+      accent: colors.goldLight,
+      soft: colors.goldSoft,
+    },
+  } satisfies Record<MoneyAction, { background: string; accent: string; soft: string }>;
+}
 
 export function MoneyActionIcon({ action, size = 58 }: { action: MoneyAction; size?: number }) {
-  const palette = palettes[action];
+  const { colors } = useSettings();
+  const styles = makeStyles();
+  const palette = getPalettes(colors)[action];
 
   return (
     <View
@@ -47,7 +51,7 @@ export function MoneyActionIcon({ action, size = 58 }: { action: MoneyAction; si
             <Circle cx="27.5" cy="8.5" r="7" fill={palette.accent} />
             <Path
               d="M24.5 11.5 30.5 5.5M26.5 5.5h4v4"
-              stroke="#0B1914"
+              stroke={colors.background}
               strokeWidth="2.2"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -67,7 +71,7 @@ export function MoneyActionIcon({ action, size = 58 }: { action: MoneyAction; si
             <Rect x="4" y="9" width="25" height="20" rx="4" stroke={palette.soft} strokeWidth="2.2" />
             <Path d="M4 15h25M9 23h5" stroke={palette.accent} strokeWidth="2.2" strokeLinecap="round" />
             <Circle cx="28" cy="8" r="6" fill={palette.accent} />
-            <Path d="M28 5v6M25 8h6" stroke="#172015" strokeWidth="2" strokeLinecap="round" />
+            <Path d="M28 5v6M25 8h6" stroke={colors.background} strokeWidth="2" strokeLinecap="round" />
           </>
         )}
       </Svg>
@@ -75,15 +79,17 @@ export function MoneyActionIcon({ action, size = 58 }: { action: MoneyAction; si
   );
 }
 
-const styles = StyleSheet.create({
-  tile: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.18,
-    shadowRadius: 10,
-    elevation: 3,
-  },
-});
+function makeStyles() {
+  return StyleSheet.create({
+    tile: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 1,
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 5 },
+      shadowOpacity: 0.18,
+      shadowRadius: 10,
+      elevation: 3,
+    },
+  });
+}

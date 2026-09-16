@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import type { ColorValue, StyleProp, TextStyle, ViewStyle } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { iconPaths, type IconName } from '@/constants/icons';
-import { colors } from '@/constants/theme';
+import { useSettings } from '@/contexts/SettingsContext';
 
 export type { IconName } from '@/constants/icons';
 
@@ -18,10 +18,12 @@ interface IconProps {
 export function AppIcon({
   name,
   size = 24,
-  color = colors.primaryLight,
+  color,
   strokeWidth = 1.8,
   style,
 }: IconProps) {
+  const { colors } = useSettings();
+  const stroke = color ?? colors.primaryLight;
   return (
     <View
       style={[{ width: size, height: size, flexShrink: 0 }, style]}
@@ -33,7 +35,7 @@ export function AppIcon({
         height={size}
         viewBox="0 0 24 24"
         fill="none"
-        stroke={color}
+        stroke={stroke}
         strokeWidth={strokeWidth}
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -57,6 +59,7 @@ interface LabelProps {
 
 /** A native row keeps icons aligned with wrapping labels on Android and iOS. */
 export function IconLabel({ icon, children, style, size, color }: LabelProps) {
+  const { colors } = useSettings();
   const {
     color: textColor = colors.text,
     fontSize = 14,

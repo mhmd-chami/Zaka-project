@@ -26,6 +26,26 @@ export function openDatabase(filename) {
     CREATE TABLE IF NOT EXISTS webhook_events (
       hash TEXT PRIMARY KEY, verification_id TEXT NOT NULL, status TEXT NOT NULL, received_at TEXT NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS password_reset_codes (
+      phone TEXT PRIMARY KEY,
+      code_hash TEXT NOT NULL,
+      expires_at INTEGER NOT NULL,
+      attempts INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL
+    );
   `);
+  for (const column of [
+    'document_type TEXT',
+    'full_name TEXT',
+    'date_of_birth TEXT',
+    'document_number TEXT',
+    'nationality TEXT',
+    'expiry_date TEXT',
+    'submission_method TEXT',
+    'location_id TEXT',
+    'document_photo_path TEXT',
+  ]) {
+    try { db.exec(`ALTER TABLE verifications ADD COLUMN ${column}`); } catch { /* already migrated */ }
+  }
   return db;
 }

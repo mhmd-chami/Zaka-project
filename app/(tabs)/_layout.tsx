@@ -12,7 +12,7 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        ...tabScreenOptions(colors.primaryLight, insets.bottom),
+        ...tabScreenOptions(colors, colors.primaryLight, insets.bottom),
         headerRight: () => <NotificationBellButton />,
         sceneStyle: { flex: 1, backgroundColor: colors.background },
         headerStyle: { backgroundColor: colors.background },

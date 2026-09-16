@@ -2,13 +2,15 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { WalletView } from '@/components/WalletView';
-import { colors } from '@/constants/theme';
+import { useSettings } from '@/contexts/SettingsContext';
 import { getSession } from '@/services/authStorage';
 import { AuthSession } from '@/types';
 import { getHomeRoute } from '@/utils/routes';
 
 export default function WalletScreen() {
   const router = useRouter();
+  const { colors } = useSettings();
+  const styles = makeStyles(colors);
   const [session, setSession] = useState<AuthSession | null>(null);
 
   useFocusEffect(
@@ -38,11 +40,13 @@ export default function WalletScreen() {
   return <WalletView session={session} showAddMoney showLogout={false} />;
 }
 
-const styles = StyleSheet.create({
-  loading: {
-    flex: 1,
-    backgroundColor: colors.background,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+function makeStyles(colors: ReturnType<typeof useSettings>['colors']) {
+  return StyleSheet.create({
+    loading: {
+      flex: 1,
+      backgroundColor: colors.background,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+  });
+}

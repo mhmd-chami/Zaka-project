@@ -3,11 +3,13 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { ScreenBackground } from '@/components/ScreenBackground';
 import { ZakaLogo } from '@/components/ZakaLogo';
-import { colors } from '@/constants/theme';
+import { useSettings } from '@/contexts/SettingsContext';
 import { getSession } from '@/services/authStorage';
 import { getHomeRoute } from '@/utils/routes';
 
 export default function IndexScreen() {
+  const { colors } = useSettings();
+  const styles = makeStyles(colors);
   const [ready, setReady] = useState(false);
   const [homeRoute, setHomeRoute] = useState<Href | null>(null);
 
@@ -38,13 +40,15 @@ export default function IndexScreen() {
   return <Redirect href="/login" />;
 }
 
-const styles = StyleSheet.create({
-  loading: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  spinner: {
-    marginTop: 32,
-  },
-});
+function makeStyles(_colors: ReturnType<typeof useSettings>['colors']) {
+  return StyleSheet.create({
+    loading: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    spinner: {
+      marginTop: 32,
+    },
+  });
+}

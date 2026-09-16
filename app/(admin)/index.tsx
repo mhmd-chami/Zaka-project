@@ -11,10 +11,12 @@ import {
   Text,
   View,
 } from 'react-native';
-import { colors } from '@/constants/theme';
+import { useSettings } from '@/contexts/SettingsContext';
 import { getAllUsers, getSession, logout } from '@/services/authStorage';
+import { api } from '@/services/api';
 import { getPendingTransfersForLocation } from '@/services/branchTransferStorage';
 import { getPendingCashOutsForLocation } from '@/services/cashOutStorage';
+import { BranchVerificationRequest } from '@/types';
 import { zakaLocations } from '@/data/locations';
 
 const tileTints = {
@@ -26,6 +28,8 @@ const tileTints = {
 
 export default function AdminDashboard() {
   const router = useRouter();
+  const { colors } = useSettings();
+  const styles = makeStyles(colors);
   const [stats, setStats] = useState({ users: 0, admins: 0, locations: 0, pending: 0 });
 
   const load = useCallback(async () => {
@@ -46,11 +50,14 @@ export default function AdminDashboard() {
     const users = await getAllUsers();
     let pending = 0;
     if (session.locationId) {
-      const [transfers, cashOuts] = await Promise.all([
+      const [transfers, cashOuts, verifyResult] = await Promise.all([
         getPendingTransfersForLocation(session.locationId),
         getPendingCashOutsForLocation(session.locationId),
+        api<{ requests: BranchVerificationRequest[] }>('/verification/branch').catch(() => ({
+          requests: [] as BranchVerificationRequest[],
+        })),
       ]);
-      pending = transfers.length + cashOuts.length;
+      pending = transfers.length + cashOuts.length + verifyResult.requests.length;
     }
     setStats({
       users: users.filter((u) => u.role === 'user').length,
@@ -150,63 +157,65 @@ export default function AdminDashboard() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { paddingHorizontal: 20, paddingTop: 18, paddingBottom: 40 },
-  banner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surfaceSoft,
-    borderWidth: 1,
-    borderColor: 'rgba(245,185,66,0.2)',
-    borderRadius: 18,
-    padding: 18,
-    marginBottom: 24,
-  },
-  bannerIcon: { width: 52, height: 52, borderRadius: 17, backgroundColor: 'rgba(245,185,66,0.12)', alignItems: 'center', justifyContent: 'center', marginRight: 14 },
-  bannerCopy: { flex: 1 },
-  bannerTitle: {
-    color: colors.text,
-    fontSize: 20,
-    fontWeight: '800',
-    letterSpacing: -0.35,
-  },
-  bannerSub: {
-    color: colors.textSecondary,
-    fontSize: 14,
-    marginTop: 4,
-    lineHeight: 18,
-  },
-  stats: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 12,
-  },
-  sectionTitle: {
-    color: colors.textSecondary,
-    fontSize: 12,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 1.1,
-    marginBottom: 12,
-    marginTop: 12,
-  },
-  tiles: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 12,
-  },
-  logoutBtn: {
-    marginTop: 24,
-    alignItems: 'center',
-    padding: 14,
-    borderRadius: 14,
-    backgroundColor: 'rgba(255,99,118,0.07)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,99,118,0.25)',
-  },
-  logoutText: {
-    color: colors.danger,
-    fontWeight: '600',
-  },
-});
+function makeStyles(colors: ReturnType<typeof useSettings>['colors']) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    content: { paddingHorizontal: 20, paddingTop: 18, paddingBottom: 40 },
+    banner: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.surfaceSoft,
+      borderWidth: 1,
+      borderColor: 'rgba(245,185,66,0.2)',
+      borderRadius: 18,
+      padding: 18,
+      marginBottom: 24,
+    },
+    bannerIcon: { width: 52, height: 52, borderRadius: 17, backgroundColor: 'rgba(245,185,66,0.12)', alignItems: 'center', justifyContent: 'center', marginRight: 14 },
+    bannerCopy: { flex: 1 },
+    bannerTitle: {
+      color: colors.text,
+      fontSize: 20,
+      fontWeight: '800',
+      letterSpacing: -0.35,
+    },
+    bannerSub: {
+      color: colors.textSecondary,
+      fontSize: 14,
+      marginTop: 4,
+      lineHeight: 18,
+    },
+    stats: {
+      flexDirection: 'row',
+      gap: 12,
+      marginBottom: 12,
+    },
+    sectionTitle: {
+      color: colors.textSecondary,
+      fontSize: 12,
+      fontWeight: '700',
+      textTransform: 'uppercase',
+      letterSpacing: 1.1,
+      marginBottom: 12,
+      marginTop: 12,
+    },
+    tiles: {
+      flexDirection: 'row',
+      gap: 12,
+      marginBottom: 12,
+    },
+    logoutBtn: {
+      marginTop: 24,
+      alignItems: 'center',
+      padding: 14,
+      borderRadius: 14,
+      backgroundColor: 'rgba(255,99,118,0.07)',
+      borderWidth: 1,
+      borderColor: 'rgba(255,99,118,0.25)',
+    },
+    logoutText: {
+      color: colors.danger,
+      fontWeight: '600',
+    },
+  });
+}

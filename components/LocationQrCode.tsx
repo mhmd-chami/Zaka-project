@@ -1,6 +1,6 @@
 import QRCode from 'react-native-qrcode-svg';
 import { StyleSheet, Text, View } from 'react-native';
-import { colors } from '@/constants/theme';
+import { useSettings } from '@/contexts/SettingsContext';
 import { buildLocationQrPayload } from '@/utils/locationQr';
 
 interface Props {
@@ -10,6 +10,8 @@ interface Props {
 }
 
 export function LocationQrCode({ locationId, name, size = 180 }: Props) {
+  const { colors } = useSettings();
+  const styles = makeStyles(colors);
   const payload = buildLocationQrPayload(locationId, name);
 
   return (
@@ -27,23 +29,25 @@ export function LocationQrCode({ locationId, name, size = 180 }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: {
-    alignItems: 'center',
-  },
-  qrBox: {
-    padding: 14,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    borderWidth: 2,
-    borderColor: colors.warning,
-  },
-  hint: {
-    color: colors.textSecondary,
-    fontSize: 12,
-    textAlign: 'center',
-    marginTop: 12,
-    lineHeight: 17,
-    paddingHorizontal: 8,
-  },
-});
+function makeStyles(colors: ReturnType<typeof useSettings>['colors']) {
+  return StyleSheet.create({
+    wrap: {
+      alignItems: 'center',
+    },
+    qrBox: {
+      padding: 14,
+      backgroundColor: '#FFFFFF',
+      borderRadius: 16,
+      borderWidth: 2,
+      borderColor: colors.warning,
+    },
+    hint: {
+      color: colors.textSecondary,
+      fontSize: 12,
+      textAlign: 'center',
+      marginTop: 12,
+      lineHeight: 17,
+      paddingHorizontal: 8,
+    },
+  });
+}

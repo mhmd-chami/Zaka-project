@@ -3,11 +3,13 @@ import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { TransactionRow } from '@/components/TransactionRow';
-import { colors } from '@/constants/theme';
+import { useSettings } from '@/contexts/SettingsContext';
 import { getTransactions } from '@/services/walletStorage';
 import { Transaction } from '@/types';
 
 export default function HistoryScreen() {
+  const { colors } = useSettings();
+  const styles = makeStyles(colors);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   useFocusEffect(
@@ -36,24 +38,26 @@ export default function HistoryScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  list: {
-    padding: 20,
-    paddingBottom: 40,
-  },
-  empty: {
-    alignItems: 'center',
-    paddingTop: 60,
-  },
-  emptyIcon: {
-    marginBottom: 12,
-  },
-  emptyText: {
-    color: colors.textSecondary,
-    fontSize: 15,
-  },
-});
+function makeStyles(colors: ReturnType<typeof useSettings>['colors']) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    list: {
+      padding: 20,
+      paddingBottom: 40,
+    },
+    empty: {
+      alignItems: 'center',
+      paddingTop: 60,
+    },
+    emptyIcon: {
+      marginBottom: 12,
+    },
+    emptyText: {
+      color: colors.textSecondary,
+      fontSize: 15,
+    },
+  });
+}

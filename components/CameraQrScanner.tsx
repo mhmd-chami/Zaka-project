@@ -9,7 +9,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { colors } from '@/constants/theme';
+import { useSettings } from '@/contexts/SettingsContext';
 
 interface Props {
   hint: string;
@@ -28,6 +28,8 @@ export function CameraQrScanner({
   active = true,
   requireScreenFocus = true,
 }: Props) {
+  const { colors } = useSettings();
+  const styles = makeStyles(colors);
   const [permission, requestPermission] = useCameraPermissions();
   const [granted, setGranted] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -110,70 +112,72 @@ export function CameraQrScanner({
   );
 }
 
-const styles = StyleSheet.create({
-  center: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  message: {
-    color: colors.textSecondary,
-    fontSize: 15,
-    textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 20,
-  },
-  denied: {
-    marginBottom: 12,
-  },
-  btn: {
-    backgroundColor: colors.primaryDark,
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: colors.goldMuted,
-  },
-  btnText: {
-    color: '#FFF',
-    fontWeight: '800',
-    fontSize: 15,
-  },
-  cameraWrap: {
-    marginHorizontal: 20,
-    marginBottom: 16,
-    borderRadius: 20,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: colors.borderGold,
-    backgroundColor: '#000',
-  },
-  camera: {
-    flex: 1,
-    width: '100%',
-  },
-  frame: {
-    position: 'absolute',
-    top: '22%',
-    left: '12%',
-    right: '12%',
-    bottom: '30%',
-    borderWidth: 2,
-    borderColor: colors.gold,
-    borderRadius: 16,
-  },
-  scanHint: {
-    position: 'absolute',
-    bottom: 28,
-    left: 0,
-    right: 0,
-    textAlign: 'center',
-    color: '#FFF',
-    fontSize: 14,
-    fontWeight: '600',
-    textShadowColor: '#000',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
-  },
-});
+function makeStyles(colors: ReturnType<typeof useSettings>['colors']) {
+  return StyleSheet.create({
+    center: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: 24,
+    },
+    message: {
+      color: colors.textSecondary,
+      fontSize: 15,
+      textAlign: 'center',
+      lineHeight: 22,
+      marginBottom: 20,
+    },
+    denied: {
+      marginBottom: 12,
+    },
+    btn: {
+      backgroundColor: colors.primaryDark,
+      paddingHorizontal: 24,
+      paddingVertical: 14,
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: colors.goldMuted,
+    },
+    btnText: {
+      color: '#FFF',
+      fontWeight: '800',
+      fontSize: 15,
+    },
+    cameraWrap: {
+      marginHorizontal: 20,
+      marginBottom: 16,
+      borderRadius: 20,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: colors.borderGold,
+      backgroundColor: '#000',
+    },
+    camera: {
+      flex: 1,
+      width: '100%',
+    },
+    frame: {
+      position: 'absolute',
+      top: '22%',
+      left: '12%',
+      right: '12%',
+      bottom: '30%',
+      borderWidth: 2,
+      borderColor: colors.gold,
+      borderRadius: 16,
+    },
+    scanHint: {
+      position: 'absolute',
+      bottom: 28,
+      left: 0,
+      right: 0,
+      textAlign: 'center',
+      color: '#FFF',
+      fontSize: 14,
+      fontWeight: '600',
+      textShadowColor: '#000',
+      textShadowOffset: { width: 0, height: 1 },
+      textShadowRadius: 4,
+    },
+  });
+}

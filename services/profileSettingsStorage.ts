@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { saveGlobalTheme } from '@/services/appThemeStorage';
 import { getSession } from '@/services/authStorage';
 import { ProfileSettings, SendMode } from '@/types';
 
@@ -44,6 +45,7 @@ export async function saveProfileSettings(
 ): Promise<void> {
   const session = await getSession();
   if (!session) return;
+  await saveGlobalTheme(settings.theme);
   await AsyncStorage.setItem(settingsKey(session.userId), JSON.stringify(settings));
 }
 

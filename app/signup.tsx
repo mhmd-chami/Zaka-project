@@ -16,7 +16,8 @@ import { AuthInput } from '@/components/AuthInput';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { ScreenBackground } from '@/components/ScreenBackground';
 import { ZakaLogo } from '@/components/ZakaLogo';
-import { colors, contentBottomPadding, radius, shadows } from '@/constants/theme';
+import { contentBottomPadding, shadows } from '@/constants/theme';
+import { useSettings } from '@/contexts/SettingsContext';
 import { signUp } from '@/services/authStorage';
 import { sendWelcomeNotification } from '@/services/notificationStorage';
 import { getHomeRoute } from '@/utils/routes';
@@ -24,6 +25,8 @@ import { getHomeRoute } from '@/utils/routes';
 export default function SignUpScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { colors } = useSettings();
+  const styles = makeStyles(colors);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
@@ -138,47 +141,49 @@ export default function SignUpScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  flex: { flex: 1 },
-  container: {
-    flexGrow: 1,
-    paddingHorizontal: 24,
-    paddingTop: 20,
-  },
-  title: {
-    color: colors.text,
-    fontSize: 28,
-    fontWeight: '800',
-    textAlign: 'center',
-    marginTop: 24,
-    letterSpacing: -0.7,
-  },
-  subtitle: {
-    color: colors.textSecondary,
-    fontSize: 14,
-    textAlign: 'center',
-    marginBottom: 20,
-    marginTop: 6,
-  },
-  formCard: {
-    backgroundColor: colors.surfaceSoft,
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: colors.borderStrong,
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 20,
-  },
-  footerText: {
-    color: colors.textSecondary,
-    fontSize: 14,
-  },
-  link: {
-    color: colors.primaryLight,
-    fontSize: 14,
-    fontWeight: '700',
-  },
-});
+function makeStyles(colors: ReturnType<typeof useSettings>['colors']) {
+  return StyleSheet.create({
+    flex: { flex: 1 },
+    container: {
+      flexGrow: 1,
+      paddingHorizontal: 24,
+      paddingTop: 20,
+    },
+    title: {
+      color: colors.text,
+      fontSize: 28,
+      fontWeight: '800',
+      textAlign: 'center',
+      marginTop: 24,
+      letterSpacing: -0.7,
+    },
+    subtitle: {
+      color: colors.textSecondary,
+      fontSize: 14,
+      textAlign: 'center',
+      marginBottom: 20,
+      marginTop: 6,
+    },
+    formCard: {
+      backgroundColor: colors.surfaceSoft,
+      borderRadius: 16,
+      padding: 20,
+      borderWidth: 1,
+      borderColor: colors.borderStrong,
+    },
+    footer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      marginTop: 20,
+    },
+    footerText: {
+      color: colors.textSecondary,
+      fontSize: 14,
+    },
+    link: {
+      color: colors.primaryLight,
+      fontSize: 14,
+      fontWeight: '700',
+    },
+  });
+}

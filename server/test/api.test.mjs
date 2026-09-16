@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { generateKeyPairSync, sign, randomUUID } from 'node:crypto';
 import { createApp } from '../src/app.mjs';
+import { newToken, tokenHash } from '../src/security.mjs';
 import { signVeriff } from '../src/veriff.mjs';
 
 const { publicKey, privateKey } = generateKeyPairSync('rsa', { modulusLength: 2048 });
@@ -137,6 +138,59 @@ await test('verification requires consent, is idempotent, and trusts only signed
     assert.equal((await app.webhook({ ...approved, status: 'declined', code: 9102, decisionTime: new Date(now - 1000).toISOString() })).status, 200);
     assert.equal((await app.request('/v1/verification', { token: user.token })).data.verification.status, 'approved');
     assert.equal((await start()).data.url, undefined, 'Already approved session is not recaptured');
+  } finally { await app.close(); }
+});
+
+await test('document verification is sent to a branch and waits for admin approval', async () => {
+  const app = await fixture();
+  try {
+    const customer = await app.signup('+96171123458');
+    const adminId = randomUUID();
+    app.db.prepare('INSERT INTO users (id,name,phone,password_hash,role,location_id,google_id,email,created_at) VALUES (?,?,?,?,?,?,?,?,?)')
+      .run(adminId, 'Hamra Admin', '+96171123459', null, 'admin', 'loc-1', null, null, new Date().toISOString());
+    const adminToken = newToken();
+    app.db.prepare('INSERT INTO sessions VALUES (?,?,?)').run(tokenHash(adminToken), adminId, Date.now() + 3600000);
+    const documentPhotoBase64 = Buffer.alloc(1200, 0xff).toString('base64');
+    const submit = await app.request('/v1/verification/document', {
+      method: 'POST',
+      token: customer.token,
+      data: {
+        consent: true,
+        documentType: 'lebanese_id',
+        documentCaptured: true,
+        documentPhotoBase64,
+        locationId: 'loc-1',
+        fullName: 'Test Customer',
+        documentNumber: 'LB123456',
+        dateOfBirth: '01/01/1990',
+        nationality: 'Lebanese',
+        expiryDate: '01/01/2030',
+      },
+    });
+    assert.equal(submit.status, 200);
+    assert.equal(submit.data.verification.status, 'pending');
+    assert.equal(submit.data.verification.providerStatus, 'review');
+    assert.equal(submit.data.verification.locationId, 'loc-1');
+    const listed = await app.request('/v1/verification/branch', { token: adminToken });
+    assert.equal(listed.status, 200);
+    assert.equal(listed.data.requests.length, 1);
+    assert.equal(listed.data.requests[0].userPhone, '+96171123458');
+    assert.equal(listed.data.requests[0].hasDocumentPhoto, true);
+    const photoResponse = await fetch(`http://127.0.0.1:${app.server.address().port}/v1/verification/${submit.data.verification.id}/photo`, {
+      headers: { Authorization: `Bearer ${adminToken}`, 'X-Zaka-Client': 'native' },
+    });
+    assert.equal(photoResponse.status, 200);
+    assert.equal(photoResponse.headers.get('content-type'), 'image/jpeg');
+    assert.equal(Buffer.from(await photoResponse.arrayBuffer()).length, 1200);
+    const approved = await app.request(`/v1/verification/${submit.data.verification.id}/decision`, {
+      method: 'POST',
+      token: adminToken,
+      data: { decision: 'approve' },
+    });
+    assert.equal(approved.status, 200);
+    assert.equal(approved.data.verification.status, 'approved');
+    const verified = (await app.request('/v1/verification', { token: customer.token })).data.verification;
+    assert.equal(verified.status, 'approved');
   } finally { await app.close(); }
 });
 

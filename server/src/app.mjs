@@ -1,14 +1,28 @@
 import { createServer } from 'node:http';
 import { randomUUID } from 'node:crypto';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { tmpdir } from 'node:os';
 import { openDatabase } from './database.mjs';
 import { googleVerifier } from './google.mjs';
 import { veriffProvider } from './veriff.mjs';
 import { ApiError, checkPassword, hashPassword, newToken, password, phone, rateLimiter, text, tokenHash } from './security.mjs';
 
 const SESSION_AGE = 7 * 24 * 60 * 60 * 1000;
+const JSON_BODY_LIMIT = 256 * 1024;
+const DOCUMENT_BODY_LIMIT = 6 * 1024 * 1024;
+const BRANCH_IDS = new Set(['loc-1', 'loc-2', 'loc-3', 'loc-4']);
+
+function verificationPhotoDir(config) {
+  if (config.verificationPhotoDir) return config.verificationPhotoDir;
+  if (config.databasePath === ':memory:') return join(tmpdir(), 'zaka-verification-photos');
+  return join(dirname(config.databasePath), 'verification-photos');
+}
 
 export async function createApp(config, { fetcher = fetch } = {}) {
   const db = openDatabase(config.databasePath);
+  const photoDir = verificationPhotoDir(config);
+  mkdirSync(photoDir, { recursive: true });
   const verifyGoogle = googleVerifier(config.googleClientIds || [], fetcher);
   const provider = veriffProvider(config.veriff, fetcher);
   const limit = rateLimiter();
@@ -18,9 +32,110 @@ export async function createApp(config, { fetcher = fetch } = {}) {
   const verificationRow = (user) => user.current_verification_id ? db.prepare('SELECT * FROM verifications WHERE id=?').get(user.current_verification_id) : null;
   function verificationView(row) {
     if (!row) return undefined;
-    return { id: row.id, provider: 'veriff', status: row.status, providerStatus: row.provider_status,
+    const provider = row.submission_method === 'document_questions' ? 'document' : 'veriff';
+    return {
+      id: row.id, provider, status: row.status, providerStatus: row.provider_status,
       submittedAt: row.created_at, reviewedAt: row.decision_at ? new Date(row.decision_at).toISOString() : undefined,
-      environment: row.environment };
+      environment: row.environment, documentType: row.document_type || undefined,
+      documentNumber: row.document_number || undefined, fullName: row.full_name || undefined,
+      dateOfBirth: row.date_of_birth || undefined, nationality: row.nationality || undefined,
+      expiryDate: row.expiry_date || undefined, locationId: row.location_id || undefined,
+    };
+  }
+  function branchVerificationView(row) {
+    const applicant = byId(row.user_id);
+    return {
+      id: row.id, userId: row.user_id, userName: applicant?.name || 'Customer',
+      userPhone: applicant?.phone || '', status: row.status, providerStatus: row.provider_status,
+      submittedAt: row.created_at, documentType: row.document_type || undefined,
+      documentNumber: row.document_number || undefined, fullName: row.full_name || undefined,
+      dateOfBirth: row.date_of_birth || undefined, nationality: row.nationality || undefined,
+      expiryDate: row.expiry_date || undefined, locationId: row.location_id || undefined,
+      hasDocumentPhoto: Boolean(row.document_photo_path),
+    };
+  }
+  function parseDocumentPhoto(data) {
+    const raw = typeof data.documentPhotoBase64 === 'string' ? data.documentPhotoBase64.trim() : '';
+    if (!raw) throw new ApiError(400, 'Document photo is required.');
+    const cleaned = raw.replace(/^data:image\/\w+;base64,/, '');
+    if (cleaned.length > 5 * 1024 * 1024) throw new ApiError(413, 'Document photo is too large.');
+    let buffer;
+    try { buffer = Buffer.from(cleaned, 'base64'); } catch { throw new ApiError(400, 'Invalid document photo.'); }
+    if (buffer.length < 1000) throw new ApiError(400, 'Capture a clear photo of your document first.');
+    return buffer;
+  }
+  function saveVerificationPhoto(verificationId, buffer) {
+    const filename = `${verificationId}.jpg`;
+    writeFileSync(join(photoDir, filename), buffer);
+    return filename;
+  }
+  function submitDocumentVerification(user, data) {
+    const current = verificationRow(byId(user.id));
+    const sameEnvironment = current?.environment === config.veriff.environment;
+    if (sameEnvironment && current?.status === 'approved') return { verification: verificationView(current) };
+    if (sameEnvironment && current?.provider_status === 'review') return { verification: verificationView(current) };
+    const documentType = ['lebanese_id', 'passport'].includes(data.documentType) ? data.documentType : null;
+    if (!documentType) throw new ApiError(400, 'Choose Lebanese ID or passport.');
+    if (data.documentCaptured !== true) throw new ApiError(400, 'Capture a clear photo of your document first.');
+    const fullName = text(data.fullName, 'full name');
+    const documentNumber = text(data.documentNumber, 'document number');
+    const dateOfBirth = text(data.dateOfBirth, 'date of birth');
+    const nationality = text(data.nationality, 'nationality');
+    const expiryDate = text(data.expiryDate, 'expiry date');
+    const locationId = typeof data.locationId === 'string' ? data.locationId.trim() : '';
+    if (!BRANCH_IDS.has(locationId)) throw new ApiError(400, 'Choose a branch for verification.');
+    const photoBuffer = parseDocumentPhoto(data);
+    limit(`verify:${user.id}`, 5, 3600000);
+    const id = randomUUID();
+    const providerId = `document-${id}`;
+    const status = 'pending';
+    const providerStatus = 'review';
+    db.exec('BEGIN IMMEDIATE');
+    try {
+      const photoPath = saveVerificationPhoto(id, photoBuffer);
+      db.prepare(`INSERT INTO verifications (
+        id,user_id,provider_id,url,status,provider_status,environment,created_at,decision_at,
+        document_type,full_name,date_of_birth,document_number,nationality,expiry_date,submission_method,location_id,document_photo_path
+      ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(
+        id, user.id, providerId, '', status, providerStatus, config.veriff.environment,
+        new Date().toISOString(), 0, documentType, fullName, dateOfBirth,
+        documentNumber, nationality, expiryDate, 'document_questions', locationId, photoPath,
+      );
+      db.prepare('UPDATE users SET current_verification_id=? WHERE id=?').run(id, user.id);
+      db.exec('COMMIT');
+    } catch (error) { db.exec('ROLLBACK'); throw error; }
+    return { verification: verificationView(verificationRow(byId(user.id))) };
+  }
+  function listBranchVerifications(admin) {
+    if (admin.role !== 'admin' || !admin.location_id) throw new ApiError(403, 'This action requires a branch administrator.');
+    const rows = db.prepare(`
+      SELECT * FROM verifications
+      WHERE location_id=? AND submission_method='document_questions' AND status='pending' AND provider_status='review'
+      ORDER BY created_at DESC
+    `).all(admin.location_id);
+    return { requests: rows.map(branchVerificationView) };
+  }
+  function decideBranchVerification(admin, verificationId, decision) {
+    if (admin.role !== 'admin' || !admin.location_id) throw new ApiError(403, 'This action requires a branch administrator.');
+    if (!['approve', 'reject'].includes(decision)) throw new ApiError(400, 'Decision must be approve or reject.');
+    const row = db.prepare('SELECT * FROM verifications WHERE id=?').get(verificationId);
+    if (!row || row.submission_method !== 'document_questions') throw new ApiError(404, 'Verification request not found.');
+    if (row.location_id !== admin.location_id) throw new ApiError(403, 'This verification is for another branch.');
+    if (row.status !== 'pending' || row.provider_status !== 'review') throw new ApiError(400, 'This verification was already decided.');
+    const status = decision === 'approve' ? 'approved' : 'rejected';
+    const providerStatus = decision === 'approve' ? 'approved' : 'declined';
+    const now = Date.now();
+    db.prepare('UPDATE verifications SET status=?,provider_status=?,decision_at=? WHERE id=?').run(status, providerStatus, now, row.id);
+    const updated = db.prepare('SELECT * FROM verifications WHERE id=?').get(row.id);
+    return { verification: verificationView(updated), applicantUserId: row.user_id };
+  }
+  function readBranchVerificationPhoto(admin, verificationId) {
+    if (admin.role !== 'admin' || !admin.location_id) throw new ApiError(403, 'This action requires a branch administrator.');
+    const row = db.prepare('SELECT * FROM verifications WHERE id=?').get(verificationId);
+    if (!row || row.submission_method !== 'document_questions') throw new ApiError(404, 'Verification request not found.');
+    if (row.location_id !== admin.location_id) throw new ApiError(403, 'This verification is for another branch.');
+    if (!row.document_photo_path) throw new ApiError(404, 'Document photo not found.');
+    return readFileSync(join(photoDir, row.document_photo_path));
   }
   function account(user, includeVerification = true) {
     return { id: user.id, name: user.name, phone: user.phone, role: user.role, locationId: user.location_id || undefined,
@@ -81,12 +196,12 @@ export async function createApp(config, { fetcher = fetch } = {}) {
     return { ok: true, session: sessionView(user), ...(req.headers['x-zaka-client'] === 'native' ? { accessToken: token } : {}) };
   }
   function staff(user) { if (!['admin', 'owner'].includes(user.role)) throw new ApiError(403, 'This action requires an administrator.'); }
-  async function body(req) {
+  async function body(req, maxBytes = JSON_BODY_LIMIT) {
     if (!req.headers['content-type']?.startsWith('application/json')) throw new ApiError(415, 'Use application/json.');
     const chunks = []; let size = 0;
     for await (const chunk of req) {
       size += chunk.length;
-      if (size > 256 * 1024) throw new ApiError(413, 'Request is too large.');
+      if (size > maxBytes) throw new ApiError(413, 'Request is too large.');
       chunks.push(chunk);
     }
     const raw = Buffer.concat(chunks);
@@ -242,6 +357,24 @@ export async function createApp(config, { fetcher = fetch } = {}) {
         const { data } = await body(req);
         if (data.consent !== true) throw new ApiError(400, 'Please consent to verification before continuing.');
         return reply(200, await startVerification(user));
+      }
+      if (path === '/v1/verification/document' && method === 'POST') {
+        const { data } = await body(req, DOCUMENT_BODY_LIMIT);
+        if (data.consent !== true) throw new ApiError(400, 'Please consent to verification before continuing.');
+        return reply(200, submitDocumentVerification(user, data));
+      }
+      if (path === '/v1/verification/branch' && method === 'GET') return reply(200, listBranchVerifications(user));
+      const photoMatch = path.match(/^\/v1\/verification\/([a-f0-9-]+)\/photo$/);
+      if (photoMatch && method === 'GET') {
+        const photo = readBranchVerificationPhoto(user, photoMatch[1]);
+        res.writeHead(200, { 'Content-Type': 'image/jpeg', 'Cache-Control': 'private, no-store' });
+        res.end(photo);
+        return;
+      }
+      const decisionMatch = path.match(/^\/v1\/verification\/([a-f0-9-]+)\/decision$/);
+      if (decisionMatch && method === 'POST') {
+        const { data } = await body(req);
+        return reply(200, decideBranchVerification(user, decisionMatch[1], data.decision));
       }
       throw new ApiError(404, 'Endpoint not found.');
     } catch (error) {

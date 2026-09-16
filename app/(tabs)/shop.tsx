@@ -13,7 +13,7 @@ import {
   View,
 } from 'react-native';
 import { ShopItemCard } from '@/components/ShopItemCard';
-import { colors } from '@/constants/theme';
+import { useSettings } from '@/contexts/SettingsContext';
 import { carriers } from '@/data/carriers';
 import { shopItems } from '@/data/shopItems';
 import { getProfile, purchaseItem, topUpPhone } from '@/services/walletStorage';
@@ -23,6 +23,8 @@ const QUICK = [5, 10, 15, 25];
 
 export default function ShopScreen() {
   const router = useRouter();
+  const { colors } = useSettings();
+  const styles = makeStyles(colors);
   const [phone, setPhone] = useState('');
   const [amount, setAmount] = useState('10');
   const [carrier, setCarrier] = useState<Carrier>(carriers[0]);
@@ -189,118 +191,120 @@ export default function ShopScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  content: {
-    paddingHorizontal: 20,
-    paddingTop: 18,
-    paddingBottom: 40,
-  },
-  sectionTitle: {
-    color: colors.text,
-    fontSize: 20,
-    fontWeight: '800',
-    letterSpacing: -0.35,
-    marginBottom: 6,
-  },
-  sectionTitleSpaced: {
-    marginTop: 28,
-  },
-  sectionSub: {
-    color: colors.textSecondary,
-    fontSize: 13,
-    lineHeight: 19,
-    marginBottom: 14,
-  },
-  rechargeBox: {
-    backgroundColor: colors.surfaceSoft,
-    borderRadius: 18,
-    padding: 17,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  carrierRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 8,
-  },
-  carrierBtn: {
-    flex: 1,
-    backgroundColor: colors.surface,
-    borderRadius: 14,
-    padding: 12,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'transparent',
-  },
-  carrierSelected: {
-    borderColor: colors.primary,
-    backgroundColor: colors.primarySoft,
-  },
-  carrierIcon: { marginBottom: 8 },
-  carrierName: {
-    color: colors.textSecondary,
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  carrierNameSelected: { color: colors.text },
-  label: {
-    color: colors.text,
-    fontSize: 13,
-    fontWeight: '700',
-    marginBottom: 8,
-    marginTop: 10,
-  },
-  input: {
-    backgroundColor: colors.backgroundAlt,
-    borderRadius: 14,
-    padding: 15,
-    fontSize: 16,
-    color: colors.text,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  quickRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginTop: 12,
-  },
-  quickBtn: {
-    flex: 1,
-    backgroundColor: colors.surface,
-    padding: 10,
-    borderRadius: 12,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'transparent',
-  },
-  quickBtnActive: { backgroundColor: colors.primarySoft, borderColor: 'rgba(42,140,137,0.35)' },
-  quickText: {
-    color: colors.textSecondary,
-    fontWeight: '700',
-  },
-  quickTextActive: { color: colors.primaryLight },
-  rechargeBtn: {
-    backgroundColor: colors.primary,
-    padding: 16,
-    borderRadius: 14,
-    alignItems: 'center',
-    marginTop: 18,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-  },
-  rechargeBtnText: {
-    color: colors.background,
-    fontSize: 15,
-    fontWeight: '800',
-  },
-  disabled: { opacity: 0.7 },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-});
+function makeStyles(colors: ReturnType<typeof useSettings>['colors']) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    content: {
+      paddingHorizontal: 20,
+      paddingTop: 18,
+      paddingBottom: 40,
+    },
+    sectionTitle: {
+      color: colors.text,
+      fontSize: 20,
+      fontWeight: '800',
+      letterSpacing: -0.35,
+      marginBottom: 6,
+    },
+    sectionTitleSpaced: {
+      marginTop: 28,
+    },
+    sectionSub: {
+      color: colors.textSecondary,
+      fontSize: 13,
+      lineHeight: 19,
+      marginBottom: 14,
+    },
+    rechargeBox: {
+      backgroundColor: colors.surfaceSoft,
+      borderRadius: 18,
+      padding: 17,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    carrierRow: {
+      flexDirection: 'row',
+      gap: 10,
+      marginBottom: 8,
+    },
+    carrierBtn: {
+      flex: 1,
+      backgroundColor: colors.surface,
+      borderRadius: 14,
+      padding: 12,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: 'transparent',
+    },
+    carrierSelected: {
+      borderColor: colors.primary,
+      backgroundColor: colors.primarySoft,
+    },
+    carrierIcon: { marginBottom: 8 },
+    carrierName: {
+      color: colors.textSecondary,
+      fontSize: 12,
+      fontWeight: '600',
+    },
+    carrierNameSelected: { color: colors.text },
+    label: {
+      color: colors.text,
+      fontSize: 13,
+      fontWeight: '700',
+      marginBottom: 8,
+      marginTop: 10,
+    },
+    input: {
+      backgroundColor: colors.backgroundAlt,
+      borderRadius: 14,
+      padding: 15,
+      fontSize: 16,
+      color: colors.text,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    quickRow: {
+      flexDirection: 'row',
+      gap: 8,
+      marginTop: 12,
+    },
+    quickBtn: {
+      flex: 1,
+      backgroundColor: colors.surface,
+      padding: 10,
+      borderRadius: 12,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: 'transparent',
+    },
+    quickBtnActive: { backgroundColor: colors.primarySoft, borderColor: 'rgba(42,140,137,0.35)' },
+    quickText: {
+      color: colors.textSecondary,
+      fontWeight: '700',
+    },
+    quickTextActive: { color: colors.primaryLight },
+    rechargeBtn: {
+      backgroundColor: colors.primary,
+      padding: 16,
+      borderRadius: 14,
+      alignItems: 'center',
+      marginTop: 18,
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.08)',
+    },
+    rechargeBtnText: {
+      color: colors.background,
+      fontSize: 15,
+      fontWeight: '800',
+    },
+    disabled: { opacity: 0.7 },
+    grid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'space-between',
+    },
+  });
+}

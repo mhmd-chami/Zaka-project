@@ -7,7 +7,7 @@ export type IdentityVerificationStatus = 'not_submitted' | 'pending' | 'approved
 
 export interface IdentityVerification {
   id: string;
-  provider: 'veriff';
+  provider: 'veriff' | 'document';
   environment: 'test' | 'live';
   providerStatus: string;
   reviewedAt?: string;
@@ -20,6 +20,25 @@ export interface IdentityVerification {
   dateOfBirth?: string;
   expiryDate?: string;
   nationality?: string;
+  locationId?: string;
+}
+
+export interface BranchVerificationRequest {
+  id: string;
+  userId: string;
+  userName: string;
+  userPhone: string;
+  status: IdentityVerificationStatus;
+  providerStatus: string;
+  submittedAt: string;
+  documentType?: IdentityDocumentType;
+  documentNumber?: string;
+  fullName?: string;
+  dateOfBirth?: string;
+  expiryDate?: string;
+  nationality?: string;
+  locationId?: string;
+  hasDocumentPhoto?: boolean;
 }
 
 export type TransactionType =

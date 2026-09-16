@@ -10,6 +10,7 @@ import {
 import { colors as darkColors } from '@/constants/theme';
 import { lightColors, type ThemeColors } from '@/constants/lightTheme';
 import { t as translate } from '@/constants/i18n';
+import { getGlobalTheme, saveGlobalTheme } from '@/services/appThemeStorage';
 import {
   getProfileSettings,
   saveProfileSettings,
@@ -24,6 +25,7 @@ interface SettingsContextValue {
   theme: AppTheme;
   refreshSettings: () => Promise<void>;
   patchSettings: (patch: Partial<ProfileSettings>) => Promise<void>;
+  setTheme: (theme: AppTheme) => Promise<void>;
   t: (key: string) => string;
 }
 
@@ -31,17 +33,37 @@ const SettingsContext = createContext<SettingsContextValue | null>(null);
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<ProfileSettings | null>(null);
+  const [globalTheme, setGlobalTheme] = useState<AppTheme>('dark');
 
   const refreshSettings = useCallback(async () => {
-    setSettings(await getProfileSettings());
+    const [storedTheme, profileSettings] = await Promise.all([
+      getGlobalTheme(),
+      getProfileSettings(),
+    ]);
+    if (storedTheme) setGlobalTheme(storedTheme);
+    setSettings(profileSettings);
   }, []);
 
   useEffect(() => {
+    void getGlobalTheme().then((stored) => {
+      if (stored) setGlobalTheme(stored);
+    });
     refreshSettings();
   }, [refreshSettings]);
 
+  const setTheme = useCallback(async (nextTheme: AppTheme) => {
+    await saveGlobalTheme(nextTheme);
+    setGlobalTheme(nextTheme);
+    const next = await updateProfileSettings({ theme: nextTheme });
+    if (next) setSettings(next);
+  }, []);
+
   const patchSettings = useCallback(
     async (patch: Partial<ProfileSettings>) => {
+      if (patch.theme) {
+        await saveGlobalTheme(patch.theme);
+        setGlobalTheme(patch.theme);
+      }
       const next = await updateProfileSettings(patch);
       if (next) setSettings(next);
     },
@@ -49,7 +71,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   );
 
   const language = settings?.language ?? 'en';
-  const theme = settings?.theme ?? 'dark';
+  const theme = settings?.theme ?? globalTheme;
   const palette = theme === 'light' ? lightColors : darkColors;
 
   const value = useMemo<SettingsContextValue>(
@@ -60,9 +82,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       theme,
       refreshSettings,
       patchSettings,
+      setTheme,
       t: (key: string) => translate(key, language),
     }),
-    [settings, palette, language, theme, refreshSettings, patchSettings]
+    [settings, palette, language, theme, refreshSettings, patchSettings, setTheme]
   );
 
   return (
@@ -80,6 +103,7 @@ export function useSettings(): SettingsContextValue {
       theme: 'dark',
       refreshSettings: async () => {},
       patchSettings: async () => {},
+      setTheme: async () => {},
       t: (key: string) => translate(key, 'en'),
     };
   }

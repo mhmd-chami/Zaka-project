@@ -97,6 +97,24 @@ export default function ProfileScreen() {
     await refreshSettings();
   }, [router, refreshSettings]);
 
+  const verification = account?.identityVerification;
+  const identityVerified = verification?.status === 'approved';
+  const identityPending =
+    verification?.status === 'pending' && verification.providerStatus === 'review';
+  const identityRejected = verification?.status === 'rejected';
+  const verificationTitle = identityVerified
+    ? verification.environment === 'test'
+      ? t('verifyCompleteTest')
+      : t('verifyCompleteLive')
+    : t('verifyIdentityTitle');
+  const verificationSubtitle = identityVerified
+    ? t('verifyCompleteBody')
+    : identityPending
+      ? t('verifyProfilePending')
+      : identityRejected
+        ? t('verifyStatusRejected')
+        : t('verifyProfileStart');
+
   useFocusEffect(
     useCallback(() => {
       load();
@@ -203,11 +221,11 @@ export default function ProfileScreen() {
             <AppIcon name={roleIcon(session.role)} size={12} color={colors.primaryLight} />
             <Text style={styles.roleText}>{roleLabel(session.role, t)}</Text>
           </View>
-          {account?.identityVerification?.status === 'approved' && account.identityVerification.environment === 'live' && (
+          {identityVerified ? (
             <View style={styles.verifiedBadge}>
               <Text style={styles.verifiedText}>✓ {t('verified')}</Text>
             </View>
-          )}
+          ) : null}
         </View>
 
         <View style={styles.summaryCard}>
@@ -249,12 +267,8 @@ export default function ProfileScreen() {
               <AppIcon name="shield" size={23} color={colors.primaryLight} />
             </View>
           }
-          title={account?.identityVerification?.status === 'approved' && account.identityVerification.environment === 'live' ? 'Identity verified' : 'Verify identity'}
-          subtitle={
-            account?.identityVerification?.status === 'pending'
-              ? 'Your documents are under review'
-              : 'Use a Lebanese ID, passport, or residence permit'
-          }
+          title={verificationTitle}
+          subtitle={verificationSubtitle}
           onPress={() => router.push('/verification')}
         />
         <MenuItem

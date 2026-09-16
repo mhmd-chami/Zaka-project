@@ -9,6 +9,53 @@ export const API_URL = (configuredUrl || `http://${host}:3001`).replace(/\/$/, '
 // Native bearer tokens stay in memory. Browser sessions use HttpOnly cookies.
 let accessToken: string | undefined;
 export function clearApiSession() { accessToken = undefined; }
+function verificationPhotoHeaders(): Record<string, string> {
+  return {
+    'X-Zaka-Client': Platform.OS === 'web' ? 'web' : 'native',
+    ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+  };
+}
+
+function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (typeof reader.result === 'string') resolve(reader.result);
+      else reject(new Error('Could not read document photo.'));
+    };
+    reader.onerror = () => reject(new Error('Could not read document photo.'));
+    reader.readAsDataURL(blob);
+  });
+}
+
+export async function fetchVerificationPhotoDataUrl(verificationId: string): Promise<string> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30000);
+  try {
+    const response = await fetch(`${API_URL}/v1/verification/${verificationId}/photo`, {
+      credentials: Platform.OS === 'web' ? 'include' : 'omit',
+      signal: controller.signal,
+      headers: verificationPhotoHeaders(),
+    });
+    if (!response.ok) {
+      if (response.status === 401) clearApiSession();
+      throw new ApiError('Could not load document photo.', response.status);
+    }
+    return blobToDataUrl(await response.blob());
+  } catch (error) {
+    if (error instanceof ApiError) throw error;
+    throw new ApiError('Could not load document photo.', 0);
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+export async function readLocalPhotoBase64(uri: string): Promise<string> {
+  const response = await fetch(uri);
+  const dataUrl = await blobToDataUrl(await response.blob());
+  const comma = dataUrl.indexOf(',');
+  return comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl;
+}
 export class ApiError extends Error {
   constructor(message: string, public status: number) { super(message); }
 }

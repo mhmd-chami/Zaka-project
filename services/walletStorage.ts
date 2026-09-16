@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { findUserByPhone, getAllUsers, getSession } from '@/services/authStorage';
 import { sendNotificationToUser } from '@/services/notificationStorage';
+import { ensureCanSendMoney } from '@/services/verificationGate';
 import { Transaction, UserRole, WalletProfile } from '@/types';
 
 function defaultBalance(role: UserRole): number {
@@ -166,6 +167,11 @@ export async function sendMoneyP2P(
 ): Promise<{ ok: boolean; error?: string; recipientName?: string }> {
   if (amount <= 0) return { ok: false, error: 'Enter a valid amount' };
 
+  const verification = await ensureCanSendMoney();
+  if (!verification.ok) {
+    return { ok: false, error: verification.reason };
+  }
+
   const session = await getSession();
   if (!session) return { ok: false, error: 'Not logged in' };
 
@@ -239,6 +245,11 @@ export async function sendCashAtLocation(
   locationName: string
 ): Promise<{ ok: boolean; error?: string; reference?: string }> {
   if (amount <= 0) return { ok: false, error: 'Enter a valid amount' };
+
+  const verification = await ensureCanSendMoney();
+  if (!verification.ok) {
+    return { ok: false, error: verification.reason };
+  }
 
   const session = await getSession();
   if (!session) return { ok: false, error: 'Not logged in' };

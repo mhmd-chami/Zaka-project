@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native';
 import { NotificationRow } from '@/components/NotificationRow';
-import { colors } from '@/constants/theme';
+import { useSettings } from '@/contexts/SettingsContext';
 import { getSession } from '@/services/authStorage';
 import {
   getNotifications,
@@ -19,6 +19,8 @@ import {
 import { AppNotification } from '@/types';
 
 export default function NotificationsScreen() {
+  const { colors } = useSettings();
+  const styles = makeStyles(colors);
   const [items, setItems] = useState<AppNotification[]>([]);
 
   const load = useCallback(async () => {
@@ -83,40 +85,42 @@ export default function NotificationsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  markAll: {
-    alignSelf: 'flex-end',
-    padding: 16,
-    paddingBottom: 0,
-  },
-  markAllText: {
-    color: colors.primary,
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  list: {
-    padding: 20,
-    paddingBottom: 40,
-  },
-  empty: {
-    alignItems: 'center',
-    paddingTop: 60,
-  },
-  emptyIcon: {
-    marginBottom: 12,
-  },
-  emptyTitle: {
-    color: colors.text,
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  emptySub: {
-    color: colors.textSecondary,
-    fontSize: 14,
-    marginTop: 6,
-  },
-});
+function makeStyles(colors: ReturnType<typeof useSettings>['colors']) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    markAll: {
+      alignSelf: 'flex-end',
+      padding: 16,
+      paddingBottom: 0,
+    },
+    markAllText: {
+      color: colors.primary,
+      fontWeight: '600',
+      fontSize: 14,
+    },
+    list: {
+      padding: 20,
+      paddingBottom: 40,
+    },
+    empty: {
+      alignItems: 'center',
+      paddingTop: 60,
+    },
+    emptyIcon: {
+      marginBottom: 12,
+    },
+    emptyTitle: {
+      color: colors.text,
+      fontSize: 18,
+      fontWeight: '700',
+    },
+    emptySub: {
+      color: colors.textSecondary,
+      fontSize: 14,
+      marginTop: 6,
+    },
+  });
+}

@@ -1,6 +1,7 @@
 import { AppIcon } from '@/components/AppIcon';
 import { StyleSheet, Text, View } from 'react-native';
-import { colors, logoText } from '@/constants/theme';
+import { logoText } from '@/constants/theme';
+import { useSettings } from '@/contexts/SettingsContext';
 
 interface Props {
   size?: 'sm' | 'md' | 'lg';
@@ -8,6 +9,8 @@ interface Props {
 }
 
 export function ZakaLogo({ size = 'md', showTagline = false }: Props) {
+  const { colors } = useSettings();
+  const styles = makeStyles(colors);
   const scale = size === 'sm' ? 0.78 : size === 'lg' ? 1.15 : 1;
 
   return (
@@ -35,41 +38,43 @@ export function ZakaLogo({ size = 'md', showTagline = false }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: {
-    alignItems: 'center',
-    gap: 10,
-  },
-  badge: {
-    width: 60,
-    height: 60,
-    borderRadius: 18,
-    backgroundColor: colors.goldSoft,
-    borderWidth: 1,
-    borderColor: colors.borderGold,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.12,
-    shadowRadius: 6,
-    elevation: 1,
-  },
-  brand: {
-    ...logoText,
-    textAlign: 'center',
-  },
-  zaka: {
-    color: colors.gold,
-  },
-  pay: {
-    color: colors.text,
-  },
-  tagline: {
-    color: colors.textSecondary,
-    fontSize: 12,
-    textAlign: 'center',
-    marginTop: 6,
-    letterSpacing: 0.2,
-  },
-});
+function makeStyles(colors: ReturnType<typeof useSettings>['colors']) {
+  return StyleSheet.create({
+    wrap: {
+      alignItems: 'center',
+      gap: 10,
+    },
+    badge: {
+      width: 60,
+      height: 60,
+      borderRadius: 18,
+      backgroundColor: colors.goldSoft,
+      borderWidth: 1,
+      borderColor: colors.borderGold,
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.12,
+      shadowRadius: 6,
+      elevation: 1,
+    },
+    brand: {
+      ...logoText,
+      textAlign: 'center',
+    },
+    zaka: {
+      color: colors.gold,
+    },
+    pay: {
+      color: colors.text,
+    },
+    tagline: {
+      color: colors.textSecondary,
+      fontSize: 12,
+      textAlign: 'center',
+      marginTop: 6,
+      letterSpacing: 0.2,
+    },
+  });
+}

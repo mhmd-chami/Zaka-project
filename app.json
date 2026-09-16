@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "zakapay",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.zaka.zakapay"
@@ -29,9 +29,10 @@
       [
         "react-native-nitro-google-signin",
         {
-          "iosUrlScheme": "com.googleusercontent.apps.zakapay-development"
+          "iosUrlScheme": "com.googleusercontent.apps.868733254861-lkgv5nli04an55k48a2mmnkhuirhrhjs"
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true

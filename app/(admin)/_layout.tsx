@@ -1,14 +1,19 @@
 import { AppIcon } from '@/components/AppIcon';
 import { Tabs } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, tabScreenOptions } from '@/constants/theme';
+import { tabScreenOptions } from '@/constants/theme';
+import { useSettings } from '@/contexts/SettingsContext';
 
 export default function AdminLayout() {
   const insets = useSafeAreaInsets();
+  const { colors } = useSettings();
 
   return (
     <Tabs
-      screenOptions={tabScreenOptions(colors.warning, insets.bottom)}
+      screenOptions={{
+        ...tabScreenOptions(colors, colors.warning, insets.bottom),
+        sceneStyle: { flex: 1, backgroundColor: colors.background },
+      }}
     >
       <Tabs.Screen
         name="index"

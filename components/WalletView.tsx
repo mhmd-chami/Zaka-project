@@ -13,10 +13,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ActionButton } from '@/components/ActionButton';
 import { BalanceCard } from '@/components/BalanceCard';
 import { TransactionRow } from '@/components/TransactionRow';
-import { colors, contentBottomPadding } from '@/constants/theme';
+import { contentBottomPadding } from '@/constants/theme';
 import { useSettings } from '@/contexts/SettingsContext';
 import { getLocationById } from '@/data/locations';
 import { logout } from '@/services/authStorage';
+import {
+  getSendBlockReason,
+  sendBlockTranslationKey,
+} from '@/services/verificationGate';
 import {
   getProfile,
   getTransactions,
@@ -37,7 +41,8 @@ export function WalletView({
 }: Props) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { t } = useSettings();
+  const { colors, t } = useSettings();
+  const styles = makeStyles(colors);
   const [profile, setProfile] = useState<WalletProfile | null>(null);
   const [recent, setRecent] = useState<Transaction[]>([]);
 
@@ -59,6 +64,23 @@ export function WalletView({
       load();
     }, [load])
   );
+
+  async function handleSendPress() {
+    if (session.role === 'user') {
+      const block = await getSendBlockReason();
+      if (block) {
+        Alert.alert(t('sendVerificationRequiredTitle'), t(sendBlockTranslationKey(block)), [
+          { text: t('cancel'), style: 'cancel' },
+          {
+            text: t('sendVerifyNow'),
+            onPress: () => router.push('/verification'),
+          },
+        ]);
+        return;
+      }
+    }
+    router.push('/send');
+  }
 
   function handleLogout() {
     Alert.alert('Sign out?', 'You will need to sign in again.', [
@@ -110,7 +132,7 @@ export function WalletView({
         <ActionButton
           icon='send'
           label='Send'
-          onPress={() => router.push('/send')}
+          onPress={() => void handleSendPress()}
         />
         <ActionButton
           icon='receive'
@@ -189,109 +211,111 @@ export function WalletView({
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  content: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-  },
-  loading: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.background,
-  },
-  loadingText: {
-    color: colors.textSecondary,
-  },
-  locationInfo: {
-    backgroundColor: colors.surfaceSoft,
-    borderRadius: 12,
-    padding: 11,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  locationInfoText: {
-    color: colors.textSecondary,
-    fontSize: 12,
-    lineHeight: 17,
-  },
-  agentCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    backgroundColor: colors.surfaceSoft,
-    borderRadius: 16,
-    padding: 14,
-    marginBottom: 22,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  agentIconWrap: {
-    width: 42,
-    height: 42,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.primarySoft,
-  },
-  agentTextWrap: { flex: 1 },
-  agentTitle: {
-    color: colors.text,
-    fontSize: 15,
-    fontWeight: '800',
-  },
-  agentSub: {
-    color: colors.textSecondary,
-    fontSize: 12,
-    marginTop: 2,
-  },
-  actions: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 18,
-  },
-  logoutBtn: {
-    alignSelf: 'flex-end',
-    marginBottom: 6,
-    paddingVertical: 5,
-  },
-  logoutText: {
-    color: colors.danger,
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  historyLink: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 2,
-    paddingVertical: 6,
-    paddingLeft: 8,
-  },
-  historyLinkText: {
-    color: colors.primaryLight,
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  sectionTitle: {
-    fontSize: 17,
-    fontWeight: '800',
-    color: colors.text,
-    letterSpacing: -0.3,
-  },
-  sectionSubtitle: { color: colors.textMuted, fontSize: 11, marginTop: 2 },
-  empty: {
-    color: colors.textSecondary,
-    fontSize: 13,
-  },
-});
+function makeStyles(colors: ReturnType<typeof useSettings>['colors']) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    content: {
+      paddingHorizontal: 20,
+      paddingTop: 16,
+    },
+    loading: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.background,
+    },
+    loadingText: {
+      color: colors.textSecondary,
+    },
+    locationInfo: {
+      backgroundColor: colors.surfaceSoft,
+      borderRadius: 12,
+      padding: 11,
+      marginBottom: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    locationInfoText: {
+      color: colors.textSecondary,
+      fontSize: 12,
+      lineHeight: 17,
+    },
+    agentCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      backgroundColor: colors.surfaceSoft,
+      borderRadius: 16,
+      padding: 14,
+      marginBottom: 22,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    agentIconWrap: {
+      width: 42,
+      height: 42,
+      borderRadius: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.primarySoft,
+    },
+    agentTextWrap: { flex: 1 },
+    agentTitle: {
+      color: colors.text,
+      fontSize: 15,
+      fontWeight: '800',
+    },
+    agentSub: {
+      color: colors.textSecondary,
+      fontSize: 12,
+      marginTop: 2,
+    },
+    actions: {
+      flexDirection: 'row',
+      gap: 10,
+      marginBottom: 18,
+    },
+    logoutBtn: {
+      alignSelf: 'flex-end',
+      marginBottom: 6,
+      paddingVertical: 5,
+    },
+    logoutText: {
+      color: colors.danger,
+      fontSize: 13,
+      fontWeight: '600',
+    },
+    sectionHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 12,
+    },
+    historyLink: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 2,
+      paddingVertical: 6,
+      paddingLeft: 8,
+    },
+    historyLinkText: {
+      color: colors.primaryLight,
+      fontSize: 12,
+      fontWeight: '700',
+    },
+    sectionTitle: {
+      fontSize: 17,
+      fontWeight: '800',
+      color: colors.text,
+      letterSpacing: -0.3,
+    },
+    sectionSubtitle: { color: colors.textMuted, fontSize: 11, marginTop: 2 },
+    empty: {
+      color: colors.textSecondary,
+      fontSize: 13,
+    },
+  });
+}
